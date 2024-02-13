@@ -63,7 +63,8 @@ export class UsersService {
         return await this.userModel.find().exec()
     }
 
-    async getUser(user_id):Promise<User[]>{
+    async getUser({user_id}):Promise<any>{
+      console.log("user", user_id);
       return await this.userProfileModel.findOne({user_id})
   }
 }
