@@ -6,4 +6,5 @@ export class CreateUserDto {
     password: string
     phone: number
     role: string
+  static token: string
 }

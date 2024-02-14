@@ -1,3 +1,5 @@
+import { Types } from "mongoose";
+
 class WorkHistory{
     jobTitle:string;
     employer:string;
@@ -34,21 +36,24 @@ class Certificate{
 }
 
 export class UserProfileDto{
-    user_id: string
-    phone: number
-    profile_summary: string
-    work_history: Array<WorkHistory>
-    education: Array<Education>
-    licences: Array<Licence>
-    certification: Array<Licence>
-    skills: Array<string>
-    availability: string
-    preferredJobTypes: Array<string>
-    preferredJobLocations: Array<string>
-    preferredJobCategories: Array<string>
-    expectedRatePerHour: number
-    visaType: string
-    visaExpiryDate: Date
-    cv: string
-    coverLetter: string
+    user_id: Types.ObjectId
+    first_name: string
+    last_name: string
+    email: string
+    phone?: number
+    profile_summary?: string
+    work_history?: Array<WorkHistory>
+    education?: Array<Education>
+    licences?: Array<Licence>
+    certification?: Array<Licence>
+    skills?: Array<string>
+    availability?: string
+    preferredJobTypes?: Array<string>
+    preferredJobLocations?: Array<string>
+    preferredJobCategories?: Array<string>
+    expectedRatePerHour?: number
+    visaType?: string
+    visaExpiryDate?: Date
+    cv?: string
+    coverLetter?: string
 }

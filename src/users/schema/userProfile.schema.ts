@@ -45,6 +45,12 @@ export class UserProfile{
     @Prop()
     user_id: Types.ObjectId
     @Prop()
+    first_name: string
+    @Prop()
+    last_name: string
+    @Prop()
+    email: string
+    @Prop()
     phone?: number
     @Prop()
     profile_summary?: string

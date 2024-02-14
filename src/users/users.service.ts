@@ -1,7 +1,7 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Param } from '@nestjs/common';
 import { User } from './schema/user.schema';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import mongoose, { Model } from 'mongoose';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { UserProfileDto } from './dto/user-profile.dto';
@@ -35,18 +35,26 @@ export class UsersService {
           throw new HttpException({message: "The given email "+email+" already exsit"}, HttpStatus.BAD_REQUEST);
         }
 
-      const user =   await this.userModel.create(createUserDto);
-      const payload = { username: user.first_name+" "+user.last_name, sub: user._id };
-      //user.token  = this.jwtService.sign(payload);
-      user.token  = '999';
-      //console.log(users);
-      const userData = {user_id:null}; 
-       this.userModel.create(createUserDto).then((res) => {
-          userData.user_id  = res._id;
-          this.userProfileModel.create({user_id:userData})
+        //CreateUserDto.token = '';
+      //const user =   await this.userModel.create(createUserDto);
+      return await this.userModel.create(createUserDto).then((res) => {
+        
+         const user = res;
+          const payload = { username: res.first_name+" "+res.last_name, sub: res._id };
+         
+          user._id = res._id;
+          //user.token  = this.jwtService.sign(payload);
+          user.token  = '999';
+          console.log(user);
+         
+          const userProfileDto:UserProfileDto = {user_id: res._id, first_name: res.first_name, last_name: res.last_name, email: res.email};
+
+          this.userProfileModel.create(userProfileDto);
+
+          
+        return user;
       })
        
-      return user;
     }
 
     async updateProfile(userProfileDto:UserProfileDto):Promise<any>{
@@ -63,7 +71,16 @@ export class UsersService {
         return await this.userModel.find().exec()
     }
 
-    async getUser(user_id):Promise<User[]>{
-      return await this.userProfileModel.findOne({user_id})
+    async getUser(user_id):Promise<any>{
+      user_id = new mongoose.Types.ObjectId(user_id);
+      
+      console.log(user_id);
+      const isUser = await this.userProfileModel.findOne({user_id});
+      console.log(isUser);
+      if (!isUser) {
+        throw new HttpException({message: "The given user does not exsit"}, HttpStatus.BAD_REQUEST);
+      }else{
+        return await this.userProfileModel.findOne({user_id});
+      }
   }
 }
