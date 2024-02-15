@@ -6,12 +6,14 @@ import { UsersController } from './users.controller';
 import { UserProfile, UserProfileSchema } from './schema/userProfile.schema';
 
 import { JwtService } from '@nestjs/jwt';
+import { CompanyProfile, CompanyProfileSchema } from 'src/company/schema/companyProfile.schema';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       {name: User.name, schema: UserSchema},
-      { name: UserProfile.name, schema: UserProfileSchema }
+      { name: UserProfile.name, schema: UserProfileSchema },
+      { name: CompanyProfile.name, schema: CompanyProfileSchema }
     ])
   ],
   providers: [User, UserProfile, UsersService, JwtService],

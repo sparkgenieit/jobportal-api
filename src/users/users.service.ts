@@ -7,12 +7,15 @@ import { LoginUserDto } from './dto/login-user.dto';
 import { UserProfileDto } from './dto/user-profile.dto';
 import { UserProfile } from './schema/userProfile.schema';
 import { JwtService } from '@nestjs/jwt';
+import { CompanyProfileDto } from 'src/company/dto/company-profile.dto';
+import { CompanyProfile } from 'src/company/schema/companyProfile.schema';
 
 @Injectable()
 export class UsersService {
     constructor(
         @InjectModel(User.name) private readonly userModel:Model<User>,
         @InjectModel(UserProfile.name) private readonly userProfileModel:Model<UserProfile>,
+        @InjectModel(CompanyProfile.name) private readonly companyProfileModel:Model<CompanyProfile>,
         private jwtService: JwtService
     ){}
 
@@ -30,6 +33,7 @@ export class UsersService {
 
     async createUser(createUserDto:CreateUserDto):Promise<any>{
         const email = createUserDto.email;
+        const role = createUserDto.role;
         const isUser = await this.userModel.findOne({email});
         if (isUser) {
           throw new HttpException({message: "The given email "+email+" already exsit"}, HttpStatus.BAD_REQUEST);
@@ -45,11 +49,33 @@ export class UsersService {
           user._id = res._id;
           //user.token  = this.jwtService.sign(payload);
           user.token  = '999';
-          console.log(user);
+          console.log("role", role);
          
-          const userProfileDto:UserProfileDto = {user_id: res._id, first_name: res.first_name, last_name: res.last_name, email: res.email};
+          if(role == 'user'){
+            const userProfileDto:UserProfileDto = {user_id: res._id, first_name: res.first_name, last_name: res.last_name, email: res.email};
 
-          this.userProfileModel.create(userProfileDto);
+            this.userProfileModel.create(userProfileDto);
+          }
+
+          if(role == 'employer'){
+            const companyProfileDto:CompanyProfileDto = {
+              user_id: res._id, 
+              email: res.email,
+              name:'',
+              address1: '',
+              address2: '',
+              address3: '',
+              city: '',
+              phone:'',
+              postalCode: '',
+              contact: '',
+              website: '',
+              logo: ''
+            };
+            console.log(companyProfileDto);
+
+            this.companyProfileModel.create(companyProfileDto);
+          }
 
           
         return user;
@@ -57,13 +83,16 @@ export class UsersService {
        
     }
 
-    async updateProfile(userProfileDto:UserProfileDto):Promise<any>{
-      const user_id = userProfileDto.user_id;
+    async updateProfile(user_id, userProfileDto:UserProfileDto):Promise<any>{
+      console.log(user_id);
+      user_id = new mongoose.Types.ObjectId(user_id);
+      //userProfileDto.user_id = user_id;
       const isUser = await this.userProfileModel.findOne({user_id});
       if (!isUser) {
         throw new HttpException({message: "The given user does not exsit"}, HttpStatus.BAD_REQUEST);
       }else{
-        return await this.userProfileModel.updateOne(userProfileDto);
+        //console.log(userProfileDto);
+        return await this.userProfileModel.findOneAndUpdate({user_id}, userProfileDto)
       }
   }
 

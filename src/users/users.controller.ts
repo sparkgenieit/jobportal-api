@@ -1,7 +1,8 @@
 import { UsersService } from './users.service';
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './schema/user.schema';
+import { UserProfile } from './schema/userProfile.schema';
 import { LoginUserDto } from './dto/login-user.dto';
 import { UserProfileDto } from './dto/user-profile.dto';
 
@@ -28,13 +29,13 @@ export class UsersController {
         return await this.userService.getAllUsers()
     }
 
-    @Post('profile/update')
-    async userProfileDto(@Body() userProfileDto:UserProfileDto):Promise<User>{
-        return await this.userService.updateProfile(userProfileDto);
+    @Put('profile/update/:id')
+    async userProfileDto(@Param() data, @Body() userProfileDto:UserProfileDto):Promise<UserProfile>{
+        return await this.userService.updateProfile(data.id, userProfileDto);
     }
 
     @Get('profile/:id')
-     async getUser(@Param() data):Promise<User[]>{
+     async getUser(@Param() data):Promise<UserProfile>{
         console.log(data.id);
         return await this.userService.getUser(data.id);
     }
