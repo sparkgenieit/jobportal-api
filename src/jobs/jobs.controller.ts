@@ -16,10 +16,16 @@ export class jobsController {
         return await this.jobsService.createJob(jobsDto);
     }
 
-    @Get("all")
-    async getAlljobs():Promise<Jobs[]>{
-        return await this.jobsService.getAllJobs()
+    @Get("approved")
+    async getApprovedjobs():Promise<Jobs[]>{
+        return await this.jobsService.getApprovedJobs()
     }
+
+    @Get("queue")
+    async getQueuejobs():Promise<Jobs[]>{
+        return await this.jobsService.getQueueJobs()
+    }
+
 
     @Put('update/:id')
     async jobsDto(@Param() data, @Body() jobsDto:JobsDto):Promise<Jobs[]>{
