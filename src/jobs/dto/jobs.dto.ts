@@ -1,7 +1,7 @@
 import { Types } from "mongoose"
 
 export class JobsDto {
-    user_id: Types.ObjectId
+    jobId: Types.ObjectId
     company: string
     closedate: string
     creationdate: string

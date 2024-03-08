@@ -5,10 +5,12 @@ export type JobsDocument = HydratedDocument<Jobs>;
 
 @Schema()
 export class Jobs {
+    @Prop()
+    jobId: Types.ObjectId
     @Prop({ type: Date })
     created_date?: Date
     @Prop()
-    user_id: Types.ObjectId
+    companyId: Types.ObjectId
     @Prop()
     company: string
     @Prop()
@@ -45,6 +47,8 @@ export class Jobs {
     employerquestions: string
     @Prop()
     employer: string
+    @Prop()
+    adminId: Types.ObjectId
     @Prop()
     status?: string
 }

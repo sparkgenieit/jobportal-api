@@ -12,7 +12,6 @@ export class jobsController {
 
     @Post('create')
     async createUserDto(@Body() jobsDto:JobsDto):Promise<Jobs>{
-        jobsDto.status = "review";
         return await this.jobsService.createJob(jobsDto);
     }
 
@@ -24,6 +23,32 @@ export class jobsController {
     @Get("queue")
     async getQueuejobs():Promise<Jobs[]>{
         return await this.jobsService.getQueueJobs()
+    }
+
+    @Post('assign')
+    async assignJob(@Body() data:{adminId:string, jobId:string, jobsDto:JobsDto}):Promise<Jobs>{
+        return await this.jobsService.assignJob(data);
+    }
+
+    @Post('approve')
+    async approveJob(@Body() data:{adminId:string, jobId:string, jobsDto:JobsDto}):Promise<Jobs>{
+        return await this.jobsService.assignJob(data);
+    }
+
+    @Post('reject')
+    async rejectJob(@Body() data:{adminId:string, jobId:string, jobsDto:JobsDto}):Promise<Jobs>{
+        return await this.jobsService.assignJob(data);
+    }
+
+    @Get(':adminId')
+    async getAssignedJobs(@Param() data):Promise<Jobs[]>{
+        return await this.jobsService.getAssignedJobs(data.adminId);
+    }
+
+
+    @Get(':companyId')
+    async getPostedJobs(@Param() data):Promise<Jobs[]>{
+        return await this.jobsService.getPostedJobs(data.companyId);
     }
 
 

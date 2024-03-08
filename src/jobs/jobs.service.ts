@@ -4,11 +4,13 @@ import mongoose, { Model } from 'mongoose';
 import { JwtService } from '@nestjs/jwt';
 import { Jobs } from './schema/Jobs.schema';
 import { JobsDto } from './dto/jobs.dto';
+import { User } from 'src/users/schema/user.schema';
 
 @Injectable()
 export class JobsService {
   constructor(
     @InjectModel(Jobs.name) private readonly jobsModel: Model<Jobs>,
+    private userModel:Model<User>,
     private jwtService: JwtService
   ) { }
 
@@ -24,15 +26,59 @@ export class JobsService {
 
   }
 
-  async updateJob(user_id, jobsDto: JobsDto): Promise<any> {
-    console.log(user_id);
-    user_id = new mongoose.Types.ObjectId(user_id);
-    const isUser = await this.jobsModel.findOne({ user_id });
-    if (!isUser) {
-      throw new HttpException({ message: "The given user does not exsit" }, HttpStatus.BAD_REQUEST);
+  async updateJob(jobId, jobsDto: JobsDto): Promise<any> {
+    const isJob = await this.jobsModel.findOne({ id:jobId });
+    if (!isJob) {
+      throw new HttpException({ message: "The given Job does not exsit" }, HttpStatus.BAD_REQUEST);
     } else {
       jobsDto.status = 'queue';
-      return await this.jobsModel.findOneAndUpdate({ user_id }, jobsDto);
+      return await this.jobsModel.findOneAndUpdate({ id:jobId }, jobsDto);
+    }
+  }
+
+  async assignJob({adminId, jobId, jobsDto}): Promise<any> {
+    adminId = new mongoose.Types.ObjectId(adminId);
+    
+    const isUser = await this.userModel.findOne({ adminId });
+    const isJob = await this.jobsModel.findOne({ id:jobId });
+    if (!isUser) {
+      throw new HttpException({ message: "The given admin does not exsit" }, HttpStatus.BAD_REQUEST);
+    } if (!isJob) {
+      throw new HttpException({ message: "The given Job does not exsit" }, HttpStatus.BAD_REQUEST);
+    } else {
+      jobsDto.adminId = adminId;
+      jobsDto.status = 'review';
+      return await this.jobsModel.findOneAndUpdate({  id:jobId }, jobsDto);
+    }
+  }
+
+  async approveJob({adminId, jobId, jobsDto}): Promise<any> {
+    adminId = new mongoose.Types.ObjectId(adminId);
+    
+    const isUser = await this.userModel.findOne({ adminId });
+    const isJob = await this.jobsModel.findOne({ id:jobId });
+    if (!isUser) {
+      throw new HttpException({ message: "The given admin does not exsit" }, HttpStatus.BAD_REQUEST);
+    } if (!isJob) {
+      throw new HttpException({ message: "The given Job does not exsit" }, HttpStatus.BAD_REQUEST);
+    } else {
+      jobsDto.status = 'approved';
+      return await this.jobsModel.findOneAndUpdate({ adminId, id:jobId }, jobsDto);
+    }
+  }
+
+  async rejectJob({adminId, jobId, jobsDto}): Promise<any> {
+    adminId = new mongoose.Types.ObjectId(adminId);
+    
+    const isUser = await this.userModel.findOne({ adminId });
+    const isJob = await this.jobsModel.findOne({ id:jobId });
+    if (!isUser) {
+      throw new HttpException({ message: "The given admin does not exsit" }, HttpStatus.BAD_REQUEST);
+    } if (!isJob) {
+      throw new HttpException({ message: "The given Job does not exsit" }, HttpStatus.BAD_REQUEST);
+    } else {
+      jobsDto.status = 'rejected';
+      return await this.jobsModel.findOneAndUpdate({  adminId, id:jobId }, jobsDto);
     }
   }
 
@@ -48,27 +94,22 @@ export class JobsService {
     return await this.jobsModel.find({'status': 'queue'}).exec()
   }
 
+  async getAssignedJobs(adminId):Promise<Jobs[]>{
+    return await this.jobsModel.find({ adminId}).exec()
+  }
 
-  async getJobs(id): Promise<any> {
-    const isJob = await this.jobsModel.findOne({ id });
+  async getPostedJobs(companyId):Promise<Jobs[]>{
+    return await this.jobsModel.find({ companyId}).exec()
+  }
+
+
+  async getJob(id): Promise<any> {
+    const isJob = await this.jobsModel.findOne({ jobId:id });
     console.log(isJob);
     if (!isJob) {
       throw new HttpException({ message: "The given Job does not exsit" }, HttpStatus.BAD_REQUEST);
     } else {
       return await this.jobsModel.findOne({ id });
-    }
-  }
-
-  async getJob(user_id): Promise<any> {
-    user_id = new mongoose.Types.ObjectId(user_id);
-
-    console.log(user_id);
-    const isUser = await this.jobsModel.findOne({ user_id });
-    console.log(isUser);
-    if (!isUser) {
-      throw new HttpException({ message: "The given user does not exsit" }, HttpStatus.BAD_REQUEST);
-    } else {
-      return await this.jobsModel.findOne({ user_id });
     }
   }
 }
