@@ -6,9 +6,11 @@ import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { CompanyModule } from './company/company.module';
 import { JobsModule } from './jobs/jobs.module';
+import { UploadModule } from './upload/upload.module';
+
 
 @Module({
-  imports: [DatabaseModule, UsersModule, CompanyModule, JobsModule, AuthModule],
+  imports: [DatabaseModule, UsersModule, CompanyModule, JobsModule, AuthModule, UploadModule],
   controllers: [AppController],
   providers: [AppService],
 })
