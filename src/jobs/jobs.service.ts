@@ -10,8 +10,7 @@ import { User } from 'src/users/schema/user.schema';
 export class JobsService {
   constructor(
     @InjectModel(Jobs.name) private readonly jobsModel: Model<Jobs>,
-    private userModel:Model<User>,
-    private jwtService: JwtService
+    @InjectModel(User.name) private userModel:Model<User>
   ) { }
 
   async createJob(jobsDto: JobsDto): Promise<any> {
