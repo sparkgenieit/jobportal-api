@@ -67,10 +67,11 @@ export class JobsService {
   }
 
   async rejectJob({adminId, jobId, jobsDto}): Promise<any> {
-    adminId = new mongoose.Types.ObjectId(adminId);
+    //adminId = new mongoose.Types.ObjectId(adminId);
     jobId = new mongoose.Types.ObjectId(jobId);
     
-    const isUser = await this.userModel.findOne({ adminId });
+    //const isUser = await this.userModel.findOne({ adminId });
+    const isUser = true;
     const isJob = await this.jobsModel.findOne({ jobId });
     if (!isUser) {
       throw new HttpException({ message: "The given admin does not exsit" }, HttpStatus.BAD_REQUEST);
