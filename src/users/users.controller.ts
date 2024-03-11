@@ -5,6 +5,8 @@ import { User } from './schema/user.schema';
 import { UserProfile } from './schema/userProfile.schema';
 import { LoginUserDto } from './dto/login-user.dto';
 import { UserProfileDto } from './dto/user-profile.dto';
+import { UserJobsDto } from './dto/user-jobs.dto';
+import { UserJobs } from './schema/userJobs.schema';
 
 
 @Controller('users')
@@ -38,5 +40,10 @@ export class UsersController {
      async getUser(@Param() data):Promise<UserProfile>{
         console.log(data.id);
         return await this.userService.getUser(data.id);
+    }
+
+    @Post('profile/update/:id')
+    async userJobsDto(@Param() data, @Body() userJobsDto:UserJobsDto):Promise<UserJobs>{
+        return await this.userService.updateUserJobs(data.id, userJobsDto);
     }
 }
