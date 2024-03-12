@@ -6,6 +6,8 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { UserProfileDto } from './dto/user-profile.dto';
 import { UserProfile } from './schema/userProfile.schema';
+import { UserJobsDto } from './dto/user-jobs.dto';
+import { UserJobs } from './schema/userJobs.schema';
 import { JwtService } from '@nestjs/jwt';
 import { CompanyProfileDto } from 'src/company/dto/company-profile.dto';
 import { CompanyProfile } from 'src/company/schema/companyProfile.schema';
@@ -13,13 +15,15 @@ import { UploadController } from 'src/upload/upload.controller';
 
 @Injectable()
 export class UsersService {
-  constructor(
-    private readonly uploadController: UploadController,
-    @InjectModel(User.name) private readonly userModel: Model<User>,
-    @InjectModel(UserProfile.name) private readonly userProfileModel: Model<UserProfile>,
-    @InjectModel(CompanyProfile.name) private readonly companyProfileModel: Model<CompanyProfile>,
-    private jwtService: JwtService
-  ) { }
+    constructor(
+      private readonly uploadController: UploadController,
+        @InjectModel(User.name) private readonly userModel:Model<User>,
+        @InjectModel(UserProfile.name) private readonly userProfileModel:Model<UserProfile>,
+        @InjectModel(UserJobs.name) private readonly userJobsModel:Model<UserJobs>,
+       
+        @InjectModel(CompanyProfile.name) private readonly companyProfileModel:Model<CompanyProfile>,
+        private jwtService: JwtService
+    ){}
 
   async findOne({ email, password }: LoginUserDto): Promise<any> {
     const user = await this.userModel.findOne({ email, password });
@@ -130,4 +134,16 @@ export class UsersService {
       return await this.userProfileModel.findOne({ user_id });
     }
   }
+  async updateUserJobs(user_id, userJobsDto:UserJobsDto):Promise<any>{
+    console.log(user_id);
+    user_id = new mongoose.Types.ObjectId(user_id);
+    //userProfileDto.user_id = user_id;
+    const isUser = await this.userJobsModel.findOne({user_id});
+    if (!isUser) {
+      throw new HttpException({message: "The given user does not exsit"}, HttpStatus.BAD_REQUEST);
+    }else{
+      //console.log(userProfileDto);
+      return await this.userJobsModel.findOneAndUpdate({user_id}, userJobsDto)
+    }
+}
 }
