@@ -54,6 +54,6 @@ export class UserProfileDto{
     expectedRatePerHour?: number
     visaType?: string
     visaExpiryDate?: Date
-    cv?: string
-    coverLetter?: string
+    cv?: any
+    coverLetter?: any
 }

@@ -32,12 +32,12 @@ export class jobsController {
 
     @Post('approve')
     async approveJob(@Body() data:{adminId:string, jobId:string, jobsDto:JobsDto}):Promise<Jobs>{
-        return await this.jobsService.assignJob(data);
+        return await this.jobsService.approveJob(data);
     }
 
     @Post('reject')
     async rejectJob(@Body() data:{adminId:string, jobId:string, jobsDto:JobsDto}):Promise<Jobs>{
-        return await this.jobsService.assignJob(data);
+        return await this.jobsService.rejectJob(data);
     }
 
     @Get(':adminId')

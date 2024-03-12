@@ -1,6 +1,7 @@
 import {
   Controller,
   Post,
+  Get,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -13,7 +14,8 @@ import { FileInterceptor } from '@nestjs/platform-express';
 
 const storage = {
   storage: diskStorage({
-    destination: (req, file, callback) => {      
+    destination: (req, file, callback) => {
+      console.log(req.query);
       const userPath = req.query.path;
       let path = `public/uploads/${userPath}`;
       console.log(fs.existsSync(path));
@@ -23,18 +25,28 @@ const storage = {
       callback(null, path);
     },
 
-    filename: (req, file, cb) => {
-      const filename: string = 'myfile-' + randomUUID();
-      const extension: string = Path.parse(file.originalname).ext;
-      cb(null, `${filename}${extension}`);
-    },
+    // filename: (req, file, cb) => {
+    //   console.log(req);
+    //   console.log(file);
+    //   const filename: string = 'myfile-' + randomUUID();
+    //   const extension: string = Path.parse(file.originalname).ext;
+    //   cb(null, `${filename}${extension}`);
+    // },
   }),
 };
 
 @Controller('upload')
 export class UploadController {
+  constructor(
+  ) { }
+
+  @Get("allfiles")
+   getAllUsers(): any {
+    return {};
+  }
+
   // @UseGuards(JwtAuthGuard) your methode of guard
-  @Post()
+  @Post('cvs')
   @UseInterceptors(FileInterceptor('file', storage))
   uploadFile(@UploadedFile() file: any) {
     return file;

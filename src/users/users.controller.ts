@@ -29,6 +29,11 @@ export class UsersController {
         return await this.userService.getAllUsers()
     }
 
+    @Get("admins/all")
+    async getAllAdmins():Promise<User[]>{
+        return await this.userService.getAllAdmins()
+    }
+
     @Put('profile/update/:id')
     async userProfileDto(@Param() data, @Body() userProfileDto:UserProfileDto):Promise<UserProfile>{
         return await this.userService.updateProfile(data.id, userProfileDto);

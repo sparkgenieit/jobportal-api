@@ -26,7 +26,7 @@ export class JobsService {
   }
 
   async updateJob(jobId, jobsDto: JobsDto): Promise<any> {
-    const isJob = await this.jobsModel.findOne({ id:jobId });
+    const isJob = await this.jobsModel.findOne({ jobId });
     if (!isJob) {
       throw new HttpException({ message: "The given Job does not exsit" }, HttpStatus.BAD_REQUEST);
     } else {
@@ -39,7 +39,7 @@ export class JobsService {
     adminId = new mongoose.Types.ObjectId(adminId);
     
     const isUser = await this.userModel.findOne({ adminId });
-    const isJob = await this.jobsModel.findOne({ id:jobId });
+    const isJob = await this.jobsModel.findOne({ jobId });
     if (!isUser) {
       throw new HttpException({ message: "The given admin does not exsit" }, HttpStatus.BAD_REQUEST);
     } if (!isJob) {
@@ -62,7 +62,7 @@ export class JobsService {
       throw new HttpException({ message: "The given Job does not exsit" }, HttpStatus.BAD_REQUEST);
     } else {
       jobsDto.status = 'approved';
-      return await this.jobsModel.findOneAndUpdate({ adminId, id:jobId }, jobsDto);
+      return await this.jobsModel.findOneAndUpdate({ jobId }, jobsDto);
     }
   }
 
@@ -79,7 +79,7 @@ export class JobsService {
       throw new HttpException({ message: "The given Job does not exsit" }, HttpStatus.BAD_REQUEST);
     } else {
       jobsDto.status = 'rejected';
-      return await this.jobsModel.findOneAndUpdate({  adminId, id:jobId }, jobsDto);
+      return await this.jobsModel.findOneAndUpdate({  jobId }, jobsDto);
     }
   }
 

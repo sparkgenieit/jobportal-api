@@ -7,6 +7,7 @@ import { UserProfile, UserProfileSchema } from './schema/userProfile.schema';
 
 import { JwtService } from '@nestjs/jwt';
 import { CompanyProfile, CompanyProfileSchema } from 'src/company/schema/companyProfile.schema';
+import { UploadController } from 'src/upload/upload.controller';
 
 @Module({
   imports: [
@@ -16,7 +17,7 @@ import { CompanyProfile, CompanyProfileSchema } from 'src/company/schema/company
       { name: CompanyProfile.name, schema: CompanyProfileSchema }
     ])
   ],
-  providers: [User, UserProfile, UsersService, JwtService],
+  providers: [User, UploadController, UserProfile, UsersService, JwtService],
   controllers: [UsersController]
 })
 export class UsersModule {}
