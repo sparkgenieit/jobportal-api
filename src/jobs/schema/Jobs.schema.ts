@@ -14,6 +14,8 @@ export class Jobs {
     @Prop()
     company: string
     @Prop()
+    companyLogo: string
+    @Prop()
     closedate: string
     @Prop()
     creationdate: string

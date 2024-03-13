@@ -3,6 +3,7 @@ import { Types } from "mongoose"
 export class JobsDto {
     jobId: Types.ObjectId
     company: string
+    companyLogo: string
     closedate: string
     creationdate: string
     jobtype: string

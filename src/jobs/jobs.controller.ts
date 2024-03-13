@@ -40,14 +40,15 @@ export class jobsController {
         return await this.jobsService.rejectJob(data);
     }
 
-    @Get(':adminId')
+    @Get('assignedJobs/:adminId')
     async getAssignedJobs(@Param() data):Promise<Jobs[]>{
         return await this.jobsService.getAssignedJobs(data.adminId);
     }
 
 
-    @Get(':companyId')
+    @Get('postedJobs/:companyId')
     async getPostedJobs(@Param() data):Promise<Jobs[]>{
+        console.log(data);
         return await this.jobsService.getPostedJobs(data.companyId);
     }
 
@@ -59,7 +60,7 @@ export class jobsController {
     }
 
     @Get(':id')
-    async getJobs(@Param() data):Promise<Jobs[]>{
+    async getJob(@Param() data):Promise<Jobs[]>{
         console.log(data.id);
         return await this.jobsService.getJob(data.id);
     }
