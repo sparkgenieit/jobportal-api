@@ -30,6 +30,11 @@ export class jobsController {
         return await this.jobsService.assignJob(data);
     }
 
+    @Post('release')
+    async releaseJob(@Body() data:{adminId:string, jobId:string, jobsDto:JobsDto}):Promise<Jobs>{
+        return await this.jobsService.releaseJob(data);
+    }
+
     @Post('approve')
     async approveJob(@Body() data:{adminId:string, jobId:string, jobsDto:JobsDto}):Promise<Jobs>{
         return await this.jobsService.approveJob(data);

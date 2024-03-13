@@ -51,6 +51,22 @@ export class JobsService {
     }
   }
 
+  async releaseJob({adminId, jobId, jobsDto}): Promise<any> {
+    adminId = new mongoose.Types.ObjectId(adminId);
+    
+    const isUser = await this.userModel.findOne({ _id:adminId });
+    const isJob = await this.jobsModel.findOne({ _id:jobId });
+    if (!isUser) {
+      throw new HttpException({ message: "The given admin does not exsit" }, HttpStatus.BAD_REQUEST);
+    } if (!isJob) {
+      throw new HttpException({ message: "The given Job does not exsit" }, HttpStatus.BAD_REQUEST);
+    } else {
+      jobsDto.adminId = "";
+      jobsDto.status = 'queue';
+      return await this.jobsModel.findOneAndUpdate({  _id:jobId }, jobsDto);
+    }
+  }
+
   async approveJob({adminId, jobId, jobsDto}): Promise<any> {
     adminId = new mongoose.Types.ObjectId(adminId);
     
