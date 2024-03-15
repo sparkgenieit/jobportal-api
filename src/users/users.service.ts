@@ -106,6 +106,21 @@ export class UsersService {
     }
   }
 
+  async updateAdmin(user_id, userDto: CreateUserDto): Promise<any> {
+    console.log(user_id);
+    user_id = new mongoose.Types.ObjectId(user_id);
+    //userProfileDto.user_id = user_id;
+    const isUser = await this.userModel.findOne({ user_id });
+    if (!isUser) {
+      throw new HttpException({ message: "The given user does not exsit" }, HttpStatus.BAD_REQUEST);
+    } else {
+      console.log("update");
+      console.log(userDto);
+     
+      return await this.userModel.findOneAndUpdate({ user_id }, userDto)
+    }
+  }
+
   async uploadCv(cv){
     if (cv) {
       const cvFileName = this.uploadController.uploadFile(cv);

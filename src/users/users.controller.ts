@@ -36,6 +36,11 @@ export class UsersController {
         return await this.userService.getAllAdmins()
     }
 
+    @Put('admin/update/:id')
+    async updateAdmin(@Param() data, @Body() userDto:CreateUserDto):Promise<User>{
+        return await this.userService.updateAdmin(data.id, userDto);
+    }
+
     @Put('profile/update/:id')
     async userProfileDto(@Param() data, @Body() userProfileDto:UserProfileDto):Promise<UserProfile>{
         return await this.userService.updateProfile(data.id, userProfileDto);
