@@ -7,12 +7,13 @@ export class UserJobs{
     @Prop({type: Date})
     created_date?: Date
     @Prop()
-    user_id: Types.ObjectId
+    userId: Types.ObjectId
     @Prop()
-    jobId: string
+    jobId: Types.ObjectId
     @Prop()
-    type: string
-   
+    applied: Boolean
+    @Prop()
+    saved: Boolean
 }
 
 export const UserJobsSchema = SchemaFactory.createForClass(UserJobs);

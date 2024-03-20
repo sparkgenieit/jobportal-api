@@ -25,6 +25,16 @@ export class jobsController {
         return await this.jobsService.getQueueJobs()
     }
 
+    @Post('apply')
+    async applyJob(@Body() data:{userId:string, jobId:string, applied:boolean}):Promise<any>{
+        return await this.jobsService.applyJob(data);
+    }
+
+    @Post('save')
+    async saveJob(@Body() data:{userId:string, jobId:string, saved:boolean}):Promise<any>{
+        return await this.jobsService.saveJob(data);
+    }
+
     @Post('assign')
     async assignJob(@Body() data:{adminId:string, jobId:string, jobsDto:JobsDto}):Promise<Jobs>{
         return await this.jobsService.assignJob(data);
@@ -55,6 +65,17 @@ export class jobsController {
     async getPostedJobs(@Param() data):Promise<Jobs[]>{
         console.log(data);
         return await this.jobsService.getPostedJobs(data.companyId);
+    }
+
+    @Get('appliedJobs/:userId')
+    async getAppliedJobs(@Param() data):Promise<Jobs[]>{
+        return await this.jobsService.getAppliedJobs(data.userId);
+    }
+
+
+    @Get('savedJobs/:userId')
+    async getSavedJobs(@Param() data):Promise<Jobs[]>{
+        return await this.jobsService.getSavedJobs(data.userId);
     }
 
 
