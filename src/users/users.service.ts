@@ -121,6 +121,19 @@ export class UsersService {
     }
   }
 
+  async deleteAdmin(user_id): Promise<any> {
+    console.log(user_id);
+    user_id = new mongoose.Types.ObjectId(user_id);
+    //userProfileDto.user_id = user_id;
+    const isUser = await this.userModel.findOne({ user_id });
+    if (!isUser) {
+      throw new HttpException({ message: "The given user does not exsit" }, HttpStatus.BAD_REQUEST);
+    } else {
+     
+      return await this.userModel.deleteOne({ user_id })
+    }
+  }
+
   async uploadCv(cv){
     if (cv) {
       const cvFileName = this.uploadController.uploadFile(cv);
