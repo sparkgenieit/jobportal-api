@@ -65,4 +65,11 @@ export class UploadController {
   uploadLogo(@UploadedFile() file: any) {
     return file;
   }
+
+  // @UseGuards(JwtAuthGuard) your methode of guard
+  @Post('skillPhoto')
+  @UseInterceptors(FileInterceptor('file', storage))
+  uploadSkillPhoto(@UploadedFile() file: any) {
+    return file;
+  }
 }
