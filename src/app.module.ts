@@ -11,12 +11,13 @@ import { SkillModule } from './skills/skill.module';
 import { UploadModule } from './upload/upload.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { OrderModule } from './orders/order.module';
 
 
 @Module({
   imports: [ServeStaticModule.forRoot({
     rootPath: join(__dirname, '..', 'public'),
-}), DatabaseModule, UsersModule, CompanyModule, JobsModule, AuthModule, UploadModule, AdModule, SkillModule],
+}), DatabaseModule, UsersModule, CompanyModule, JobsModule, AuthModule, UploadModule, AdModule, SkillModule, OrderModule],
   controllers: [AppController],
   providers: [AppService],
 })

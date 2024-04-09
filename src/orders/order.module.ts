@@ -19,4 +19,4 @@ import { UserJobs, UserJobsSchema } from 'src/users/schema/userJobs.schema';
   providers: [Order, OrderService, User, UserJobs, JwtService],
   controllers: [OrderController]
 })
-export class AdModule { }
+export class OrderModule { }
