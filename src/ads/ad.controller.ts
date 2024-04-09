@@ -11,7 +11,7 @@ export class AdController {
     ) { }
 
     @Post('create')
-    async createUserDto(@Body() AdDto: AdDto): Promise<Ad> {
+    async createAdDto(@Body() AdDto: AdDto): Promise<Ad> {
         return await this.adService.createAd(AdDto);
     }
 
@@ -21,7 +21,7 @@ export class AdController {
     }
 
     @Put('update/:id')
-    async AddDto(@Param() data, @Body() AdDto: AdDto): Promise<Ad[]> {
+    async updateAdDto(@Param() data, @Body() AdDto: AdDto): Promise<Ad[]> {
         console.log("update ads id", data.id)
         return await this.adService.updateAd(data.id, AdDto);
     }

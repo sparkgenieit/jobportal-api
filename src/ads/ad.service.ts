@@ -33,7 +33,6 @@ export class AdService {
     if (!isJob) {
       throw new HttpException({ message: "The given Ad does not exsit" }, HttpStatus.BAD_REQUEST);
     } else {
-      adsDto.status = 'queue';
       return await this.adsModel.findOneAndUpdate({ _id: adId }, adsDto);
     }
   }
