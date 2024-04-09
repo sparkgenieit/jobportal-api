@@ -19,4 +19,4 @@ export class Category {
     status?: string
 }
 
-export const AdSchema = SchemaFactory.createForClass(Category);
+export const CategorySchema = SchemaFactory.createForClass(Category);
