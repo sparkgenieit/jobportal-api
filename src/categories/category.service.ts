@@ -29,7 +29,9 @@ export class CategoryService {
   }
 
   async updateCategory(categoryId,catagoriesDto: CategoryDto): Promise<any> {
-    const isJob = await this.catagoriesModel.findOne({ categoryId });
+    console.log(categoryId);
+    const isJob = await this.catagoriesModel.findOne({_id: categoryId });
+    console.log(isJob);
     if (!isJob) {
       throw new HttpException({ message: "The given Category does not exsit" }, HttpStatus.BAD_REQUEST);
     } else {

@@ -48,12 +48,14 @@ export class UserProfileDto{
     certification?: Array<Licence>
     skills?: Array<string>
     availability?: string
+    noticePeriod?:number
     preferredJobTypes?: Array<string>
     preferredJobLocations?: Array<string>
     preferredJobCategories?: Array<string>
     expectedRatePerHour?: number
     visaType?: string
     visaExpiryDate?: Date
+    showProfile?: string
     cv?: any
     coverLetter?: any
 }

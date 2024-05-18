@@ -30,6 +30,7 @@ export class CreateUserDto {
     Certifications_description: string
     skills: string
     availability: string
+    notice_period:number
     full_time: string
     part_time: string
     causal: string

@@ -67,6 +67,8 @@ export class UserProfile{
     @Prop()
     availability?: string
     @Prop()
+    noticePeriod?:number
+    @Prop()
     preferredJobTypes?: Array<string>
     @Prop()
     preferredJobLocations?: Array<string>
@@ -80,6 +82,8 @@ export class UserProfile{
     visaExpiryDate?: Date
     @Prop()
     cv?: string
+    @Prop()
+    showProfile?: string
     @Prop()
     coverLetter?: string
 }
