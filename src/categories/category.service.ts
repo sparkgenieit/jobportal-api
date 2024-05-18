@@ -28,15 +28,15 @@ export class CategoryService {
 
   }
 
-  async updateCategory(categoryId,catagoriesDto: CategoryDto): Promise<any> {
+  async updateCategory(categoryId, catagoriesDto: CategoryDto): Promise<any> {
     console.log(categoryId);
-    const isJob = await this.catagoriesModel.findOne({_id: categoryId });
+    const isJob = await this.catagoriesModel.findOne({ _id: categoryId });
     console.log(isJob);
     if (!isJob) {
       throw new HttpException({ message: "The given Category does not exsit" }, HttpStatus.BAD_REQUEST);
     } else {
-     catagoriesDto.status = 'queue';
-      return await this.catagoriesModel.findOneAndUpdate({ _id: categoryId },catagoriesDto);
+      catagoriesDto.status = 'queue';
+      return await this.catagoriesModel.findOneAndUpdate({ _id: categoryId }, catagoriesDto);
     }
   }
 
@@ -56,17 +56,17 @@ export class CategoryService {
     }
   }
 
-  
+
   async deleteCategory(categoryId): Promise<any> {
     console.log(categoryId);
     categoryId = new mongoose.Types.ObjectId(categoryId);
     //userProfileDto.user_id = user_id;
-    const isCategory = await this.catagoriesModel.findOne({ _id:categoryId });
+    const isCategory = await this.catagoriesModel.findOne({ _id: categoryId });
     if (!isCategory) {
       throw new HttpException({ message: "The given Category does not exsit" }, HttpStatus.BAD_REQUEST);
     } else {
-     
-      return await this.userModel.deleteOne({ categoryId })
+
+      return await this.catagoriesModel.deleteOne({ _id: categoryId })
     }
   }
 }

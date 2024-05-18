@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common';
 import { SkillDto } from './dto/Skill.dto';
 import { Skill } from './schema/Skill.schema';
 import { SkillService } from './skill.service';
@@ -30,5 +30,10 @@ export class SkillController {
     async getAd(@Param() data): Promise<Skill[]> {
         console.log(data.id);
         return await this.skillService.getSkill(data.id);
+    }
+
+    @Delete('delete/:id')
+    async deleteSkill(@Param() data): Promise<Skill[]> {
+        return await this.skillService.deleteSkill(data.id);
     }
 }

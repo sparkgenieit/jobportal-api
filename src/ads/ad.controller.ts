@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common';
 import { AdDto } from './dto/Ad.dto';
 import { Ad } from './schema/Ad.schema';
 import { AdService } from './ad.service';
@@ -30,5 +30,9 @@ export class AdController {
     async getAd(@Param() data): Promise<Ad[]> {
         console.log(data.id);
         return await this.adService.getAd(data.id);
+    }
+    @Delete('delete/:id')
+    async deleteAd(@Param() data): Promise<Ad[]> {
+        return await this.adService.deleteAd(data.id);
     }
 }

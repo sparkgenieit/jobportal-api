@@ -29,7 +29,7 @@ export class AdService {
   }
 
   async updateAd(adId, adsDto: AdDto): Promise<any> {
-    const isJob = await this.adsModel.findOne({ adId });
+    const isJob = await this.adsModel.findOne({ _id: adId });
     if (!isJob) {
       throw new HttpException({ message: "The given Ad does not exsit" }, HttpStatus.BAD_REQUEST);
     } else {
@@ -53,17 +53,17 @@ export class AdService {
     }
   }
 
-  
+
   async deleteAd(adId): Promise<any> {
     console.log(adId);
     adId = new mongoose.Types.ObjectId(adId);
     //userProfileDto.user_id = user_id;
-    const isAd = await this.adsModel.findOne({ _id:adId });
+    const isAd = await this.adsModel.findOne({ _id: adId });
     if (!isAd) {
       throw new HttpException({ message: "The given Ad does not exsit" }, HttpStatus.BAD_REQUEST);
     } else {
-     
-      return await this.userModel.deleteOne({ adId })
+
+      return await this.adsModel.deleteOne({ _id: adId })
     }
   }
 }

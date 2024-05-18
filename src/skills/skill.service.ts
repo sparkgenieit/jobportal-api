@@ -29,7 +29,7 @@ export class SkillService {
   }
 
   async updateSkill(skillId, skillsDto: SkillDto): Promise<any> {
-    const isJob = await this.skillsModel.findOne({ skillId });
+    const isJob = await this.skillsModel.findOne({ _id: skillId });
     if (!isJob) {
       throw new HttpException({ message: "The given Skill does not exsit" }, HttpStatus.BAD_REQUEST);
     } else {
@@ -54,17 +54,17 @@ export class SkillService {
     }
   }
 
-  
+
   async deleteSkill(skillId): Promise<any> {
     console.log(skillId);
     skillId = new mongoose.Types.ObjectId(skillId);
     //userProfileDto.user_id = user_id;
-    const isSkill = await this.skillsModel.findOne({ _id:skillId });
+    const isSkill = await this.skillsModel.findOne({ _id: skillId });
     if (!isSkill) {
       throw new HttpException({ message: "The given Skill does not exsit" }, HttpStatus.BAD_REQUEST);
     } else {
-     
-      return await this.userModel.deleteOne({ skillId })
+
+      return await this.skillsModel.deleteOne({ _id: skillId })
     }
   }
 }
