@@ -15,15 +15,15 @@ import { UploadController } from 'src/upload/upload.controller';
 
 @Injectable()
 export class UsersService {
-    constructor(
-      private readonly uploadController: UploadController,
-        @InjectModel(User.name) private readonly userModel:Model<User>,
-        @InjectModel(UserProfile.name) private readonly userProfileModel:Model<UserProfile>,
-        @InjectModel(UserJobs.name) private readonly userJobsModel:Model<UserJobs>,
-       
-        @InjectModel(CompanyProfile.name) private readonly companyProfileModel:Model<CompanyProfile>,
-        private jwtService: JwtService
-    ){}
+  constructor(
+    private readonly uploadController: UploadController,
+    @InjectModel(User.name) private readonly userModel: Model<User>,
+    @InjectModel(UserProfile.name) private readonly userProfileModel: Model<UserProfile>,
+    @InjectModel(UserJobs.name) private readonly userJobsModel: Model<UserJobs>,
+
+    @InjectModel(CompanyProfile.name) private readonly companyProfileModel: Model<CompanyProfile>,
+    private jwtService: JwtService
+  ) { }
 
   async findOne({ email, password }: LoginUserDto): Promise<any> {
     const user = await this.userModel.findOne({ email, password });
@@ -101,7 +101,7 @@ export class UsersService {
     } else {
       console.log("update");
       console.log(userProfileDto);
-     
+
       return await this.userProfileModel.findOneAndUpdate({ user_id }, userProfileDto)
     }
   }
@@ -110,14 +110,14 @@ export class UsersService {
     console.log(user_id);
     user_id = new mongoose.Types.ObjectId(user_id);
     //userProfileDto.user_id = user_id;
-    const isUser = await this.userModel.findOne({ user_id });
+    const isUser = await this.userModel.findOne({ _id: user_id });
     if (!isUser) {
       throw new HttpException({ message: "The given user does not exsit" }, HttpStatus.BAD_REQUEST);
     } else {
       console.log("update");
       console.log(userDto);
-     
-      return await this.userModel.findOneAndUpdate({ user_id }, userDto)
+
+      return await this.userModel.findOneAndUpdate({ _id: user_id }, userDto)
     }
   }
 
@@ -125,16 +125,16 @@ export class UsersService {
     console.log(user_id);
     user_id = new mongoose.Types.ObjectId(user_id);
     //userProfileDto.user_id = user_id;
-    const isUser = await this.userModel.findOne({ user_id });
+    const isUser = await this.userModel.findOne({ _id: user_id });
     if (!isUser) {
       throw new HttpException({ message: "The given user does not exsit" }, HttpStatus.BAD_REQUEST);
     } else {
-     
-      return await this.userModel.deleteOne({ user_id })
+
+      return await this.userModel.deleteOne({ _id: user_id })
     }
   }
 
-  async uploadCv(cv){
+  async uploadCv(cv) {
     if (cv) {
       const cvFileName = this.uploadController.uploadFile(cv);
       console.log(cvFileName);
@@ -147,7 +147,7 @@ export class UsersService {
   }
 
   async getAllAdmins(): Promise<User[]> {
-    return await this.userModel.find({role:'admin'}).exec()
+    return await this.userModel.find({ role: 'admin' }).exec()
   }
 
   async getUser(user_id): Promise<any> {
@@ -162,16 +162,16 @@ export class UsersService {
       return await this.userProfileModel.findOne({ user_id });
     }
   }
-  async updateUserJobs(user_id, userJobsDto:UserJobsDto):Promise<any>{
+  async updateUserJobs(user_id, userJobsDto: UserJobsDto): Promise<any> {
     console.log(user_id);
     user_id = new mongoose.Types.ObjectId(user_id);
     //userProfileDto.user_id = user_id;
-    const isUser = await this.userJobsModel.findOne({user_id});
+    const isUser = await this.userJobsModel.findOne({ user_id });
     if (!isUser) {
-      throw new HttpException({message: "The given user does not exsit"}, HttpStatus.BAD_REQUEST);
-    }else{
+      throw new HttpException({ message: "The given user does not exsit" }, HttpStatus.BAD_REQUEST);
+    } else {
       //console.log(userProfileDto);
-      return await this.userJobsModel.findOneAndUpdate({user_id}, userJobsDto)
+      return await this.userJobsModel.findOneAndUpdate({ user_id }, userJobsDto)
     }
-}
+  }
 }
