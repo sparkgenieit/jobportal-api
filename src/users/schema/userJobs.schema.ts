@@ -3,8 +3,8 @@ import { HydratedDocument, Types } from "mongoose";
 
 
 @Schema()
-export class UserJobs{
-    @Prop({type: Date})
+export class UserJobs {
+    @Prop({ type: Date })
     created_date?: Date
     @Prop()
     userId: Types.ObjectId
@@ -14,6 +14,10 @@ export class UserJobs{
     applied: Boolean
     @Prop()
     saved: Boolean
+    @Prop()
+    saved_date: string
+    @Prop()
+    applied_date: string
 }
 
 export const UserJobsSchema = SchemaFactory.createForClass(UserJobs);
