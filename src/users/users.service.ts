@@ -12,6 +12,7 @@ import { JwtService } from '@nestjs/jwt';
 import { CompanyProfileDto } from 'src/company/dto/company-profile.dto';
 import { CompanyProfile } from 'src/company/schema/companyProfile.schema';
 import { UploadController } from 'src/upload/upload.controller';
+import * as bcrypt from 'bcrypt'; 
 
 @Injectable()
 export class UsersService {
@@ -26,11 +27,21 @@ export class UsersService {
   ) { }
 
   async findOne({ email, password }: LoginUserDto): Promise<any> {
-    const user = await this.userModel.findOne({ email, password });
-    if (!user) {
-      throw new HttpException({ message: 'Invalid Credentials' }, HttpStatus.BAD_REQUEST);
-      //return {"msg": "Invaid Credentials"};
-    }
+    const user = await this.userModel.findOne({ email });
+
+    
+
+      if (!user) {
+        throw new HttpException({message:'Invalid email'}, HttpStatus.BAD_REQUEST);
+      }
+
+      const isMatch: boolean = await bcrypt.compare(password, user.password);
+
+      if (!isMatch) {
+        throw new HttpException({message:'Invalid password'}, HttpStatus.BAD_REQUEST);
+      }
+
+ 
     const payload = { username: user.first_name + " " + user.last_name, sub: user._id };
     //user.token  = this.jwtService.sign(payload);
     user.token = '999';
@@ -40,6 +51,8 @@ export class UsersService {
   async createUser(createUserDto: CreateUserDto): Promise<any> {
     const email = createUserDto.email;
     const role = createUserDto.role;
+    const encryptedPassword = await bcrypt.hash(createUserDto.password, 10);
+    createUserDto.password = encryptedPassword;
     const isUser = await this.userModel.findOne({ email });
     if (isUser) {
       throw new HttpException({ message: "The given email " + email + " already exsit" }, HttpStatus.BAD_REQUEST);
@@ -93,6 +106,8 @@ export class UsersService {
 
   async updateProfile(user_id, userProfileDto: UserProfileDto): Promise<any> {
     console.log(user_id);
+    const encryptedPassword = await bcrypt.hash('kiran123', 10);
+    console.log('password',encryptedPassword);
     user_id = new mongoose.Types.ObjectId(user_id);
     //userProfileDto.user_id = user_id;
     const isUser = await this.userProfileModel.findOne({ user_id });
