@@ -12,7 +12,7 @@ import { JwtService } from '@nestjs/jwt';
 import { CompanyProfileDto } from 'src/company/dto/company-profile.dto';
 import { CompanyProfile } from 'src/company/schema/companyProfile.schema';
 import { UploadController } from 'src/upload/upload.controller';
-import * as bcrypt from 'bcrypt'; 
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
@@ -29,19 +29,17 @@ export class UsersService {
   async findOne({ email, password }: LoginUserDto): Promise<any> {
     const user = await this.userModel.findOne({ email });
 
-    
+    if (!user) {
+      throw new HttpException({ message: 'Invalid email' }, HttpStatus.BAD_REQUEST);
+    }
 
-      if (!user) {
-        throw new HttpException({message:'Invalid email'}, HttpStatus.BAD_REQUEST);
-      }
+    const isMatch: boolean = await bcrypt.compare(password, user.password);
 
-      const isMatch: boolean = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      throw new HttpException({ message: 'Invalid password' }, HttpStatus.BAD_REQUEST);
+    }
 
-      if (!isMatch) {
-        throw new HttpException({message:'Invalid password'}, HttpStatus.BAD_REQUEST);
-      }
 
- 
     const payload = { username: user.first_name + " " + user.last_name, sub: user._id };
     //user.token  = this.jwtService.sign(payload);
     user.token = '999';
@@ -72,7 +70,7 @@ export class UsersService {
 
       if (role == 'user') {
         console.log(createUserDto)
-        const userProfileDto: UserProfileDto = { user_id: res._id, first_name: 'test', last_name: 'testing', email: res.email };
+        const userProfileDto: UserProfileDto = { user_id: res._id, first_name: res.first_name, last_name: res.last_name, email: res.email };
         console.log("userr");
         console.log(userProfileDto);
         this.userProfileModel.create(userProfileDto);
@@ -107,7 +105,7 @@ export class UsersService {
   async updateProfile(user_id, userProfileDto: UserProfileDto): Promise<any> {
     console.log(user_id);
     const encryptedPassword = await bcrypt.hash('kiran123', 10);
-    console.log('password',encryptedPassword);
+    console.log('password', encryptedPassword);
     user_id = new mongoose.Types.ObjectId(user_id);
     //userProfileDto.user_id = user_id;
     const isUser = await this.userProfileModel.findOne({ user_id });
@@ -131,6 +129,8 @@ export class UsersService {
     } else {
       console.log("update");
       console.log(userDto);
+      const encryptedPassword = await bcrypt.hash(userDto.password, 10);
+      userDto.password = encryptedPassword;
 
       return await this.userModel.findOneAndUpdate({ _id: user_id }, userDto)
     }
@@ -161,8 +161,16 @@ export class UsersService {
     return await this.userModel.find().exec()
   }
 
-  async getAllAdmins(): Promise<User[]> {
-    return await this.userModel.find({ role: 'admin' }).exec()
+  async getAllAdmins(limit: number, skip: number) {
+
+    const count = await this.userModel.countDocuments({ role: 'admin' }).exec();
+    const data = await this.userModel.find({ role: 'admin' }).skip(skip).limit(limit).exec();
+    return {
+      jobs: data,
+      total: count,
+      status: 200,
+    }
+
   }
 
   async getUser(user_id): Promise<any> {

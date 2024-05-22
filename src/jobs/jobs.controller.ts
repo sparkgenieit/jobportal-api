@@ -50,6 +50,18 @@ export class jobsController {
         return await this.jobsService.releaseJob(data);
     }
 
+    @Post('multi_release')
+    async multiReleaseJob(@Body() bodyData: any, response: any): Promise<Jobs> {
+        const promises = [];
+        bodyData.forEach(async (data: { adminId: string; jobId: string; jobsDto: JobsDto; }) => {
+            await this.jobsService.releaseJob(data);
+        })
+        response = { status: '200' };
+        return response;
+
+
+    }
+
     @Post('approve')
     async approveJob(@Body() data: { adminId: string, jobId: string, jobsDto: JobsDto }): Promise<Jobs> {
         return await this.jobsService.approveJob(data);
