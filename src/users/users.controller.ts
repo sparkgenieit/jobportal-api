@@ -1,5 +1,5 @@
 import { UsersService } from './users.service';
-import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './schema/user.schema';
 import { UserProfile } from './schema/userProfile.schema';
@@ -19,6 +19,16 @@ export class UsersController {
     @Post('login')
     async LoginUserDto(@Body() loginUserDto: LoginUserDto): Promise<User> {
         return await this.userService.findOne(loginUserDto);
+    }
+
+    @Post('forgot-password')
+    async UserForgotPassword(@Body() email): Promise<any> {
+        return await this.userService.forgotPassword(email);
+    }
+
+    @Patch('reset-password')
+    async UserResetPassword(@Param() data, @Body() password): Promise<any> {
+        return await this.userService.resetPassword(data.email, password)
     }
 
     @Post('register')

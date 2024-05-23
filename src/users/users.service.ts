@@ -13,6 +13,7 @@ import { CompanyProfileDto } from 'src/company/dto/company-profile.dto';
 import { CompanyProfile } from 'src/company/schema/companyProfile.schema';
 import { UploadController } from 'src/upload/upload.controller';
 import * as bcrypt from 'bcrypt';
+import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()
 export class UsersService {
@@ -45,6 +46,32 @@ export class UsersService {
     user.token = '999';
     return user;
   }
+
+  async forgotPassword({ email }): Promise<any> {
+    const user = await this.userModel.findOne({ email });
+    if (!user) {
+      throw new HttpException({ message: 'No User Found' }, HttpStatus.BAD_REQUEST);
+    } else {
+      return user
+    }
+  }
+
+  async resetPassword(email, { password }): Promise<any> {
+    const user = await this.userModel.findOne({ email });
+    if (!user) {
+      throw new HttpException({ message: 'No User Found' }, HttpStatus.BAD_REQUEST);
+    } else {
+      const encryptedPassword = await bcrypt.hash(password, 10);
+
+      user.password = encryptedPassword;
+
+      return await this.userModel.findOneAndUpdate({ email }, user)
+
+    }
+  }
+
+
+
 
   async createUser(createUserDto: CreateUserDto): Promise<any> {
     const email = createUserDto.email;
@@ -161,7 +188,7 @@ export class UsersService {
     return await this.userModel.find().exec()
   }
 
-  async getAllAdmins(limit: number, skip: number) {
+  async getAllAdmins(limit: number, skip: number): Promise<any> {
 
     const count = await this.userModel.countDocuments({ role: 'admin' }).exec();
     const data = await this.userModel.find({ role: 'admin' }).skip(skip).limit(limit).exec();
