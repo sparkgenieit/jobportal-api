@@ -27,8 +27,8 @@ export class UsersController {
     }
 
     @Patch('reset-password')
-    async UserResetPassword(@Param() data, @Body() password): Promise<any> {
-        return await this.userService.resetPassword(data.email, password)
+    async UserResetPassword(@Query() { email, token }, @Body() password): Promise<any> {
+        return await this.userService.resetPassword(email, token, password)
     }
 
     @Post('register')

@@ -13,7 +13,7 @@ import { CompanyProfileDto } from 'src/company/dto/company-profile.dto';
 import { CompanyProfile } from 'src/company/schema/companyProfile.schema';
 import { UploadController } from 'src/upload/upload.controller';
 import * as bcrypt from 'bcrypt';
-import { MailerService } from '@nestjs-modules/mailer';
+import { randomUUID } from 'crypto';
 
 @Injectable()
 export class UsersService {
@@ -50,28 +50,31 @@ export class UsersService {
   async forgotPassword({ email }): Promise<any> {
     const user = await this.userModel.findOne({ email });
     if (!user) {
-      throw new HttpException({ message: 'No User Found' }, HttpStatus.BAD_REQUEST);
+      throw new HttpException({ message: 'No User Found' }, HttpStatus.NOT_FOUND);
     } else {
-      return user
+      let token = randomUUID()
+      await this.userModel.findOneAndUpdate({ _id: user._id }, { token: token })
+      return { url: `http://localhost:3000/reset-password?email=${user.email}&token=${token}` }
     }
   }
 
-  async resetPassword(email, { password }): Promise<any> {
+  async resetPassword(email: string, token: string, { password }): Promise<any> {
     const user = await this.userModel.findOne({ email });
     if (!user) {
-      throw new HttpException({ message: 'No User Found' }, HttpStatus.BAD_REQUEST);
+      throw new HttpException({ message: 'No User Found' }, HttpStatus.NOT_FOUND);
     } else {
-      const encryptedPassword = await bcrypt.hash(password, 10);
-
-      user.password = encryptedPassword;
-
-      return await this.userModel.findOneAndUpdate({ email }, user)
+      if ((user.token).trim() !== "" && user.token === token) {
+        const encryptedPassword = await bcrypt.hash(password, 10);
+        password = encryptedPassword;
+        token = "";
+        return await this.userModel.findOneAndUpdate({ _id: user._id }, { password, token })
+      }
+      else {
+        throw new HttpException({ message: "You can't change the password" }, HttpStatus.UNAUTHORIZED);
+      }
 
     }
   }
-
-
-
 
   async createUser(createUserDto: CreateUserDto): Promise<any> {
     const email = createUserDto.email;
@@ -137,7 +140,7 @@ export class UsersService {
     //userProfileDto.user_id = user_id;
     const isUser = await this.userProfileModel.findOne({ user_id });
     if (!isUser) {
-      throw new HttpException({ message: "The given user does not exsit" }, HttpStatus.BAD_REQUEST);
+      throw new HttpException({ message: "The given user does not exsit" }, HttpStatus.NOT_FOUND);
     } else {
       console.log("update");
       console.log(userProfileDto);
@@ -152,7 +155,7 @@ export class UsersService {
     //userProfileDto.user_id = user_id;
     const isUser = await this.userModel.findOne({ _id: user_id });
     if (!isUser) {
-      throw new HttpException({ message: "The given user does not exsit" }, HttpStatus.BAD_REQUEST);
+      throw new HttpException({ message: "The given user does not exsit" }, HttpStatus.NOT_FOUND);
     } else {
       console.log("update");
       console.log(userDto);
@@ -169,7 +172,7 @@ export class UsersService {
     //userProfileDto.user_id = user_id;
     const isUser = await this.userModel.findOne({ _id: user_id });
     if (!isUser) {
-      throw new HttpException({ message: "The given user does not exsit" }, HttpStatus.BAD_REQUEST);
+      throw new HttpException({ message: "The given user does not exsit" }, HttpStatus.NOT_FOUND);
     } else {
 
       return await this.userModel.deleteOne({ _id: user_id })
@@ -207,7 +210,7 @@ export class UsersService {
     const isUser = await this.userProfileModel.findOne({ user_id });
     console.log(isUser);
     if (!isUser) {
-      throw new HttpException({ message: "The given user does not exsit" }, HttpStatus.BAD_REQUEST);
+      throw new HttpException({ message: "The given user does not exsit" }, HttpStatus.NOT_FOUND);
     } else {
       return await this.userProfileModel.findOne({ user_id });
     }
@@ -218,7 +221,7 @@ export class UsersService {
     //userProfileDto.user_id = user_id;
     const isUser = await this.userJobsModel.findOne({ user_id });
     if (!isUser) {
-      throw new HttpException({ message: "The given user does not exsit" }, HttpStatus.BAD_REQUEST);
+      throw new HttpException({ message: "The given user does not exsit" }, HttpStatus.NOT_FOUND);
     } else {
       //console.log(userProfileDto);
       return await this.userJobsModel.findOneAndUpdate({ user_id }, userJobsDto)
