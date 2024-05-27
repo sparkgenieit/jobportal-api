@@ -4,8 +4,8 @@ import { HydratedDocument } from "mongoose";
 export type UserDocument = HydratedDocument<User>;
 
 @Schema()
-export class User{
-    @Prop({type: Date})
+export class User {
+    @Prop({ type: Date })
     created_date?: Date
     @Prop()
     first_name: string
@@ -17,6 +17,10 @@ export class User{
     password: string
     @Prop()
     role: 'string'
+    @Prop()
+    plan: string
+    @Prop()
+    price: string
     @Prop()
     token?: string
 }
