@@ -196,7 +196,7 @@ export class UsersService {
     const count = await this.userModel.countDocuments({ role: 'admin' }).exec();
     const data = await this.userModel.find({ role: 'admin' }).skip(skip).limit(limit).exec();
     return {
-      jobs: data,
+      admins: data,
       total: count,
       status: 200,
     }

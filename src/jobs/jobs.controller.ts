@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put, Query } from '@nestjs/common';
 import { JobsDto } from './dto/jobs.dto';
 import { Jobs } from './schema/jobs.schema';
 import { JobsService } from './jobs.service';
@@ -16,18 +16,18 @@ export class jobsController {
     }
 
     @Get("all")
-    async getAllJobs(): Promise<Jobs[]> {
-        return await this.jobsService.getAllJobs()
+    async getAllAdmins(@Query() { limit, skip }) {
+        return await this.jobsService.getAllJobs(+limit, +skip)
     }
 
     @Get("approved")
-    async getApprovedjobs(): Promise<Jobs[]> {
-        return await this.jobsService.getApprovedJobs()
+    async getApprovedjobs(@Query() { limit, skip }) {
+        return await this.jobsService.getApprovedJobs(+limit, +skip)
     }
 
     @Get("queue")
-    async getQueuejobs(): Promise<Jobs[]> {
-        return await this.jobsService.getQueueJobs()
+    async getQueuejobs(@Query() { limit, skip }) {
+        return await this.jobsService.getQueueJobs(+limit, +skip)
     }
 
     @Post('apply')
@@ -73,15 +73,15 @@ export class jobsController {
     }
 
     @Get('assignedJobs/:adminId')
-    async getAssignedJobs(@Param() data): Promise<Jobs[]> {
-        return await this.jobsService.getAssignedJobs(data.adminId);
+    async getAssignedJobs(@Param() data, @Query() { limit, skip }) {
+        return await this.jobsService.getAssignedJobs(data.adminId, limit, skip);
     }
 
 
     @Get('postedJobs/:companyId')
-    async getPostedJobs(@Param() data): Promise<Jobs[]> {
+    async getPostedJobs(@Param() data, @Query() { limit, skip }) {
         console.log(data);
-        return await this.jobsService.getPostedJobs(data.companyId);
+        return await this.jobsService.getPostedJobs(data.companyId, +limit, +skip);
     }
 
     @Get('appliedJobs/:userId')

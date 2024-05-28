@@ -143,22 +143,46 @@ export class JobsService {
     }
   }
 
-  async getAllJobs(): Promise<Jobs[]> {
-    return await this.jobsModel.find().exec()
+  async getAllJobs(limit: number, skip: number) {
+    const count = await this.jobsModel.countDocuments().exec();
+    const data = await this.jobsModel.find().skip(skip).limit(limit).exec();
+    return {
+      jobs: data,
+      total: count,
+      status: 200,
+    }
   }
 
-  async getApprovedJobs(): Promise<Jobs[]> {
-    return await this.jobsModel.find({ 'status': 'approved' }).exec()
+  async getApprovedJobs(limit: number, skip: number) {
+    const count = await this.jobsModel.countDocuments({ 'status': 'approved' }).exec();
+    const data = await this.jobsModel.find({ 'status': 'approved' }).skip(skip).limit(limit).exec();
+    return {
+      jobs: data,
+      total: count,
+      status: 200,
+    }
   }
 
-  async getQueueJobs(): Promise<Jobs[]> {
-    return await this.jobsModel.find({ 'status': 'queue' }).exec()
+  async getQueueJobs(limit: number, skip: number) {
+    const count = await this.jobsModel.countDocuments({ 'status': 'queue' }).exec();
+    const data = await this.jobsModel.find({ 'status': 'queue' }).skip(skip).limit(limit).exec();
+    return {
+      jobs: data,
+      total: count,
+      status: 200,
+    }
   }
 
-  async getAssignedJobs(adminId): Promise<Jobs[]> {
+  async getAssignedJobs(adminId, limit: number, skip: number) {
     adminId = new mongoose.Types.ObjectId(adminId);
+    const count = await this.jobsModel.countDocuments({ adminId }).exec();
+    const data = await this.jobsModel.find({ adminId }).skip(skip).limit(limit).exec();
+    return {
+      jobs: data,
+      total: count,
+      status: 200,
+    }
 
-    return await this.jobsModel.find({ adminId }).exec()
   }
 
   async getAppliedJobs(userId): Promise<any> {
@@ -173,9 +197,15 @@ export class JobsService {
     return await this.UserJobsModel.find({ userId }).exec()
   }
 
-  async getPostedJobs(companyId): Promise<Jobs[]> {
+  async getPostedJobs(companyId, limit: number, skip: number) {
     //companyId = new mongoose.Types.ObjectId(companyId);
-    return await this.jobsModel.find({ companyId: companyId }).exec()
+    const count = await this.jobsModel.countDocuments({ companyId: companyId }).exec();
+    const data = await this.jobsModel.find({ companyId: companyId }).skip(skip).limit(limit).exec();
+    return {
+      jobs: data,
+      total: count,
+      status: 200,
+    }
   }
 
 
