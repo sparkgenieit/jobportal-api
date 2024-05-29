@@ -13,12 +13,14 @@ import { CompanyProfileDto } from 'src/company/dto/company-profile.dto';
 import { CompanyProfile } from 'src/company/schema/companyProfile.schema';
 import { UploadController } from 'src/upload/upload.controller';
 import * as bcrypt from 'bcrypt';
+import { MailerService } from '@nestjs-modules/mailer';
 import { randomUUID } from 'crypto';
 
 @Injectable()
 export class UsersService {
   constructor(
     private readonly uploadController: UploadController,
+    private emailService: MailerService,
     @InjectModel(User.name) private readonly userModel: Model<User>,
     @InjectModel(UserProfile.name) private readonly userProfileModel: Model<UserProfile>,
     @InjectModel(UserJobs.name) private readonly userJobsModel: Model<UserJobs>,
@@ -54,6 +56,23 @@ export class UsersService {
     } else {
       let token = randomUUID()
       await this.userModel.findOneAndUpdate({ _id: user._id }, { token: token })
+
+      const promises = [];
+    await  this.emailService.sendMail({
+          to: user.email,
+          subject: `[${process.env.APP_NAME}] Email Confirmation`,
+          // The `.pug`, `.ejs` or `.hbs` extension is appended automatically.
+          template: 'user/reset_password',
+          context: {
+            name: `${user.first_name} ${user.last_name}`,
+            url: `http://localhost:3000/reset-password?email=${user.email}&token=${token}`,
+            
+          },
+        });
+     
+
+      
+
       return { url: `http://localhost:3000/reset-password?email=${user.email}&token=${token}` }
     }
   }

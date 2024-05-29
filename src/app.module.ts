@@ -15,12 +15,13 @@ import { OrderModule } from './orders/order.module';
 import { CategoryModule } from './categories/category.module';
 import { StripeModule } from './stripe/stripe.module';
 import { ConfigModule } from '@nestjs/config';
+import { GlobalModule } from './global/global.module';
 
 
 @Module({
   imports: [ConfigModule.forRoot({ isGlobal: true, }), ServeStaticModule.forRoot({
     rootPath: join(__dirname, '..', 'public'),
-  }), DatabaseModule, UsersModule, CompanyModule, JobsModule, AuthModule, UploadModule, AdModule, SkillModule, OrderModule, CategoryModule, StripeModule],
+  }), GlobalModule,DatabaseModule, UsersModule, CompanyModule, JobsModule, AuthModule, UploadModule, AdModule, SkillModule, OrderModule, CategoryModule, StripeModule],
   controllers: [AppController],
   providers: [AppService],
 })
