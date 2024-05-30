@@ -22,6 +22,8 @@ export class User {
     @Prop()
     price: string
     @Prop()
+    activated: boolean
+    @Prop()
     token?: string
 }
 

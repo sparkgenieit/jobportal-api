@@ -35,7 +35,9 @@ export class UsersService {
     if (!user) {
       throw new HttpException({ message: 'Invalid email' }, HttpStatus.BAD_REQUEST);
     }
-
+    if (!user.activated) {
+      throw new HttpException({ message: 'User Not Activated' }, HttpStatus.BAD_REQUEST);
+    }
     const isMatch: boolean = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
@@ -58,20 +60,20 @@ export class UsersService {
       await this.userModel.findOneAndUpdate({ _id: user._id }, { token: token })
 
       const promises = [];
-    await  this.emailService.sendMail({
-          to: user.email,
-          subject: `[${process.env.APP_NAME}] Email Confirmation`,
-          // The `.pug`, `.ejs` or `.hbs` extension is appended automatically.
-          template: 'user/reset_password',
-          context: {
-            name: `${user.first_name} ${user.last_name}`,
-            url: `http://localhost:3000/reset-password?email=${user.email}&token=${token}`,
-            
-          },
-        });
-     
+      await this.emailService.sendMail({
+        to: user.email,
+        subject: `[${process.env.APP_NAME}] Email Confirmation`,
+        // The `.pug`, `.ejs` or `.hbs` extension is appended automatically.
+        template: 'user/reset_password',
+        context: {
+          name: `${user.first_name} ${user.last_name}`,
+          url: `http://localhost:3000/reset-password?email=${user.email}&token=${token}`,
 
-      
+        },
+      });
+
+
+
 
       return { url: `http://localhost:3000/reset-password?email=${user.email}&token=${token}` }
     }
@@ -95,11 +97,45 @@ export class UsersService {
     }
   }
 
+  async verifyEmail(email: string) {
+    const token = randomUUID()
+    const user = await this.userModel.findOneAndUpdate({ email }, { token })
+    console.log(user)
+    await this.emailService.sendMail({
+      to: email,
+      subject: `[${process.env.APP_NAME}] Email Confirmation`,
+      // The `.pug`, `.ejs` or `.hbs` extension is appended automatically.
+      template: 'user/user_welcome',
+      context: {
+        name: `${user.first_name} ${user.last_name}`,
+        url: `http://localhost:3000/activate-account?email=${email}&token=${token}`,
+
+      },
+    });
+    return { status: 200 }
+  }
+
+  async activateAccount(email: string, token: string): Promise<any> {
+
+    const user = await this.userModel.findOne({ email });
+    if (!user) {
+      throw new HttpException({ message: 'No User Found' }, HttpStatus.NOT_FOUND);
+    }
+    else if (user.token !== token) {
+      throw new HttpException({ message: `Can't Activate the Account` }, HttpStatus.NOT_FOUND);
+    } else {
+      const activated = true;
+      return await this.userModel.findOneAndUpdate({ _id: user._id }, { activated: activated })
+    }
+
+  }
+
   async createUser(createUserDto: CreateUserDto): Promise<any> {
     const email = createUserDto.email;
     const role = createUserDto.role;
     const encryptedPassword = await bcrypt.hash(createUserDto.password, 10);
     createUserDto.password = encryptedPassword;
+
     const isUser = await this.userModel.findOne({ email });
     if (isUser) {
       throw new HttpException({ message: "The given email " + email + " already exsit" }, HttpStatus.BAD_REQUEST);
@@ -107,14 +143,14 @@ export class UsersService {
 
     //CreateUserDto.token = '';
     //const user =   await this.userModel.create(createUserDto);
-    return await this.userModel.create(createUserDto).then((res) => {
+    return await this.userModel.create(createUserDto).then(async (res) => {
 
       const user = res;
       const payload = { username: res.first_name + " " + res.last_name, sub: res._id };
 
       user._id = res._id;
       //user.token  = this.jwtService.sign(payload);
-      user.token = '999';
+      // user.token = '999';
       console.log("role", role);
 
       if (role == 'user') {
@@ -145,7 +181,7 @@ export class UsersService {
         this.companyProfileModel.create(companyProfileDto);
       }
 
-
+      await this.verifyEmail(email)
       return user;
     })
 

@@ -8,5 +8,6 @@ export class CreateUserDto {
   role: string
   plan: string
   amount_paid: string
-  static token: string
+  activated: boolean
+  token: string
 }

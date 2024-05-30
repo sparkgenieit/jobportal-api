@@ -1,3 +1,4 @@
+import { MailerService } from '@nestjs-modules/mailer';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -8,7 +9,10 @@ import Stripe from 'stripe';
 @Injectable()
 export class StripeService {
     private readonly stripe: Stripe;
-    constructor(@InjectModel(User.name) private readonly userModel: Model<User>) {
+    constructor(
+        private emailService: MailerService,
+        @InjectModel(User.name) private readonly userModel: Model<User>
+    ) {
         this.stripe = new Stripe('sk_test_51PKHdMSIkLQ1QpWMKj1xClSWqcOgyIQsd28qfTkD7scrtjZ5Nf2dAijNlyHXlq5a5CCHzEzqwuqJnV9XydBGYz4z00rBFUPxZc');
     }
     async CreatePaymentIntent(plan: string, price: number, user_id) {
@@ -59,8 +63,21 @@ export class StripeService {
             );
             if (event.type === "charge.succeeded") {
                 const { price, user_id, plan } = event.data.object.metadata;
+                const user = await this.userModel.findOneAndUpdate({ _id: user_id }, { plan: plan, price: price })
+                await this.emailService.sendMail({
+                    to: user.email,
+                    subject: `[${process.env.APP_NAME}] Payment Completed`,
+                    // The `.pug`, `.ejs` or `.hbs` extension is appended automatically.
+                    template: 'user/payment_invoice',
+                    context: {
+                        name: `${user.first_name} ${user.last_name}`,
+                        email: user.email,
+                        plan: plan,
+                        price: price
+                    },
+                });
 
-                await this.userModel.findOneAndUpdate({ _id: user_id }, { plan: plan, price: price })
+
             }
 
 

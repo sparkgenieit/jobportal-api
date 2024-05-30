@@ -10,24 +10,22 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handleba
 ////////////////////////////////////////////////
 let emailTransport: any;
 if (process.env.PROD === 'true') {
-  console.log('PROD'); 
+  console.log('PROD');
   emailTransport = {
-   // SES: new AWS.SES(),
+    // SES: new AWS.SES(),
     secure: true,
     ignoreTLS: true,
     debug: false,
   };
 } else {
-  console.log('TEST'); 
-  
+  console.log('TEST');
+
   emailTransport = {
     host: "sandbox.smtp.mailtrap.io",
     port: 2525,
     auth: {
-      auth: {
-        user: "cd77fd23ac2372",
-        pass: "bf86298ae33419"
-      }
+      user: "cd77fd23ac2372",
+      pass: "bf86298ae33419"
     },
   };
 }
@@ -44,11 +42,11 @@ if (process.env.PROD === 'true') {
     MailerModule.forRootAsync({
       useFactory: async (config: ConfigService) => ({
         transport: emailTransport,
-        defaults: { 
+        defaults: {
           from: `"${process.env.APP_NAME} Support" <kiran@gmail.com}>`,
         },
         template: {
-          dir: path.resolve(__dirname, '../', 'emails').replace('dist','src'),
+          dir: path.resolve(__dirname, '../', 'emails').replace('dist', 'src'),
           adapter: new HandlebarsAdapter(
             {},
             {
@@ -63,7 +61,7 @@ if (process.env.PROD === 'true') {
             strict: true,
           },
         },
-        preview:true,
+        preview: true,
         options: {
           // partials: true,
           partials: {
@@ -78,4 +76,4 @@ if (process.env.PROD === 'true') {
   ],
   exports: [MailerModule],
 })
-export class GlobalModule {}
+export class GlobalModule { }

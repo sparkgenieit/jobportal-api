@@ -31,6 +31,16 @@ export class UsersController {
         return await this.userService.resetPassword(email, token, password)
     }
 
+    @Post('verify-email')
+    async VerifyEmail(@Query() { email }): Promise<any> {
+        return await this.userService.verifyEmail(email)
+    }
+
+    @Post('activate-account')
+    async UserActivateAccount(@Query() { email, token }): Promise<any> {
+        return await this.userService.activateAccount(email, token)
+    }
+
     @Post('register')
     async createUserDto(@Body() createUserDto: CreateUserDto): Promise<User> {
         return await this.userService.createUser(createUserDto);
