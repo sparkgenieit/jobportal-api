@@ -19,6 +19,7 @@ import Path = require('path');
 import * as fs from 'fs';
 import { FileInterceptor } from '@nestjs/platform-express';
 import path = require('path');
+import { AuthGuard } from 'src/auth/auth.guard';
 
 const storage = {
   storage: diskStorage({
@@ -43,24 +44,25 @@ const storage = {
   }),
 };
 
+UseGuards(AuthGuard)
 @Controller('upload')
 export class UploadController {
   constructor(
   ) { }
 
   @Get("allfiles")
-   getAllUsers(): any {
+  getAllUsers(): any {
     return {};
   }
   @Get('file')
- // @Header('Content-Type', 'application/msword')
+  // @Header('Content-Type', 'application/msword')
   async getFile(@Query('path') path, @Query('file') fileName, @Res({ passthrough: true }) res: Response): Promise<StreamableFile> {
-    const filePath = Path.join(__dirname,'..', '..',"/public/uploads/" +path+"/"+fileName);
-      const file = createReadStream(filePath);
-      return new StreamableFile(file);
-    }
-  
-  
+    const filePath = Path.join(__dirname, '..', '..', "/public/uploads/" + path + "/" + fileName);
+    const file = createReadStream(filePath);
+    return new StreamableFile(file);
+  }
+
+
   // @UseGuards(JwtAuthGuard) your methode of guard
   @Post('cvs')
   @UseInterceptors(FileInterceptor('file', storage))
@@ -89,10 +91,10 @@ export class UploadController {
     return file;
   }
 
-    // @UseGuards(JwtAuthGuard) your methode of guard
-    @Post('categoryPhoto')
-    @UseInterceptors(FileInterceptor('file', storage))
-    uploadCategoryPhoto(@UploadedFile() file: any) {
-      return file;
-    }
+  // @UseGuards(JwtAuthGuard) your methode of guard
+  @Post('categoryPhoto')
+  @UseInterceptors(FileInterceptor('file', storage))
+  uploadCategoryPhoto(@UploadedFile() file: any) {
+    return file;
+  }
 }

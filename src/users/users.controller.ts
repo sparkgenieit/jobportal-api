@@ -1,5 +1,5 @@
 import { UsersService } from './users.service';
-import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './schema/user.schema';
 import { UserProfile } from './schema/userProfile.schema';
@@ -7,6 +7,7 @@ import { LoginUserDto } from './dto/login-user.dto';
 import { UserProfileDto } from './dto/user-profile.dto';
 import { UserJobsDto } from './dto/user-jobs.dto';
 import { UserJobs } from './schema/userJobs.schema';
+import { AuthGuard } from 'src/auth/auth.guard';
 
 
 @Controller('users')
@@ -45,38 +46,38 @@ export class UsersController {
     async createUserDto(@Body() createUserDto: CreateUserDto): Promise<User> {
         return await this.userService.createUser(createUserDto);
     }
-
+    @UseGuards(AuthGuard)
     @Get("all")
     async getAllUsers(): Promise<User[]> {
         return await this.userService.getAllUsers()
     }
-
+    @UseGuards(AuthGuard)
     @Get("admins/all")
     async getAllAdmins(@Query() { limit, skip }) {
         return await this.userService.getAllAdmins(+limit, +skip)
     }
-
+    @UseGuards(AuthGuard)
     @Put('admin/update/:id')
     async updateAdmin(@Param() data, @Body() userDto: CreateUserDto): Promise<User> {
         return await this.userService.updateAdmin(data.id, userDto);
     }
-
+    @UseGuards(AuthGuard)
     @Delete('admin/delete/:id')
     async deleteAdmin(@Param() data): Promise<User> {
         return await this.userService.deleteAdmin(data.id);
     }
-
+    @UseGuards(AuthGuard)
     @Put('profile/update/:id')
     async userProfileDto(@Param() data, @Body() userProfileDto: UserProfileDto): Promise<UserProfile> {
         return await this.userService.updateProfile(data.id, userProfileDto);
     }
-
+    @UseGuards(AuthGuard)
     @Get('profile/:id')
     async getUser(@Param() data): Promise<UserProfile> {
         console.log(data.id);
         return await this.userService.getUser(data.id);
     }
-
+    @UseGuards(AuthGuard)
     @Post('profile/update/:id')
     async userJobsDto(@Param() data, @Body() userJobsDto: UserJobsDto): Promise<UserJobs> {
         return await this.userService.updateUserJobs(data.id, userJobsDto);

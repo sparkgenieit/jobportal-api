@@ -43,11 +43,9 @@ export class UsersService {
     if (!isMatch) {
       throw new HttpException({ message: 'Invalid password' }, HttpStatus.BAD_REQUEST);
     }
-
-
     const payload = { username: user.first_name + " " + user.last_name, sub: user._id };
-    //user.token  = this.jwtService.sign(payload);
-    user.token = '999';
+    user.token = await this.jwtService.signAsync(payload, { secret: "JWT_SECRET_KEY" });
+    //user.token = '999';
     return user;
   }
 
@@ -75,7 +73,7 @@ export class UsersService {
 
 
 
-      return { url: `http://localhost:3000/reset-password?email=${user.email}&token=${token}` }
+      return { status: 200 }
     }
   }
 
@@ -125,7 +123,8 @@ export class UsersService {
       throw new HttpException({ message: `Can't Activate the Account` }, HttpStatus.NOT_FOUND);
     } else {
       const activated = true;
-      return await this.userModel.findOneAndUpdate({ _id: user._id }, { activated: activated })
+      const token = "";
+      return await this.userModel.findOneAndUpdate({ _id: user._id }, { activated: activated, token: token });
     }
 
   }

@@ -1,10 +1,12 @@
-import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
 import { AdDto } from './dto/Ad.dto';
 import { Ad } from './schema/Ad.schema';
 import { AdService } from './ad.service';
+import { AuthGuard } from 'src/auth/auth.guard';
 
 
 @Controller('ads')
+@UseGuards(AuthGuard)
 export class AdController {
     constructor(
         private readonly adService: AdService

@@ -1,10 +1,12 @@
-import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
 import { SkillDto } from './dto/Skill.dto';
 import { Skill } from './schema/Skill.schema';
 import { SkillService } from './skill.service';
+import { AuthGuard } from 'src/auth/auth.guard';
 
 
 @Controller('skills')
+@UseGuards(AuthGuard)
 export class SkillController {
     constructor(
         private readonly skillService: SkillService

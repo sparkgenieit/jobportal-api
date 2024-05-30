@@ -3,6 +3,7 @@ import { StripeController } from './stripe.controller';
 import { StripeService } from './stripe.service';
 import { User, UserSchema } from 'src/users/schema/user.schema';
 import { MongooseModule } from '@nestjs/mongoose';
+import { JwtService } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -12,6 +13,6 @@ import { MongooseModule } from '@nestjs/mongoose';
   ],
 
   controllers: [StripeController],
-  providers: [User, StripeService]
+  providers: [User, StripeService, JwtService]
 })
 export class StripeModule { }
