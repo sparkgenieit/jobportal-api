@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Search } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model } from 'mongoose';
 import { JwtService } from '@nestjs/jwt';
@@ -6,7 +6,7 @@ import { Jobs } from './schema/Jobs.schema';
 import { JobsDto } from './dto/jobs.dto';
 import { User } from 'src/users/schema/user.schema';
 import { UserJobs } from 'src/users/schema/userJobs.schema';
-import { UserJobsDto } from 'src/users/dto/user-jobs.dto';
+
 
 @Injectable()
 export class JobsService {
@@ -149,6 +149,42 @@ export class JobsService {
     return {
       jobs: data,
       total: count,
+      status: 200,
+    }
+  }
+
+  async getFilterJobs(data: any, limit: number, skip: number) {
+    let query: any = {};
+    if (data.search && data.search.trim() !== "") {
+      query.$text = { $search: new RegExp(data.search, 'i') };
+    }
+    if (data.location && data.location.trim() !== "") {
+      query.location = new RegExp(data.location, 'i');
+    }
+    if (data.jobCategory && data.jobCategory.trim() !== "") {
+      query.jobCategory = new RegExp(data.jobCategory, 'i');
+    }
+    if (data.subCategory && data.subCategory.trim() !== "") {
+      query.subCategory = new RegExp(data.subCategory, 'i');
+    }
+    if (data.duration && data.duration.trim() !== "") {
+      query.duration = new RegExp(data.duration, 'i')
+    }
+    if (data.rateperhour && data.rateperhour.trim() !== "") {
+      query.rateperhour = { $lt: data.rateperhour }
+    }
+    if (data.weeklyperhour && data.weeklyperhour.trim() !== "") {
+      query.weeklyperhour = { $lt: data.weeklyperhour }
+    }
+    if (data.jobtype && data.jobtype.trim() !== "") {
+      query.jobtype = new RegExp(data.jobtype, 'i');
+    }
+
+    const total = await this.jobsModel.countDocuments(query).exec();
+    const jobs = await this.jobsModel.find(query).skip(skip).limit(limit).exec();
+    return {
+      jobs: jobs,
+      total: total,
       status: 200,
     }
   }

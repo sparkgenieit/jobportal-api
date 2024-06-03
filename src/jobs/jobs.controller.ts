@@ -25,6 +25,10 @@ export class jobsController {
     async getApprovedjobs(@Query() { limit, skip }) {
         return await this.jobsService.getApprovedJobs(+limit, +skip)
     }
+    @Post("filtered-jobs")
+    async getFilterJobs(@Body() data, @Query() { limit, skip }) {
+        return await this.jobsService.getFilterJobs(data, +limit, +skip)
+    }
     @UseGuards(AuthGuard)
     @Get("queue")
     async getQueuejobs(@Query() { limit, skip }) {
