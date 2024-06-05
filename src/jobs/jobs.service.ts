@@ -154,7 +154,9 @@ export class JobsService {
   }
 
   async getFilterJobs(data: any, limit: number, skip: number) {
-    let query: any = {};
+    let query: any = {
+      status: "approved",
+    };
     if (data.search && data.search.trim() !== "") {
       query.$text = { $search: new RegExp(data.search, 'i') };
     }
@@ -178,6 +180,9 @@ export class JobsService {
     }
     if (data.jobtype && data.jobtype.trim() !== "") {
       query.jobtype = new RegExp(data.jobtype, 'i');
+    }
+    if (data.company && data.company.trim() !== "") {
+      query.company = new RegExp(data.company, 'i');
     }
 
     const total = await this.jobsModel.countDocuments(query).exec();
