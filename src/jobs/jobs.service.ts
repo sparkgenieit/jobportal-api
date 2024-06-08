@@ -186,7 +186,7 @@ export class JobsService {
     }
 
     const total = await this.jobsModel.countDocuments(query).exec();
-    const jobs = await this.jobsModel.find(query).skip(skip).limit(limit).exec();
+    const jobs = await this.jobsModel.find(query).skip(skip).limit(limit).sort({ creationdate: - 1 }).exec();
     return {
       jobs: jobs,
       total: total,
@@ -196,7 +196,7 @@ export class JobsService {
 
   async getApprovedJobs(limit: number, skip: number) {
     const count = await this.jobsModel.countDocuments({ 'status': 'approved' }).exec();
-    const data = await this.jobsModel.find({ 'status': 'approved' }).skip(skip).limit(limit).exec();
+    const data = await this.jobsModel.find({ 'status': 'approved' }).skip(skip).limit(limit).sort({ creationdate: - 1 }).exec();
     return {
       jobs: data,
       total: count,

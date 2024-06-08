@@ -3,6 +3,7 @@ import { InjectModel } from "@nestjs/mongoose";
 import { Notification } from "./schema/notifications.schema";
 import { Model, Types } from "mongoose";
 import { NotificationDto } from "./dto/notifications.dto";
+import { create } from "domain";
 
 @Injectable()
 export class NotificationService {
@@ -20,6 +21,6 @@ export class NotificationService {
     }
 
     async getNotification(userId: Types.ObjectId) {
-        return await this.notificationModel.find({ userId: userId })
+        return await this.notificationModel.find({ userId: userId }).sort({ createdAt: -1 })
     }
 }

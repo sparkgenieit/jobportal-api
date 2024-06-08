@@ -14,6 +14,8 @@ export class Notification {
     @Prop()
     message: string
     @Prop()
+    jobTitle: string
+    @Prop()
     status: string
     @Prop()
     isRead: boolean
