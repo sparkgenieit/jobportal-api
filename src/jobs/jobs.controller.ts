@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { JobsDto } from './dto/jobs.dto';
 import { Jobs } from './schema/jobs.schema';
 import { JobsService } from './jobs.service';
@@ -111,5 +111,11 @@ export class jobsController {
     async getJob(@Param() data): Promise<Jobs[]> {
         console.log(data.id);
         return await this.jobsService.getJob(data.id);
+    }
+
+    @UseGuards(AuthGuard)
+    @Delete('delete/:id')
+    async deleteJob(@Param() data) {
+        return await this.jobsService.deleteJob(data.id);
     }
 }

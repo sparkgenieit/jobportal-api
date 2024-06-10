@@ -261,4 +261,14 @@ export class JobsService {
       return await this.jobsModel.findOne({ _id: jobId });
     }
   }
+
+  async deleteJob(jobId) {
+    const isJob = await this.jobsModel.findOne({ _id: jobId });
+    console.log(isJob);
+    if (!isJob) {
+      throw new HttpException({ message: "The given Job does not exist" }, HttpStatus.NOT_FOUND);
+    } else {
+      return await this.jobsModel.findByIdAndDelete({ _id: jobId });
+    }
+  }
 }
