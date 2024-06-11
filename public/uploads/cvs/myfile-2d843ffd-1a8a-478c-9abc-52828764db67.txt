@@ -1,0 +1,24 @@
+Super Admin:
+
+1. Updating the data of Ads management,admin management,Skills management,category management is coming as "Given user doesnt exist"
+
+2. In Admin management delete admin is also coming as "admin doesnt exist"
+
+3. In Admin management after creating the admin a blank page is coming.
+
+
+User :
+
+1. In Viewprofile some fields are coming empty.
+
+2. In Single job page when we click apply or save it is coming as "Applied Successfully".
+
+3. Applied Jobs and Saved Jobs not showing anything.
+
+Company :
+
+1. In post a job,if we click the plus button for questions that data will be same in all the fields
+
+2. In jobs list, edit and delete button functionality is pending
+
+3. the home page is taking time to load

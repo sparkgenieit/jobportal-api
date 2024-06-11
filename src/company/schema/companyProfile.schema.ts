@@ -31,6 +31,8 @@ export class CompanyProfile{
     website: string
     @Prop()
     logo: string
+    @Prop()
+    credits: number
 }
 
 export const CompanyProfileSchema = SchemaFactory.createForClass(CompanyProfile);

@@ -13,5 +13,6 @@ import { Types } from "mongoose"
     website: string
     logo: string
     phone:string
+    credits:number 
 }
 

@@ -20,6 +20,7 @@ export class CompaniesController {
 
     @Put('profile/update/:id')
     async companyProfileDto(@Param() data, @Body() companyProfileDto: CompanyProfileDto): Promise<CompanyProfile[]> {
+      console.log('data',data);
         console.log("update company id", data.id)
         return await this.companyService.updateProfile(data.id, companyProfileDto);
     }

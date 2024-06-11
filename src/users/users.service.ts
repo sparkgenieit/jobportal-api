@@ -173,7 +173,8 @@ export class UsersService {
           postalCode: '',
           contact: '',
           website: '',
-          logo: ''
+          logo: '',
+          credits:0
         };
         console.log(companyProfileDto);
 
