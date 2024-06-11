@@ -1,7 +1,9 @@
 import { MailerService } from '@nestjs-modules/mailer';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { randomUUID } from 'crypto';
+import mongoose, { Model } from 'mongoose';
+import { CompanyProfile } from 'src/company/schema/companyProfile.schema';
 import { User } from 'src/users/schema/user.schema';
 
 import Stripe from 'stripe';
@@ -11,7 +13,8 @@ export class StripeService {
     private readonly stripe: Stripe;
     constructor(
         private emailService: MailerService,
-        @InjectModel(User.name) private readonly userModel: Model<User>
+        @InjectModel(User.name) private readonly userModel: Model<User>,
+        @InjectModel(CompanyProfile.name) private readonly companyProfileModel: Model<CompanyProfile>,
     ) {
         this.stripe = new Stripe('sk_test_51PKHdMSIkLQ1QpWMKj1xClSWqcOgyIQsd28qfTkD7scrtjZ5Nf2dAijNlyHXlq5a5CCHzEzqwuqJnV9XydBGYz4z00rBFUPxZc');
     }
@@ -34,8 +37,9 @@ export class StripeService {
         //     cancel_url: `http://localhost:3000/?canceled=true`,
         // });
         // return { url: session.url };
+        let amount = (price * 1000) + +(Math.ceil((price * 1000) * (15 / 100)));
         const paymentIntent = await this.stripe.paymentIntents.create({
-            amount: price * 1000,
+            amount: amount,
             currency: "inr",
             payment_method: 'pm_card_in',
             metadata: {
@@ -64,26 +68,29 @@ export class StripeService {
             if (event.type === "charge.succeeded") {
                 const { price, user_id, plan } = event.data.object.metadata;
                 const user = await this.userModel.findOneAndUpdate({ _id: user_id }, { plan: plan, price: price })
+                let userId = new mongoose.Types.ObjectId(user_id)
+                const profile = await this.companyProfileModel.findOne({ user_id: userId });
+
                 await this.emailService.sendMail({
                     to: user.email,
                     subject: `[${process.env.APP_NAME}] Payment Completed`,
                     // The `.pug`, `.ejs` or `.hbs` extension is appended automatically.
                     template: 'user/payment_invoice',
                     context: {
-                        name: `${user.first_name} ${user.last_name}`,
-                        email: user.email,
-                        plan: plan,
-                        price: price
+                        CompanyName: profile.name || "",
+                        date: new Date().toLocaleDateString("en-GB"),
+                        Address1: profile.address1,
+                        Address2: profile.address2,
+                        Address3: profile.address3,
+                        price: price,
+                        gstPrice: (Math.ceil(+price * (15 / 100))),
+                        totalPrice: +(price) + +(Math.ceil(+price * (15 / 100))),
+                        invoiceNumber: `WH${randomUUID()}`
                     },
                 });
-
-
             }
-
-
-
         } catch (error) {
-            console.error(error);
+            console.log(error);
         }
     }
 

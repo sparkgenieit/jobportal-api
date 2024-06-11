@@ -271,4 +271,9 @@ export class JobsService {
       return await this.jobsModel.findByIdAndDelete({ _id: jobId });
     }
   }
+
+  async getAppliedUsers(jobId) {
+    jobId = new mongoose.Types.ObjectId(jobId);
+    return await this.UserJobsModel.find({ jobId: jobId, applied: true })
+  }
 }
