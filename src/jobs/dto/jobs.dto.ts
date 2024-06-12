@@ -21,6 +21,7 @@ export class JobsDto {
     description: string
     employerquestions: string
     employer: string
+    companyId: string
     status?: string
 }
 

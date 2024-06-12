@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { CompanyService } from './company.service';
 import { CompanyProfileDto } from './dto/company-profile.dto';
 import { CompanyProfile } from './schema/companyProfile.schema';
@@ -20,7 +20,7 @@ export class CompaniesController {
 
     @Put('profile/update/:id')
     async companyProfileDto(@Param() data, @Body() companyProfileDto: CompanyProfileDto): Promise<CompanyProfile[]> {
-      console.log('data',data);
+        console.log('data', data);
         console.log("update company id", data.id)
         return await this.companyService.updateProfile(data.id, companyProfileDto);
     }
@@ -29,5 +29,10 @@ export class CompaniesController {
     async getCompany(@Param() data): Promise<CompanyProfile[]> {
         console.log(data.id);
         return await this.companyService.getCompany(data.id);
+    }
+
+    @Get('/applied-users/:id')
+    async getAppliedUsers(@Param() data, @Query() { limit, skip }) {
+        return await this.companyService.getAppliedUsers(data.id, +limit, +skip);
     }
 }

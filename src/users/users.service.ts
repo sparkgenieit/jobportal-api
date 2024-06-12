@@ -69,10 +69,6 @@ export class UsersService {
 
         },
       });
-
-
-
-
       return { status: 200 }
     }
   }
@@ -134,8 +130,8 @@ export class UsersService {
     const role = createUserDto.role;
     const encryptedPassword = await bcrypt.hash(createUserDto.password, 10);
     createUserDto.password = encryptedPassword;
-    createUserDto.credits=0;
-    createUserDto.usedFreeCredit=false;
+    createUserDto.credits = 0;
+    createUserDto.usedFreeCredit = false;
 
     const isUser = await this.userModel.findOne({ email });
     if (isUser) {
@@ -200,7 +196,7 @@ export class UsersService {
     } else {
       console.log("update");
       console.log(userProfileDto);
-
+      await this.userModel.findOneAndUpdate({ _id: user_id }, { first_name: userProfileDto.first_name, last_name: userProfileDto.last_name })
       return await this.userProfileModel.findOneAndUpdate({ user_id }, userProfileDto)
     }
   }
@@ -215,7 +211,7 @@ export class UsersService {
     } else {
       console.log("update");
       console.log(userDto);
-      
+
       return await this.userModel.findOneAndUpdate({ _id: user_id }, userDto)
     }
   }
@@ -232,7 +228,6 @@ export class UsersService {
       console.log(userDto);
       const encryptedPassword = await bcrypt.hash(userDto.password, 10);
       userDto.password = encryptedPassword;
-
       return await this.userModel.findOneAndUpdate({ _id: user_id }, userDto)
     }
   }

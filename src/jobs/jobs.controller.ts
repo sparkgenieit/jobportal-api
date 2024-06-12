@@ -17,8 +17,8 @@ export class jobsController {
     }
     @UseGuards(AuthGuard)
     @Get("all")
-    async getAllAdmins(@Query() { limit, skip }) {
-        return await this.jobsService.getAllJobs(+limit, +skip)
+    async getAllAdmins(@Query() { limit, skip, adminName }) {
+        return await this.jobsService.getAllJobs(+limit, +skip, adminName)
     }
 
     @Get("approved")
@@ -115,10 +115,5 @@ export class jobsController {
     @Delete('delete/:id')
     async deleteJob(@Param() data) {
         return await this.jobsService.deleteJob(data.id);
-    }
-    @UseGuards(AuthGuard)
-    @Get('/applied-users/:id')
-    async getAppliedUsers(@Param() data) {
-        return await this.jobsService.getAppliedUsers(data.id);
     }
 }

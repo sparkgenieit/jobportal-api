@@ -52,6 +52,8 @@ export class Jobs {
     @Prop()
     adminId: Types.ObjectId
     @Prop()
+    adminName: string
+    @Prop()
     status?: string
 }
 

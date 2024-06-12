@@ -15,6 +15,6 @@ import { CompanyProfile, CompanyProfileSchema } from 'src/company/schema/company
   ],
 
   controllers: [StripeController],
-  providers: [User, StripeService, JwtService]
+  providers: [User, CompanyProfile, StripeService, JwtService]
 })
 export class StripeModule { }
