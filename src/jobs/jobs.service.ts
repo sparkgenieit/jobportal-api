@@ -23,6 +23,8 @@ export class JobsService {
     // }
 
     //CreateUserDto.token = '';
+
+    this.userModel.findOneAndUpdate({ _id: jobsDto.company},{usedFreeCredit:true});
     jobsDto.status = 'queue';
     return await this.jobsModel.create(jobsDto);
 

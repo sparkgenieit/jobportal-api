@@ -10,4 +10,6 @@ export class CreateUserDto {
   amount_paid: string
   activated: boolean
   token: string
+  credits:number 
+  usedFreeCredit:boolean
 }

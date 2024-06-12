@@ -134,6 +134,8 @@ export class UsersService {
     const role = createUserDto.role;
     const encryptedPassword = await bcrypt.hash(createUserDto.password, 10);
     createUserDto.password = encryptedPassword;
+    createUserDto.credits=0;
+    createUserDto.usedFreeCredit=false;
 
     const isUser = await this.userModel.findOne({ email });
     if (isUser) {
@@ -174,7 +176,6 @@ export class UsersService {
           contact: '',
           website: '',
           logo: '',
-          credits:0
         };
         console.log(companyProfileDto);
 
@@ -201,6 +202,21 @@ export class UsersService {
       console.log(userProfileDto);
 
       return await this.userProfileModel.findOneAndUpdate({ user_id }, userProfileDto)
+    }
+  }
+
+  async updateUser(user_id, userDto: CreateUserDto): Promise<any> {
+    console.log(user_id);
+    user_id = new mongoose.Types.ObjectId(user_id);
+    //userProfileDto.user_id = user_id;
+    const isUser = await this.userModel.findOne({ _id: user_id });
+    if (!isUser) {
+      throw new HttpException({ message: "The given user does not exsit" }, HttpStatus.NOT_FOUND);
+    } else {
+      console.log("update");
+      console.log(userDto);
+      
+      return await this.userModel.findOneAndUpdate({ _id: user_id }, userDto)
     }
   }
 

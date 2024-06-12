@@ -25,6 +25,10 @@ export class User {
     activated: boolean
     @Prop()
     token?: string
+    @Prop()
+    credits: number
+    @Prop()
+    usedFreeCredit: boolean
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
