@@ -63,8 +63,6 @@ export class jobsController {
         })
         response = { status: '200' };
         return response;
-
-
     }
     @UseGuards(AuthGuard)
     @Post('approve')
@@ -117,5 +115,10 @@ export class jobsController {
     @Delete('delete/:id')
     async deleteJob(@Param() data) {
         return await this.jobsService.deleteJob(data.id);
+    }
+    @UseGuards(AuthGuard)
+    @Get('/applied-users/:id')
+    async getAppliedUsers(@Param() data) {
+        return await this.jobsService.getAppliedUsers(data.id);
     }
 }
