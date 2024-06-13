@@ -48,8 +48,8 @@ export class UsersController {
     }
     @UseGuards(AuthGuard)
     @Get("all")
-    async getAllUsers(): Promise<User[]> {
-        return await this.userService.getAllUsers()
+    async getAllUsers(@Query() { role, limit, skip }): Promise<any> {
+        return await this.userService.getAllUsers(role, +limit, +skip)
     }
     @UseGuards(AuthGuard)
     @Get("admins/all")
@@ -66,8 +66,8 @@ export class UsersController {
     async updateUser(@Param() data, @Body() userDto: CreateUserDto): Promise<User> {
         return await this.userService.updateUser(data.id, userDto);
     }
-    
-    
+
+
     @UseGuards(AuthGuard)
     @Delete('admin/delete/:id')
     async deleteAdmin(@Param() data): Promise<User> {

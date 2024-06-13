@@ -88,14 +88,20 @@ export class jobsController {
     }
     @UseGuards(AuthGuard)
     @Get('appliedJobs/:userId')
-    async getAppliedJobs(@Param() data): Promise<Jobs[]> {
-        return await this.jobsService.getAppliedJobs(data.userId);
+    async getAppliedJobs(@Param() data, @Query() { limit, skip }): Promise<Jobs[]> {
+        return await this.jobsService.getAppliedJobs(data.userId, +limit, +skip);
     }
 
     @UseGuards(AuthGuard)
     @Get('savedJobs/:userId')
-    async getSavedJobs(@Param() data): Promise<Jobs[]> {
-        return await this.jobsService.getSavedJobs(data.userId);
+    async getSavedJobs(@Param() data, @Query() { limit, skip }): Promise<Jobs[]> {
+        return await this.jobsService.getSavedJobs(data.userId, +limit, +skip);
+    }
+
+    @UseGuards(AuthGuard)
+    @Get('user-job-status/:userId')
+    async getUserJobStatus(@Param() { userId }, @Query() { jobId }): Promise<any> {
+        return await this.jobsService.getUserJobStatus(userId, jobId);
     }
 
     @UseGuards(AuthGuard)

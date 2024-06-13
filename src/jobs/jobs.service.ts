@@ -6,6 +6,7 @@ import { Jobs } from './schema/Jobs.schema';
 import { JobsDto } from './dto/jobs.dto';
 import { User } from 'src/users/schema/user.schema';
 import { UserJobs } from 'src/users/schema/userJobs.schema';
+import { skip } from 'node:test';
 
 
 @Injectable()
@@ -245,18 +246,47 @@ export class JobsService {
       total: count,
       status: 200,
     }
-
   }
 
-  async getAppliedJobs(userId): Promise<any> {
+  async getAppliedJobs(userId, limit: number, skip: number): Promise<any> {
     userId = new mongoose.Types.ObjectId(userId);
-
-    return await this.UserJobsModel.find({ userId, applied: true }).sort({ creationdate: - 1 }).exec()
+    const count = await this.UserJobsModel.countDocuments({ userId, applied: true });
+    const jobs = await this.UserJobsModel.find({ userId, applied: true }).sort({ applied_date: -1 }).limit(limit).skip(skip).populate("jobId");
+    return {
+      jobs: jobs,
+      total: count,
+      status: 200
+    }
   }
 
-  async getSavedJobs(userId): Promise<any> {
+  async getUserJobStatus(userId, jobId) {
     userId = new mongoose.Types.ObjectId(userId);
-    return await this.UserJobsModel.find({ userId, saved: true }).sort({ creationdate: - 1 }).exec()
+    jobId = new mongoose.Types.ObjectId(jobId);
+    let userApplied = false;
+    let userSaved = false;
+    const job = await this.UserJobsModel.findOne({ userId, jobId });
+    if (job && job.saved == true) {
+      userSaved = true;
+    }
+    if (job && job.applied == true) {
+      userApplied = true;
+    }
+    return {
+      saved: userSaved,
+      applied: userApplied,
+      status: 200
+    }
+  }
+
+  async getSavedJobs(userId, limit: number, skip: number): Promise<any> {
+    userId = new mongoose.Types.ObjectId(userId);
+    const count = await this.UserJobsModel.countDocuments({ userId, saved: true });
+    const jobs = await this.UserJobsModel.find({ userId, saved: true }).sort({ saved_date: -1 }).limit(limit).skip(skip).populate("jobId");
+    return {
+      jobs: jobs,
+      total: count,
+      status: 200
+    }
   }
 
   async getPostedJobs(companyId, limit: number, skip: number) {
@@ -270,10 +300,8 @@ export class JobsService {
     }
   }
 
-
   async getJob(jobId): Promise<any> {
     jobId = new mongoose.Types.ObjectId(jobId);
-
     const isJob = await this.jobsModel.findOne({ _id: jobId });
     console.log(isJob);
     if (!isJob) {
@@ -292,5 +320,4 @@ export class JobsService {
       return await this.jobsModel.findByIdAndDelete({ _id: jobId });
     }
   }
-
 }

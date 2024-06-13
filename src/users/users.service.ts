@@ -253,12 +253,17 @@ export class UsersService {
     }
   }
 
-  async getAllUsers(): Promise<User[]> {
-    return await this.userModel.find().exec()
+  async getAllUsers(role: string, limit: number, skip: number): Promise<any> {
+    const count = await this.userModel.countDocuments({ role }).exec();
+    const users = await this.userModel.find({ role }).skip(skip).limit(limit);
+    return {
+      users: users,
+      total: count,
+      status: 200
+    }
   }
 
   async getAllAdmins(limit: number, skip: number): Promise<any> {
-
     const count = await this.userModel.countDocuments({ role: 'admin' }).exec();
     const data = await this.userModel.find({ role: 'admin' }).skip(skip).limit(limit).exec();
     return {
