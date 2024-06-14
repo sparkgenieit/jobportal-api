@@ -98,7 +98,6 @@ export class jobsController {
         return await this.jobsService.getSavedJobs(data.userId, +limit, +skip);
     }
 
-    @UseGuards(AuthGuard)
     @Get('user-job-status/:userId')
     async getUserJobStatus(@Param() { userId }, @Query() { jobId }): Promise<any> {
         return await this.jobsService.getUserJobStatus(userId, jobId);
