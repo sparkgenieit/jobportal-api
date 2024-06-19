@@ -181,7 +181,7 @@ export class JobsService {
       status: "approved",
     };
     if (data.search && data.search.trim() !== "") {
-      query.$text = { $search: new RegExp(data.search, 'i') };
+      query.jobTitle = new RegExp(data.search, 'i');
     }
     if (data.location && data.location.trim() !== "") {
       query.location = new RegExp(data.location, 'i');
@@ -204,12 +204,10 @@ export class JobsService {
     if (data.jobtype && data.jobtype.trim() !== "") {
       query.jobtype = new RegExp(data.jobtype, 'i');
     }
-    if (data.company && data.company.trim() !== "") {
-      query.company = new RegExp(data.company, 'i');
-    }
-
+    console.log(data.sort)
+    let sorting: any = { [data.sort]: -1 }
     const total = await this.jobsModel.countDocuments(query).exec();
-    const jobs = await this.jobsModel.find(query).sort({ creationdate: - 1 }).skip(skip).limit(limit).exec();
+    const jobs = await this.jobsModel.find(query).sort({ rateperhour: -1 }).skip(skip).limit(limit).exec();
     return {
       jobs: jobs,
       total: total,
