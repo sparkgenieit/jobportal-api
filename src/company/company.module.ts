@@ -7,15 +7,18 @@ import { JwtService } from '@nestjs/jwt';
 import { CompanyProfile, CompanyProfileSchema } from './schema/companyProfile.schema';
 import { UserJobs, UserJobsSchema } from 'src/users/schema/userJobs.schema';
 import { User, UserSchema } from 'src/users/schema/user.schema';
+import { Jobs, JobsSchema } from 'src/jobs/schema/jobs.schema';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: CompanyProfile.name, schema: CompanyProfileSchema },
+      { name: User.name, schema: UserSchema },
+      { name: Jobs.name, schema: JobsSchema },
       { name: UserJobs.name, schema: UserJobsSchema },
     ])
   ],
-  providers: [CompanyProfile, CompanyService, UserJobs, JwtService],
+  providers: [CompanyProfile, CompanyService, User, Jobs, UserJobs, JwtService],
   controllers: [CompaniesController]
 })
 export class CompanyModule { }

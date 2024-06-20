@@ -5,13 +5,18 @@ import { JwtService } from '@nestjs/jwt';
 import { CompanyProfile } from './schema/companyProfile.schema';
 import { CompanyProfileDto } from './dto/company-profile.dto';
 import { UserJobs } from 'src/users/schema/userJobs.schema';
+import { Jobs } from 'src/jobs/schema/jobs.schema';
 import { User } from 'src/users/schema/user.schema';
+import * as fs from 'fs';
+import * as path from 'path';
 
 @Injectable()
 export class CompanyService {
   constructor(
+    @InjectModel(Jobs.name) private readonly jobsModel: Model<Jobs>,
     @InjectModel(CompanyProfile.name) private readonly companyProfileModel: Model<CompanyProfile>,
     @InjectModel(UserJobs.name) private readonly UserJobsModel: Model<UserJobs>,
+    @InjectModel(User.name) private readonly UserModel: Model<User>,
     private jwtService: JwtService
   ) { }
 
@@ -22,7 +27,25 @@ export class CompanyService {
     if (!isUser) {
       throw new HttpException({ message: "The given user does not exist" }, HttpStatus.BAD_REQUEST);
     } else {
-      return await this.companyProfileModel.findOneAndUpdate({ user_id }, companyProfileDto);
+      await this.companyProfileModel.findOneAndUpdate({ user_id }, companyProfileDto);
+      if (companyProfileDto.logo) { // checking if logo is changed or not 
+
+        if (isUser.logo !== "") { // deleting the previous logo if the user is updating the existing logo
+          const filePath = path.join(__dirname, '..', '..', "public", "uploads", "logos", isUser.logo);
+          await fs.promises.unlink(filePath);
+        }
+
+        // Updating the logo in all the jobs posted by the company
+        await this.jobsModel.updateMany({ companyId: user_id.toString() }, { companyLogo: companyProfileDto.logo });
+      }
+      if (isUser.name !== companyProfileDto.name) { // checking if the user name is updated or not
+
+        const name = companyProfileDto.name.split(" ")  // Updating the name in Users Collection
+        let [first_name, ...lastName] = name;
+        let last_name = lastName.join(" ");
+        await this.UserModel.findOneAndUpdate({ _id: user_id }, { first_name, last_name });
+      }
+      return { message: "Update Success" }
     }
   }
 

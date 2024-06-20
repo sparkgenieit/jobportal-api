@@ -204,10 +204,15 @@ export class JobsService {
     if (data.jobtype && data.jobtype.trim() !== "") {
       query.jobtype = new RegExp(data.jobtype, 'i');
     }
-    console.log(data.sort)
+    if (data.date) {
+      const today = new Date(); // Get the current date
+      today.setDate(today.getDate() - data.date); // Subtracts the specified number of days
+      query.creationdate = { $gte: today.toLocaleDateString('en-GB') }
+    }
+
     let sorting: any = { [data.sort]: -1 }
     const total = await this.jobsModel.countDocuments(query).exec();
-    const jobs = await this.jobsModel.find(query).sort({ rateperhour: -1 }).skip(skip).limit(limit).exec();
+    const jobs = await this.jobsModel.find(query).sort(sorting).skip(skip).limit(limit).exec();
     return {
       jobs: jobs,
       total: total,
@@ -289,8 +294,8 @@ export class JobsService {
 
   async getPostedJobs(companyId, limit: number, skip: number) {
     //companyId = new mongoose.Types.ObjectId(companyId);
-    const count = await this.jobsModel.countDocuments({ companyId: companyId }).exec();
-    const data = await this.jobsModel.find({ companyId: companyId }).sort({ creationdate: - 1 }).skip(skip).limit(limit).exec();
+    const count = await this.jobsModel.countDocuments({ companyId }).exec();
+    const data = await this.jobsModel.find({ companyId }).sort({ creationdate: - 1 }).skip(skip).limit(limit).exec();
     return {
       jobs: data,
       total: count,
