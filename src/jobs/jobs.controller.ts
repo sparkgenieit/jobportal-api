@@ -82,9 +82,8 @@ export class jobsController {
 
     @UseGuards(AuthGuard)
     @Get('postedJobs/:companyId')
-    async getPostedJobs(@Param() data, @Query() { limit, skip }) {
-        console.log(data);
-        return await this.jobsService.getPostedJobs(data.companyId, +limit, +skip);
+    async getPostedJobs(@Param() data, @Query() { limit, skip, name }) {
+        return await this.jobsService.getPostedJobs(data.companyId, +limit, +skip, name);
     }
     @UseGuards(AuthGuard)
     @Get('appliedJobs/:userId')

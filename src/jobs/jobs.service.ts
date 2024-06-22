@@ -186,6 +186,9 @@ export class JobsService {
     if (data.location && data.location.trim() !== "") {
       query.location = new RegExp(data.location, 'i');
     }
+    if (data.company && data.company.trim() !== "") {
+      query.company = new RegExp(data.company, 'i');
+    }
     if (data.jobCategory && data.jobCategory.trim() !== "") {
       query.jobCategory = new RegExp(data.jobCategory, 'i');
     }
@@ -292,10 +295,15 @@ export class JobsService {
     }
   }
 
-  async getPostedJobs(companyId, limit: number, skip: number) {
-    //companyId = new mongoose.Types.ObjectId(companyId);
-    const count = await this.jobsModel.countDocuments({ companyId }).exec();
-    const data = await this.jobsModel.find({ companyId }).sort({ creationdate: - 1 }).skip(skip).limit(limit).exec();
+  async getPostedJobs(companyId, limit: number, skip: number, name: string) {
+    let query: any = {
+      companyId,
+    }
+    if (name && name.trim() !== "") {
+      query.jobTitle = new RegExp(name, 'i');
+    }
+    const count = await this.jobsModel.countDocuments(query).exec();
+    const data = await this.jobsModel.find(query).sort({ creationdate: - 1 }).skip(skip).limit(limit).exec();
     return {
       jobs: data,
       total: count,
