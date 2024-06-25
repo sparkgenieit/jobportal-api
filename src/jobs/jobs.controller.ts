@@ -25,6 +25,12 @@ export class jobsController {
     async getApprovedjobs(@Query() { limit, skip }) {
         return await this.jobsService.getApprovedJobs(+limit, +skip)
     }
+
+    @Get('suggestions')
+    async searchSuggestion(@Query() { searchTerm, searchValue }) {
+        return await this.jobsService.searchSuggestions(searchTerm, searchValue);
+    }
+
     @Post("filtered-jobs")
     async getFilterJobs(@Body() data, @Query() { limit, skip }) {
         return await this.jobsService.getFilterJobs(data, +limit, +skip)

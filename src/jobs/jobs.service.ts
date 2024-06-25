@@ -39,7 +39,7 @@ export class JobsService {
       await this.jobsModel.create(jobsDto);
       return ({ message: "Job Posted", credits: credits })
     }
-    if (user.usedFreeCredit === true && user.credits === 0) {
+    if (user.usedFreeCredit === true && user.credits == 0) {
       throw new HttpException({ message: "Not Enough Credits, Can't Post this Job" }, HttpStatus.BAD_REQUEST);
     }
   }
@@ -126,6 +126,8 @@ export class JobsService {
       }
     }
   }
+
+
 
   async approveJob({ adminId, jobId, jobsDto }): Promise<any> {
     adminId = new mongoose.Types.ObjectId(adminId);
@@ -221,6 +223,17 @@ export class JobsService {
       total: total,
       status: 200,
     }
+  }
+
+  async searchSuggestions(searchTerm: string, searchValue: string) {
+    const regex = new RegExp(searchValue, 'i'); // Case-insensitive search
+    const field = "$" + searchTerm;
+    return await this.jobsModel.aggregate([
+      { $match: { [searchTerm]: { $regex: regex } } },  // Matching the value with the field
+      { $group: { _id: field, unique: { $first: "$_id" } } },  // Grouping if there are more than one value
+      { $project: { _id: 0, value: "$_id", document: "$unique" } },
+      { $limit: 4 }
+    ])
   }
 
   async getApprovedJobs(limit: number, skip: number) {
