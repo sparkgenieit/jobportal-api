@@ -182,8 +182,8 @@ export class JobsService {
     let query: any = {
       status: "approved",
     };
-    if (data.search && data.search.trim() !== "") {
-      query.jobTitle = new RegExp(data.search, 'i');
+    if (data.jobTitle && data.jobTitle.trim() !== "") {
+      query.jobTitle = new RegExp(data.jobTitle, 'i');
     }
     if (data.location && data.location.trim() !== "") {
       query.location = new RegExp(data.location, 'i');
@@ -231,7 +231,7 @@ export class JobsService {
     return await this.jobsModel.aggregate([
       { $match: { [searchTerm]: { $regex: regex } } },  // Matching the value with the field
       { $group: { _id: field, unique: { $first: "$_id" } } },  // Grouping if there are more than one value
-      { $project: { _id: 0, value: "$_id", document: "$unique" } },
+      { $project: { _id: 0, value: "$_id" } },
       { $limit: 4 }
     ])
   }
