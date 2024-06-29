@@ -50,6 +50,8 @@ export class JobsService {
       throw new HttpException({ message: "The given Job does not exist" }, HttpStatus.BAD_REQUEST);
     } else {
       jobsDto.status = 'queue';
+      jobsDto.adminId = null;
+      jobsDto.adminName = "";
       return await this.jobsModel.findOneAndUpdate({ _id: jobId }, jobsDto);
     }
   }

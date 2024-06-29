@@ -23,5 +23,7 @@ export class JobsDto {
     employer: string
     companyId: string
     status?: string
+    adminId: Types.ObjectId
+    adminName: string
 }
 
