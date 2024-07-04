@@ -114,7 +114,7 @@ export class jobsController {
         console.log("update jobs id", data.id)
         return await this.jobsService.updateJob(data.id, jobsDto);
     }
-    @UseGuards(AuthGuard)
+
     @Get(':id')
     async getJob(@Param() data): Promise<Jobs[]> {
         console.log(data.id);

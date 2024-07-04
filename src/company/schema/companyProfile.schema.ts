@@ -4,8 +4,8 @@ import { HydratedDocument, Types } from "mongoose";
 export type CompanyProfileDocument = HydratedDocument<CompanyProfile>;
 
 @Schema()
-export class CompanyProfile{
-    @Prop({type: Date})
+export class CompanyProfile {
+    @Prop({ type: Date })
     created_date?: Date
     @Prop()
     user_id: Types.ObjectId
@@ -30,7 +30,11 @@ export class CompanyProfile{
     @Prop()
     website: string
     @Prop()
-    logo: string   
+    logo?: string
+    @Prop()
+    youtubeUrl?: string
+    @Prop()
+    banner?: string
 }
 
 export const CompanyProfileSchema = SchemaFactory.createForClass(CompanyProfile);

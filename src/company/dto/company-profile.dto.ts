@@ -1,6 +1,6 @@
 import { Types } from "mongoose"
 
- export class CompanyProfileDto{
+export class CompanyProfileDto {
     user_id: Types.ObjectId
     name: string
     address1: string
@@ -11,7 +11,9 @@ import { Types } from "mongoose"
     email: string
     contact: string
     website: string
-    logo: string
-    phone:string    
+    logo?: string
+    phone: string
+    youtubeUrl?: string
+    banner?: string
 }
 

@@ -7,12 +7,14 @@ import { JobsDto } from './dto/jobs.dto';
 import { User } from 'src/users/schema/user.schema';
 import { UserJobs } from 'src/users/schema/userJobs.schema';
 import { skip } from 'node:test';
+import { CompanyProfile } from 'src/company/schema/companyProfile.schema';
 
 
 @Injectable()
 export class JobsService {
   constructor(
     @InjectModel(Jobs.name) private readonly jobsModel: Model<Jobs>,
+    @InjectModel(CompanyProfile.name) private readonly companyProfileModel: Model<CompanyProfile>,
     @InjectModel(UserJobs.name) private readonly UserJobsModel: Model<UserJobs>,
     @InjectModel(User.name) private userModel: Model<User>
   ) { }
@@ -333,7 +335,9 @@ export class JobsService {
     if (!isJob) {
       throw new HttpException({ message: "The given Job does not exist" }, HttpStatus.BAD_REQUEST);
     } else {
-      return await this.jobsModel.findOne({ _id: jobId });
+      let companyId = new mongoose.Types.ObjectId(isJob.companyId);
+      const company = await this.companyProfileModel.findOne({ user_id: companyId }, { banner: 1, youtubeUrl: 1, _id: 0 });
+      return { ...isJob.toObject(), ...company.toObject() }
     }
   }
 

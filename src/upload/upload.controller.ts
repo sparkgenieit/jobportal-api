@@ -97,4 +97,9 @@ export class UploadController {
   uploadCategoryPhoto(@UploadedFile() file: any) {
     return file;
   }
+  @Post('banners')
+  @UseInterceptors(FileInterceptor('file', storage))
+  uploadBanner(@UploadedFile() file: any) {
+    return file;
+  }
 }

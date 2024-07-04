@@ -7,16 +7,18 @@ import { Jobs, JobsSchema } from './schema/Jobs.schema';
 import { JobsService } from './jobs.service';
 import { User, UserSchema } from 'src/users/schema/user.schema';
 import { UserJobs, UserJobsSchema } from 'src/users/schema/userJobs.schema';
+import { CompanyProfile, CompanyProfileSchema } from 'src/company/schema/companyProfile.schema';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: Jobs.name, schema: JobsSchema },
       { name: User.name, schema: UserSchema },
-      { name: UserJobs.name, schema: UserJobsSchema}
+      { name: UserJobs.name, schema: UserJobsSchema },
+      { name: CompanyProfile.name, schema: CompanyProfileSchema },
     ])
   ],
-  providers: [Jobs, JobsService, User, UserJobs, JwtService],
+  providers: [Jobs, JobsService, User, UserJobs, JwtService, CompanyProfile],
   controllers: [jobsController]
 })
-export class JobsModule {}
+export class JobsModule { }

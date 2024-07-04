@@ -28,22 +28,28 @@ export class CompanyService {
       throw new HttpException({ message: "The given user does not exist" }, HttpStatus.BAD_REQUEST);
     } else {
       await this.companyProfileModel.findOneAndUpdate({ user_id }, companyProfileDto);
+      if (isUser.name !== companyProfileDto.name) { // checking if the user name is changed or not
+        const name = companyProfileDto.name.split(" ")  // Updating the name in Users Collection
+        let [first_name, ...lastName] = name;
+        let last_name = lastName.join(" ");
+        await this.UserModel.findOneAndUpdate({ _id: user_id }, { first_name, last_name });
+      }
+
       if (companyProfileDto.logo) { // checking if logo is changed or not 
 
         if (isUser.logo !== "") { // deleting the previous logo if the user is updating the existing logo
           const filePath = path.join(__dirname, '..', '..', "public", "uploads", "logos", isUser.logo);
           await fs.promises.unlink(filePath);
         }
-
         // Updating the logo in all the jobs posted by the company
         await this.jobsModel.updateMany({ companyId: user_id.toString() }, { companyLogo: companyProfileDto.logo });
       }
-      if (isUser.name !== companyProfileDto.name) { // checking if the user name is updated or not
 
-        const name = companyProfileDto.name.split(" ")  // Updating the name in Users Collection
-        let [first_name, ...lastName] = name;
-        let last_name = lastName.join(" ");
-        await this.UserModel.findOneAndUpdate({ _id: user_id }, { first_name, last_name });
+      if (companyProfileDto.banner) { // checking if Banner is changed or not 
+        if (isUser.banner !== "") { // deleting the previous Banner if the user is updating the existing Banner
+          const filePath = path.join(__dirname, '..', '..', "public", "uploads", "banners", isUser.banner);
+          await fs.promises.unlink(filePath);
+        }
       }
       return { message: "Update Success" }
     }
