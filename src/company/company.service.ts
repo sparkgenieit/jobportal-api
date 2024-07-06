@@ -20,6 +20,15 @@ export class CompanyService {
     private jwtService: JwtService
   ) { }
 
+  async checkPreviousPhotoExistence(photoPath) {
+    try {
+      await fs.promises.access(photoPath, fs.promises.constants.F_OK); // Check for file existence
+      return true;
+    } catch (err) {
+      return false; // File not found or other error
+    }
+  }
+
   async updateProfile(user_id, companyProfileDto: CompanyProfileDto): Promise<any> {
     console.log(user_id);
     user_id = new mongoose.Types.ObjectId(user_id);
@@ -36,10 +45,12 @@ export class CompanyService {
       }
 
       if (companyProfileDto.logo) { // checking if logo is changed or not 
-
         if (isUser.logo !== "") { // deleting the previous logo if the user is updating the existing logo
           const filePath = path.join(__dirname, '..', '..', "public", "uploads", "logos", isUser.logo);
-          await fs.promises.unlink(filePath);
+          const photoExists = await this.checkPreviousPhotoExistence(filePath)
+          if (photoExists) {
+            await fs.promises.unlink(filePath);
+          }
         }
         // Updating the logo in all the jobs posted by the company
         await this.jobsModel.updateMany({ companyId: user_id.toString() }, { companyLogo: companyProfileDto.logo });
@@ -48,7 +59,10 @@ export class CompanyService {
       if (companyProfileDto.banner) { // checking if Banner is changed or not 
         if (isUser.banner !== "") { // deleting the previous Banner if the user is updating the existing Banner
           const filePath = path.join(__dirname, '..', '..', "public", "uploads", "banners", isUser.banner);
-          await fs.promises.unlink(filePath);
+          const photoExists = await this.checkPreviousPhotoExistence(filePath)
+          if (photoExists) {
+            await fs.promises.unlink(filePath);
+          }
         }
       }
       return { message: "Update Success" }
