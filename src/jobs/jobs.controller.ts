@@ -83,7 +83,7 @@ export class jobsController {
     @UseGuards(AuthGuard)
     @Get('assignedJobs/:adminId')
     async getAssignedJobs(@Param() data, @Query() { limit, skip }) {
-        return await this.jobsService.getAssignedJobs(data.adminId, limit, skip);
+        return await this.jobsService.getAssignedJobs(data.adminId, +limit, +skip);
     }
 
     @UseGuards(AuthGuard)

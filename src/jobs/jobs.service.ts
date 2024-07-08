@@ -263,7 +263,41 @@ export class JobsService {
   async getAssignedJobs(adminId, limit: number, skip: number) {
     adminId = new mongoose.Types.ObjectId(adminId);
     const count = await this.jobsModel.countDocuments({ adminId }).exec();
-    const data = await this.jobsModel.find({ adminId }).sort({ creationdate: - 1 }).skip(skip).limit(limit).exec();
+    const data = await this.jobsModel.aggregate([
+      {
+        $match: { adminId }
+      },
+      {
+        $addFields: {
+          sortPriority: {
+            $switch: {
+              branches: [
+                {
+                  'case': {
+                    $eq: [
+                      '$status',
+                      'review'
+                    ]
+                  },
+                  then: 1
+                },
+              ],
+              'default': 2
+            }
+          }
+        }
+      }, {
+        $sort: {
+          sortPriority: 1,
+          creationdate: - 1,
+        }
+      },
+      {
+        $skip: skip
+      },
+      {
+        $limit: limit
+      }])
     return {
       jobs: data,
       total: count,
