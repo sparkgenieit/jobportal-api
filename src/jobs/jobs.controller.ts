@@ -80,6 +80,13 @@ export class jobsController {
     async rejectJob(@Body() data: { adminId: string, jobId: string, jobsDto: JobsDto }): Promise<Jobs> {
         return await this.jobsService.rejectJob(data);
     }
+
+    @UseGuards(AuthGuard)
+    @Post('report')
+    async reportJob(@Body() data: { userId: string, jobId: string, reportedReason: string }): Promise<any> {
+        return await this.jobsService.reportJob(data);
+    }
+
     @UseGuards(AuthGuard)
     @Get('assignedJobs/:adminId')
     async getAssignedJobs(@Param() data, @Query() { limit, skip }) {

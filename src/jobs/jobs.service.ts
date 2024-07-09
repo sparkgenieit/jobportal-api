@@ -375,6 +375,21 @@ export class JobsService {
     }
   }
 
+  async reportJob({ userId, jobId, reportedReason }) {
+    jobId = new mongoose.Types.ObjectId(jobId);
+    userId = new mongoose.Types.ObjectId(userId);
+    const isJob = await this.jobsModel.findOne({ _id: jobId });
+    const isUser = await this.userModel.findOne({ _id: userId });
+    if (!isJob) {
+      throw new HttpException({ message: "The given Job does not exist" }, HttpStatus.BAD_REQUEST);
+    }
+    else if (!isUser) {
+      throw new HttpException({ message: "The given User does not exist" }, HttpStatus.BAD_REQUEST);
+    } else {
+      return await this.jobsModel.findOneAndUpdate({ _id: jobId }, { reportedBy: userId, reportedReason: reportedReason });
+    }
+  }
+
   async deleteJob(jobId) {
     const isJob = await this.jobsModel.findOne({ _id: jobId });
     console.log(isJob);
