@@ -135,7 +135,6 @@ export class JobsService {
 
   async approveJob({ adminId, jobId, jobsDto }): Promise<any> {
     adminId = new mongoose.Types.ObjectId(adminId);
-
     const isUser = await this.userModel.findOne({ _id: adminId });
     const isJob = await this.jobsModel.findOne({ _id: jobId });
     if (!isUser) {
@@ -146,6 +145,10 @@ export class JobsService {
       jobsDto.adminId = adminId;
       jobsDto.adminName = isUser.first_name + " " + isUser.last_name;
       jobsDto.status = 'approved';
+      if (isJob.reportReason || isJob.reportedBy) {
+        jobsDto.reportedBy = null;
+        jobsDto.reportReason = null;
+      }
       return await this.jobsModel.findOneAndUpdate({ _id: jobId }, jobsDto);
     }
   }
@@ -164,6 +167,10 @@ export class JobsService {
       jobsDto.adminId = adminId;
       jobsDto.adminName = isUser.first_name + " " + isUser.last_name;
       jobsDto.status = 'rejected';
+      if (isJob.reportReason || isJob.reportedBy) {
+        jobsDto.reportedBy = null;
+        jobsDto.reportReason = null;
+      }
       return await this.jobsModel.findOneAndUpdate({ _id: jobId }, jobsDto);
     }
   }
@@ -252,7 +259,17 @@ export class JobsService {
 
   async getQueueJobs(limit: number, skip: number) {
     const count = await this.jobsModel.countDocuments({ 'status': 'queue' }).exec();
-    const data = await this.jobsModel.find({ 'status': 'queue' }).sort({ creationdate: - 1 }).skip(skip).limit(limit).exec();
+    const data = await this.jobsModel
+      .find({
+        $or: [
+          { status: "approved", reportReason: { $ne: null } },
+          { status: "queue" }
+        ]
+      }).sort({
+        reportReason: -1, // if this exist it will be sorted first
+        creationdate: -1
+      })
+      .limit(limit).skip(skip);
     return {
       jobs: data,
       total: count,
@@ -375,7 +392,7 @@ export class JobsService {
     }
   }
 
-  async reportJob({ userId, jobId, reportedReason }) {
+  async reportJob({ userId, jobId, reportReason }) {
     jobId = new mongoose.Types.ObjectId(jobId);
     userId = new mongoose.Types.ObjectId(userId);
     const isJob = await this.jobsModel.findOne({ _id: jobId });
@@ -386,7 +403,7 @@ export class JobsService {
     else if (!isUser) {
       throw new HttpException({ message: "The given User does not exist" }, HttpStatus.BAD_REQUEST);
     } else {
-      return await this.jobsModel.findOneAndUpdate({ _id: jobId }, { reportedBy: userId, reportedReason: reportedReason });
+      return await this.jobsModel.findOneAndUpdate({ _id: jobId }, { reportedBy: isUser._id, reportReason });
     }
   }
 

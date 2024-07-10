@@ -83,7 +83,7 @@ export class jobsController {
 
     @UseGuards(AuthGuard)
     @Post('report')
-    async reportJob(@Body() data: { userId: string, jobId: string, reportedReason: string }): Promise<any> {
+    async reportJob(@Body() data: { userId: string, jobId: string, reportReason: string }): Promise<any> {
         return await this.jobsService.reportJob(data);
     }
 

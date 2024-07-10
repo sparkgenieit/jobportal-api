@@ -26,6 +26,6 @@ export class JobsDto {
     adminId: Types.ObjectId
     adminName: string
     reportedBy?: Types.ObjectId
-    reportedReason?: string
+    reportReason?: string
 }
 

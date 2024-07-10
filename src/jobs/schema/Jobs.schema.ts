@@ -58,7 +58,7 @@ export class Jobs {
     @Prop()
     reportedBy?: Types.ObjectId
     @Prop()
-    reportedReason?: string
+    reportReason?: string
 }
 
 const JobsSchema = SchemaFactory.createForClass(Jobs);
