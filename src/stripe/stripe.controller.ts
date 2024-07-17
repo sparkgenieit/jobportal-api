@@ -2,15 +2,14 @@ import { Body, Controller, Get, Headers, Param, Post, RawBodyRequest, Req, UseGu
 import { StripeService } from './stripe.service';
 import { Request } from 'express';
 import { AuthGuard } from 'src/auth/auth.guard';
-import { JwtService } from '@nestjs/jwt';
 
 @Controller('payment')
 export class StripeController {
     constructor(private readonly stripeService: StripeService,) { }
     @UseGuards(AuthGuard)
-    @Post('create-payment-intent')
-    async CreatePaymentIntent(@Body() { plan, price, user_id }) {
-        return await this.stripeService.CreatePaymentIntent(plan, price, user_id);
+    @Post('make-payment')
+    async CreatePaymentIntent(@Body() { plan, credits, price, user_id }) {
+        return await this.stripeService.makePayment(plan, credits, price, user_id);
     }
 
     @Post("webhook-event")
@@ -20,10 +19,8 @@ export class StripeController {
         return await this.stripeService.WebhookEvent(data, sign);
     }
     @UseGuards(AuthGuard)
-    @Get('payment-intent/:id')
+    @Get('session-complete/:id')
     async etPaymentIntent(@Param() { id }) {
-        return await this.stripeService.GetPaymentIntent(id)
+        return await this.stripeService.getSessionDetails(id)
     }
-
-
 }
