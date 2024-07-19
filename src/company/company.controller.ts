@@ -35,4 +35,8 @@ export class CompaniesController {
     async getAppliedUsers(@Param() data, @Query() { limit, skip }) {
         return await this.companyService.getAppliedUsers(data.id, +limit, +skip);
     }
+    @Get('/applied-users-count/:jobId')
+    async getAppliedUsersCount(@Param() data) {
+        return await this.companyService.getAppliedUsersCount(data.jobId);
+    }
 }

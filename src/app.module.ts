@@ -18,12 +18,15 @@ import { ConfigModule } from '@nestjs/config';
 import { GlobalModule } from './global/global.module';
 import { NotificationModule } from './notifications/notifications.module';
 import { ContactModule } from './contact/contact.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 
 @Module({
   imports: [ConfigModule.forRoot({ isGlobal: true, }), ServeStaticModule.forRoot({
     rootPath: join(__dirname, '..', 'public'),
-  }), GlobalModule, DatabaseModule, UsersModule, CompanyModule, JobsModule, AuthModule, UploadModule, AdModule, SkillModule, OrderModule, CategoryModule, StripeModule, NotificationModule, ContactModule],
+  }),
+  ScheduleModule.forRoot()
+    , GlobalModule, DatabaseModule, UsersModule, CompanyModule, JobsModule, AuthModule, UploadModule, AdModule, SkillModule, OrderModule, CategoryModule, StripeModule, NotificationModule, ContactModule],
   controllers: [AppController],
   providers: [AppService],
 })

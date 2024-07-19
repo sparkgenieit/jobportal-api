@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable, Search } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, OnModuleInit, Search } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model } from 'mongoose';
 import { JwtService } from '@nestjs/jwt';
@@ -8,16 +8,21 @@ import { User } from 'src/users/schema/user.schema';
 import { UserJobs } from 'src/users/schema/userJobs.schema';
 import { skip } from 'node:test';
 import { CompanyProfile } from 'src/company/schema/companyProfile.schema';
+import { Cron } from '@nestjs/schedule';
 
 
 @Injectable()
-export class JobsService {
+export class JobsService implements OnModuleInit {
   constructor(
     @InjectModel(Jobs.name) private readonly jobsModel: Model<Jobs>,
     @InjectModel(CompanyProfile.name) private readonly companyProfileModel: Model<CompanyProfile>,
     @InjectModel(UserJobs.name) private readonly UserJobsModel: Model<UserJobs>,
     @InjectModel(User.name) private userModel: Model<User>
   ) { }
+
+  async onModuleInit() {
+    this.checkExpiredJobs()
+  }
 
   async createJob(jobsDto: JobsDto): Promise<any> {
     // const isJob = await this.userModel.findOne({email});
@@ -415,5 +420,11 @@ export class JobsService {
     } else {
       return await this.jobsModel.findByIdAndDelete({ _id: jobId });
     }
+  }
+
+
+  @Cron('0 0 * * *') // Every day at midnight
+  async checkExpiredJobs() {
+
   }
 }

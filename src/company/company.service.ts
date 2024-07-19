@@ -83,6 +83,12 @@ export class CompanyService {
     }
   }
 
+  async getAppliedUsersCount(jobId) {
+    jobId = new mongoose.Types.ObjectId(jobId);
+    let count = await this.UserJobsModel.countDocuments({ jobId: jobId, applied: true });
+    return count
+  }
+
   async getAppliedUsers(jobId, limit: number, skip: number) {
     jobId = new mongoose.Types.ObjectId(jobId);
     let count = await this.UserJobsModel.countDocuments({ jobId: jobId, applied: true });

@@ -3,7 +3,7 @@ import { HydratedDocument, Types } from "mongoose";
 
 export type JobsDocument = HydratedDocument<Jobs>;
 
-@Schema({ autoIndex: true })
+@Schema({ autoIndex: true, timestamps: true })
 export class Jobs {
     @Prop()
     jobId: Types.ObjectId
