@@ -31,6 +31,11 @@ export class CompaniesController {
         return await this.companyService.getCompany(data.id);
     }
 
+    @Get('postedJobs/:companyId')
+    async getPostedJobs(@Param() data, @Query() { limit, skip, name }) {
+        return await this.companyService.getPostedJobs(data.companyId, +limit, +skip, name);
+    }
+
     @Get('/applied-users/:id')
     async getAppliedUsers(@Param() data, @Query() { limit, skip }) {
         return await this.companyService.getAppliedUsers(data.id, +limit, +skip);

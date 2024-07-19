@@ -93,11 +93,7 @@ export class jobsController {
         return await this.jobsService.getAssignedJobs(data.adminId, +limit, +skip);
     }
 
-    @UseGuards(AuthGuard)
-    @Get('postedJobs/:companyId')
-    async getPostedJobs(@Param() data, @Query() { limit, skip, name }) {
-        return await this.jobsService.getPostedJobs(data.companyId, +limit, +skip, name);
-    }
+
     @UseGuards(AuthGuard)
     @Get('appliedJobs/:userId')
     async getAppliedJobs(@Param() data, @Query() { limit, skip }): Promise<Jobs[]> {

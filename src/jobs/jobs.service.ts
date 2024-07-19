@@ -368,22 +368,6 @@ export class JobsService implements OnModuleInit {
     }
   }
 
-  async getPostedJobs(companyId, limit: number, skip: number, name: string) {
-    let query: any = {
-      companyId,
-    }
-    if (name && name.trim() !== "") {
-      query.jobTitle = new RegExp(name, 'i');
-    }
-    const count = await this.jobsModel.countDocuments(query).exec();
-    const data = await this.jobsModel.find(query).sort({ creationdate: - 1 }).skip(skip).limit(limit).exec();
-    return {
-      jobs: data,
-      total: count,
-      status: 200,
-    }
-  }
-
   async getJob(jobId): Promise<any> {
     jobId = new mongoose.Types.ObjectId(jobId);
     const isJob = await this.jobsModel.findOne({ _id: jobId });

@@ -89,6 +89,23 @@ export class CompanyService {
     return count
   }
 
+  async getPostedJobs(companyId, limit: number, skip: number, name: string) {
+    let query: any = {
+      companyId,
+    }
+    if (name && name.trim() !== "") {
+      query.jobTitle = new RegExp(name, 'i');
+    }
+    const count = await this.jobsModel.countDocuments(query).exec();
+    const data = await this.jobsModel.find(query).sort({ creationdate: - 1 }).skip(skip).limit(limit).exec();
+
+    return {
+      jobs: data,
+      total: count,
+      status: 200,
+    }
+  }
+
   async getAppliedUsers(jobId, limit: number, skip: number) {
     jobId = new mongoose.Types.ObjectId(jobId);
     let count = await this.UserJobsModel.countDocuments({ jobId: jobId, applied: true });
