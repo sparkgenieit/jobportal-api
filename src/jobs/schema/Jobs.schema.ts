@@ -7,8 +7,6 @@ export type JobsDocument = HydratedDocument<Jobs>;
 export class Jobs {
     @Prop()
     jobId: Types.ObjectId
-    @Prop({ type: Date })
-    created_date?: Date
     @Prop()
     companyId: Types.ObjectId
     @Prop()
@@ -18,7 +16,7 @@ export class Jobs {
     @Prop()
     closedate: string
     @Prop()
-    creationdate: string
+    creationdate: Date
     @Prop()
     jobtype: string
     @Prop()

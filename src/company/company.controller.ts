@@ -44,4 +44,9 @@ export class CompaniesController {
     async getAppliedUsersCount(@Param() data) {
         return await this.companyService.getAppliedUsersCount(data.jobId);
     }
+
+    @Put('/shortlist-candidate')
+    async shortListCandidate(@Body() { userId, jobId }) {
+        return await this.companyService.shortListCandidate(jobId, userId);
+    }
 }

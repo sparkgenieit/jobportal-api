@@ -17,9 +17,11 @@ export class UserJobs {
     @Prop()
     saved: Boolean
     @Prop()
-    saved_date: string
+    saved_date: String
     @Prop()
-    applied_date: string
+    applied_date: String
+    @Prop()
+    shortlisted?: Boolean
 }
 
 export const UserJobsSchema = SchemaFactory.createForClass(UserJobs);

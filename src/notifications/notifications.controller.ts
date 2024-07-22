@@ -19,5 +19,11 @@ export class NotificationController {
     }
 
 
+    @Get('get-message/:jobId')
+    async getRejectedMessage(@Param() data) {
+        return await this.notificationService.getRejectedMessage(data.jobId);
+    }
+
+
 
 }

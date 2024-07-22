@@ -11,6 +11,7 @@ import { CompanyProfile } from 'src/company/schema/companyProfile.schema';
 import { Cron } from '@nestjs/schedule';
 
 
+
 @Injectable()
 export class JobsService implements OnModuleInit {
   constructor(
@@ -53,9 +54,13 @@ export class JobsService implements OnModuleInit {
 
   async updateJob(jobId, jobsDto: JobsDto): Promise<any> {
     const isJob = await this.jobsModel.findOne({ _id: jobId });
+
     if (!isJob) {
       throw new HttpException({ message: "The given Job does not exist" }, HttpStatus.BAD_REQUEST);
     } else {
+      if (isJob.status === "expired") {
+        return await this.repostExpiredJob(jobId, isJob, jobsDto)
+      }
       jobsDto.status = 'queue';
       jobsDto.adminId = null;
       jobsDto.adminName = "";
@@ -228,7 +233,7 @@ export class JobsService implements OnModuleInit {
     if (data.date) {
       const today = new Date(); // Get the current date
       today.setDate(today.getDate() - data.date); // Subtracts the specified number of days
-      query.creationdate = { $gte: today.toLocaleDateString('en-GB') }
+      query.creationdate = { $gte: today }
     }
 
     let sorting: any = { [data.sort]: -1 }
@@ -343,6 +348,7 @@ export class JobsService implements OnModuleInit {
     jobId = new mongoose.Types.ObjectId(jobId);
     let userApplied = false;
     let userSaved = false;
+    let shortlisted = false;
     const job = await this.UserJobsModel.findOne({ userId, jobId });
     if (job && job.saved == true) {
       userSaved = true;
@@ -350,9 +356,13 @@ export class JobsService implements OnModuleInit {
     if (job && job.applied == true) {
       userApplied = true;
     }
+    if (job && job.shortlisted == true) {
+      shortlisted = true;
+    }
     return {
       saved: userSaved,
       applied: userApplied,
+      shortlisted: shortlisted,
       status: 200
     }
   }
@@ -407,8 +417,17 @@ export class JobsService implements OnModuleInit {
   }
 
 
+  async repostExpiredJob(jobId, jobInDB, jobUserSent) {
+
+  }
+
   @Cron('0 0 * * *') // Every day at midnight
   async checkExpiredJobs() {
+    await this.jobsModel.updateMany({}, { creationdate: new Date() })
+
+    const oneMonthAgo = new Date();
+    oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1); // Subtract one month from current date
+    await this.jobsModel.updateMany({ creationdate: { $lt: oneMonthAgo }, status: "approved" }, { status: "expired" });
 
   }
 }

@@ -7,4 +7,5 @@ export class UserJobsDto {
     saved: boolean
     applied_date: string
     saved_date: string
+    shortlisted?: boolean
 }

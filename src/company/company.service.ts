@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import mongoose, { Model } from 'mongoose';
+import mongoose, { Model, Types } from 'mongoose';
 import { JwtService } from '@nestjs/jwt';
 import { CompanyProfile } from './schema/companyProfile.schema';
 import { CompanyProfileDto } from './dto/company-profile.dto';
@@ -115,5 +115,13 @@ export class CompanyService {
       total: count,
       status: 200
     }
+  }
+
+
+  async shortListCandidate(jobId: Types.ObjectId, userId: Types.ObjectId) {
+
+    await this.UserJobsModel.findOneAndUpdate({ jobId, userId }, { shortlisted: true })
+
+    return { message: "Candidiate Shortlisted" }
   }
 }
