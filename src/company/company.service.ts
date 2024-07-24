@@ -85,8 +85,9 @@ export class CompanyService {
 
   async getAppliedUsersCount(jobId) {
     jobId = new mongoose.Types.ObjectId(jobId);
-    let count = await this.UserJobsModel.countDocuments({ jobId: jobId, applied: true });
-    return count
+    let applied = await this.UserJobsModel.countDocuments({ jobId: jobId, applied: true });
+    let shortlisted = await this.UserJobsModel.countDocuments({ jobId: jobId, applied: true, shortlisted: true });
+    return { applied, shortlisted }
   }
 
   async getPostedJobs(companyId, limit: number, skip: number, name: string) {
@@ -106,10 +107,16 @@ export class CompanyService {
     }
   }
 
-  async getAppliedUsers(jobId, limit: number, skip: number) {
-    jobId = new mongoose.Types.ObjectId(jobId);
+  async getAppliedUsers(jobId: Types.ObjectId, shortlisted, limit: number, skip: number) {
+    let query: any = {
+      jobId,
+      applied: true
+    }
+
+    if (shortlisted === "true") query.shortlisted = true
+
     let count = await this.UserJobsModel.countDocuments({ jobId: jobId, applied: true });
-    let users = await this.UserJobsModel.find({ jobId: jobId, applied: true }).sort({ applied_date: - 1 }).limit(limit).skip(skip).populate('userId').populate("jobId", "jobTitle");
+    let users = await this.UserJobsModel.find(query).sort({ shortlisted: -1, applied_date: - 1 }).limit(limit).skip(skip).populate('userId').populate("jobId", "jobTitle");
     return {
       users: users,
       total: count,
@@ -118,10 +125,10 @@ export class CompanyService {
   }
 
 
-  async shortListCandidate(jobId: Types.ObjectId, userId: Types.ObjectId) {
+  async shortListCandidate(jobId: Types.ObjectId, userId: Types.ObjectId, value: Boolean) {
 
-    await this.UserJobsModel.findOneAndUpdate({ jobId, userId }, { shortlisted: true })
+    await this.UserJobsModel.findOneAndUpdate({ jobId, userId }, { shortlisted: value })
 
-    return { message: "Candidiate Shortlisted" }
+    return { message: value ? "Candidate Shortlisted" : "Candidate removed from the Shortlist" }
   }
 }

@@ -62,9 +62,9 @@ export class UsersController {
         return await this.userService.updateAdmin(data.id, userDto);
     }
     @UseGuards(AuthGuard)
-    @Put('update/:id')
-    async updateUser(@Param() data, @Body() userDto: CreateUserDto): Promise<User> {
-        return await this.userService.updateUser(data.id, userDto);
+    @Get('get-credits/:id')
+    async updateUser(@Param() data): Promise<User> {
+        return await this.userService.getUserCredits(data.id);
     }
 
 

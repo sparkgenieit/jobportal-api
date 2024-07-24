@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable, Param } from '@nestjs/common';
 import { User } from './schema/user.schema';
 import { InjectModel } from '@nestjs/mongoose';
-import mongoose, { Model } from 'mongoose';
+import mongoose, { Model, Types } from 'mongoose';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { UserProfileDto } from './dto/user-profile.dto';
@@ -185,14 +185,11 @@ export class UsersService {
   }
 
   async updateProfile(user_id, userProfileDto: UserProfileDto): Promise<any> {
-    console.log(user_id);
-    const encryptedPassword = await bcrypt.hash('kiran123', 10);
-    console.log('password', encryptedPassword);
     user_id = new mongoose.Types.ObjectId(user_id);
     //userProfileDto.user_id = user_id;
     const isUser = await this.userProfileModel.findOne({ user_id });
     if (!isUser) {
-      throw new HttpException({ message: "The given user does not exsit" }, HttpStatus.NOT_FOUND);
+      throw new HttpException({ message: "The given user does not exist" }, HttpStatus.NOT_FOUND);
     } else {
       console.log("update");
       console.log(userProfileDto);
@@ -201,19 +198,10 @@ export class UsersService {
     }
   }
 
-  async updateUser(user_id, userDto: CreateUserDto): Promise<any> {
-    console.log(user_id);
-    user_id = new mongoose.Types.ObjectId(user_id);
-    //userProfileDto.user_id = user_id;
-    const isUser = await this.userModel.findOne({ _id: user_id });
-    if (!isUser) {
-      throw new HttpException({ message: "The given user does not exsit" }, HttpStatus.NOT_FOUND);
-    } else {
-      console.log("update");
-      console.log(userDto);
-
-      return await this.userModel.findOneAndUpdate({ _id: user_id }, userDto)
-    }
+  async getUserCredits(user_id: Types.ObjectId): Promise<any> {
+    const user = await this.userModel.findOne({ _id: user_id })
+    if (!user) throw new HttpException({ message: "The given user does not exist" }, HttpStatus.NOT_FOUND);
+    return { credits: user.credits }
   }
 
   async updateAdmin(user_id, userDto: CreateUserDto): Promise<any> {
@@ -222,7 +210,7 @@ export class UsersService {
     //userProfileDto.user_id = user_id;
     const isUser = await this.userModel.findOne({ _id: user_id });
     if (!isUser) {
-      throw new HttpException({ message: "The given user does not exsit" }, HttpStatus.NOT_FOUND);
+      throw new HttpException({ message: "The given user does not exist" }, HttpStatus.NOT_FOUND);
     } else {
       console.log("update");
       console.log(userDto);
@@ -238,7 +226,7 @@ export class UsersService {
     //userProfileDto.user_id = user_id;
     const isUser = await this.userModel.findOne({ _id: user_id });
     if (!isUser) {
-      throw new HttpException({ message: "The given user does not exsit" }, HttpStatus.NOT_FOUND);
+      throw new HttpException({ message: "The given user does not exist" }, HttpStatus.NOT_FOUND);
     } else {
 
       return await this.userModel.deleteOne({ _id: user_id })
@@ -281,7 +269,7 @@ export class UsersService {
     const isUser = await this.userProfileModel.findOne({ user_id });
     console.log(isUser);
     if (!isUser) {
-      throw new HttpException({ message: "The given user does not exsit" }, HttpStatus.NOT_FOUND);
+      throw new HttpException({ message: "The given user does not exist" }, HttpStatus.NOT_FOUND);
     } else {
       return await this.userProfileModel.findOne({ user_id });
     }
@@ -292,10 +280,13 @@ export class UsersService {
     //userProfileDto.user_id = user_id;
     const isUser = await this.userJobsModel.findOne({ user_id });
     if (!isUser) {
-      throw new HttpException({ message: "The given user does not exsit" }, HttpStatus.NOT_FOUND);
+      throw new HttpException({ message: "The given user does not exist" }, HttpStatus.NOT_FOUND);
     } else {
       //console.log(userProfileDto);
       return await this.userJobsModel.findOneAndUpdate({ user_id }, userJobsDto)
     }
   }
+
+
+
 }

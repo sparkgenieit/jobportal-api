@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseBoolPipe, Patch, Put, Query, UseGuards } from '@nestjs/common';
 import { CompanyService } from './company.service';
 import { CompanyProfileDto } from './dto/company-profile.dto';
 import { CompanyProfile } from './schema/companyProfile.schema';
@@ -37,16 +37,16 @@ export class CompaniesController {
     }
 
     @Get('/applied-users/:id')
-    async getAppliedUsers(@Param() data, @Query() { limit, skip }) {
-        return await this.companyService.getAppliedUsers(data.id, +limit, +skip);
+    async getAppliedUsers(@Param() data, @Query() { limit, skip, shortlisted }) {
+        return await this.companyService.getAppliedUsers(data.id, shortlisted, +limit, +skip);
     }
     @Get('/applied-users-count/:jobId')
     async getAppliedUsersCount(@Param() data) {
         return await this.companyService.getAppliedUsersCount(data.jobId);
     }
 
-    @Put('/shortlist-candidate')
-    async shortListCandidate(@Body() { userId, jobId }) {
-        return await this.companyService.shortListCandidate(jobId, userId);
+    @Patch('/shortlist-candidate')
+    async shortListCandidate(@Body() { userId, jobId, value }) {
+        return await this.companyService.shortListCandidate(jobId, userId, value);
     }
 }
