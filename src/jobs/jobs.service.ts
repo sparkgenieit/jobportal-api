@@ -1,16 +1,12 @@
 import { HttpException, HttpStatus, Injectable, OnModuleInit, Search } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import mongoose, { Model } from 'mongoose';
-import { JwtService } from '@nestjs/jwt';
+import mongoose, { Model, Types } from 'mongoose';
 import { Jobs } from './schema/Jobs.schema';
 import { JobsDto } from './dto/jobs.dto';
 import { User } from 'src/users/schema/user.schema';
 import { UserJobs } from 'src/users/schema/userJobs.schema';
-import { skip } from 'node:test';
 import { CompanyProfile } from 'src/company/schema/companyProfile.schema';
 import { Cron } from '@nestjs/schedule';
-
-
 
 @Injectable()
 export class JobsService implements OnModuleInit {
@@ -59,7 +55,7 @@ export class JobsService implements OnModuleInit {
       throw new HttpException({ message: "The given Job does not exist" }, HttpStatus.BAD_REQUEST);
     } else {
       if (isJob.status === "expired") {
-        return await this.repostExpiredJob(jobId, isJob, jobsDto)
+        return await this.repostExpiredJob(isJob, jobsDto)
       }
       jobsDto.status = 'queue';
       jobsDto.adminId = null;
@@ -417,17 +413,38 @@ export class JobsService implements OnModuleInit {
   }
 
 
-  async repostExpiredJob(jobId, jobInDB, jobUserSent) {
+  async repostExpiredJob(jobInDB, jobUserSent) {
+    let isEqual = true
+
+    for (let field in jobUserSent) {
+      if (field === "creationdate") {
+        JSON.stringify(jobUserSent[field]) !== JSON.stringify(jobInDB[field]) ? isEqual = false : null
+      } else {
+        jobUserSent[field] !== jobInDB[field] ? isEqual = false : null
+      }
+    }
+
+    const jobId = new mongoose.Types.ObjectId(jobInDB.companyId)
+    const company = await this.userModel.findOne({ _id: jobId })
+
+    if (company.credits > 0) {
+
+      jobUserSent = isEqual ? { ...jobUserSent, status: "approved" } : { ...jobUserSent, status: "queue", adminName: "", adminId: null }
+      await this.jobsModel.findOneAndUpdate({ _id: jobInDB._id }, jobUserSent);
+      await this.userModel.findOneAndUpdate({ _id: jobId }, { credits: company.credits - 1 })
+      return { message: "Update Success" }
+
+    } else {
+      throw new HttpException({ message: "Not Enough Credits to Post the Job" }, HttpStatus.NOT_ACCEPTABLE);
+    }
+
 
   }
 
   @Cron('0 0 * * *') // Every day at midnight
   async checkExpiredJobs() {
-    await this.jobsModel.updateMany({}, { creationdate: new Date() })
-
     const oneMonthAgo = new Date();
     oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1); // Subtract one month from current date
     await this.jobsModel.updateMany({ creationdate: { $lt: oneMonthAgo }, status: "approved" }, { status: "expired" });
-
   }
 }
