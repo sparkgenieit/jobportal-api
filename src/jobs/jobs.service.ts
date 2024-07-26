@@ -54,7 +54,7 @@ export class JobsService implements OnModuleInit {
     if (!isJob) {
       throw new HttpException({ message: "The given Job does not exist" }, HttpStatus.BAD_REQUEST);
     } else {
-      if (isJob.status === "expired") {
+      if (isJob.status === "expired" || isJob.status === "closed") {
         return await this.repostExpiredJob(isJob, jobsDto)
       }
       jobsDto.status = 'queue';
@@ -412,6 +412,14 @@ export class JobsService implements OnModuleInit {
     }
   }
 
+  async closeJob(jobId: Types.ObjectId, userId: string) {
+    const isJob = await this.jobsModel.findOne({ _id: jobId, companyId: userId })
+    if (!isJob) throw new HttpException({ message: "No job found" }, HttpStatus.NOT_FOUND);
+    isJob.status = "closed"
+    await this.jobsModel.findOneAndUpdate({ _id: isJob._id }, isJob)
+    return { message: "success" }
+  }
+
 
   async repostExpiredJob(jobInDB, jobUserSent) {
     let isEqual = true
@@ -437,8 +445,6 @@ export class JobsService implements OnModuleInit {
     } else {
       throw new HttpException({ message: "Not Enough Credits to Post the Job" }, HttpStatus.NOT_ACCEPTABLE);
     }
-
-
   }
 
   @Cron('0 0 * * *') // Every day at midnight

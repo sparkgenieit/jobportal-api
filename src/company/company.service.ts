@@ -95,7 +95,7 @@ export class CompanyService {
       companyId,
     }
     if (name && name.trim() !== "") {
-      query.jobTitle = new RegExp(name, 'i');
+      query.$or = [{ jobTitle: { $regex: name, $options: 'i' } }, { employjobreference: { $regex: name, $options: 'i' } }]
     }
     const count = await this.jobsModel.countDocuments(query).exec();
     const data = await this.jobsModel.find(query).sort({ creationdate: - 1 }).skip(skip).limit(limit).exec();
