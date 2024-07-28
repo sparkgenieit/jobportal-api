@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable, OnModuleInit, Search } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, OnModuleInit, Search, Type } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model, Types } from 'mongoose';
 import { Jobs } from './schema/Jobs.schema';
@@ -7,10 +7,12 @@ import { User } from 'src/users/schema/user.schema';
 import { UserJobs } from 'src/users/schema/userJobs.schema';
 import { CompanyProfile } from 'src/company/schema/companyProfile.schema';
 import { Cron } from '@nestjs/schedule';
+import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()
 export class JobsService implements OnModuleInit {
   constructor(
+    private emailService: MailerService,
     @InjectModel(Jobs.name) private readonly jobsModel: Model<Jobs>,
     @InjectModel(CompanyProfile.name) private readonly companyProfileModel: Model<CompanyProfile>,
     @InjectModel(UserJobs.name) private readonly UserJobsModel: Model<UserJobs>,
@@ -137,7 +139,22 @@ export class JobsService implements OnModuleInit {
     }
   }
 
+  async emailUserAboutReportedJob(jobsDto: JobsDto, status: Boolean) {
+    const userId: Types.ObjectId = jobsDto.reportedBy
+    const user = await this.userModel.findOne({ _id: userId })
+    await this.emailService.sendMail({
+      to: user.email,
+      subject: `Regarding the issue you found in the posting of ${jobsDto.jobTitle} by ${jobsDto.company}`,
+      // The `.pug`, `.ejs` or `.hbs` extension is appended automatically.
+      template: 'user/user_reported_job',
+      context: {
+        name: user.first_name + ' ' + user.last_name,
+        jobDetails: jobsDto,
+        issueFound: status
+      },
+    });
 
+  }
 
   async approveJob({ adminId, jobId, jobsDto }): Promise<any> {
     adminId = new mongoose.Types.ObjectId(adminId);
@@ -152,6 +169,7 @@ export class JobsService implements OnModuleInit {
       jobsDto.adminName = isUser.first_name + " " + isUser.last_name;
       jobsDto.status = 'approved';
       if (isJob.reportReason || isJob.reportedBy) {
+        await this.emailUserAboutReportedJob(jobsDto, false);
         jobsDto.reportedBy = null;
         jobsDto.reportReason = null;
       }
@@ -174,6 +192,7 @@ export class JobsService implements OnModuleInit {
       jobsDto.adminName = isUser.first_name + " " + isUser.last_name;
       jobsDto.status = 'rejected';
       if (isJob.reportReason || isJob.reportedBy) {
+        await this.emailUserAboutReportedJob(jobsDto, true);
         jobsDto.reportedBy = null;
         jobsDto.reportReason = null;
       }

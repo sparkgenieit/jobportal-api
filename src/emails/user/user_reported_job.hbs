@@ -1,0 +1,25 @@
+{{#> layout }}
+<p>Hello {{name}},</p>
+<p>
+    From JobPortal,
+</p>
+<p>
+    You have found an issue for the job of {{jobDetails.jobTitle}} by {{jobDetails.company}} for the reason
+    {{jobDetails.reportReason}}.
+</p>
+
+{{#if issueFound}}
+<p>
+    We also found out there was an issue about the job which you have reported and we removed the job posting from the
+    website.
+</p>
+{{else}}
+<p>
+    The reason you reported for the above mentioned job is now resolved.
+</p>
+{{/if}}
+
+<p>
+    Thank you.
+</p>
+{{/layout}}

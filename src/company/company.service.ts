@@ -90,7 +90,7 @@ export class CompanyService {
     return { applied, shortlisted }
   }
 
-  async getPostedJobs(companyId, limit: number, skip: number, name: string) {
+  async getPostedJobs(companyId: string, limit: number, skip: number, name: string) {
     let query: any = {
       companyId,
     }
@@ -98,7 +98,49 @@ export class CompanyService {
       query.$or = [{ jobTitle: { $regex: name, $options: 'i' } }, { employjobreference: { $regex: name, $options: 'i' } }]
     }
     const count = await this.jobsModel.countDocuments(query).exec();
-    const data = await this.jobsModel.find(query).sort({ creationdate: - 1 }).skip(skip).limit(limit).exec();
+
+    const data = await this.jobsModel.aggregate([
+      {
+        $match: query
+      },
+      {
+        $addFields: {
+          sortPriority: {
+            $switch: {
+              branches: [
+                {
+                  'case': { $eq: ['$status', 'rejected'] },
+                  then: 0
+                },
+                {
+                  'case': { $eq: ['$status', 'approved'] },
+                  then: 3
+                },
+                {
+                  'case': { $eq: ['$status', 'closed'] },
+                  then: 4
+                },
+                {
+                  'case': { $eq: ['$status', 'expired'] },
+                  then: 5
+                },
+              ],
+              'default': 2
+            }
+          }
+        }
+      }, {
+        $sort: {
+          sortPriority: 1,
+          creationdate: - 1,
+        }
+      },
+      {
+        $skip: skip
+      },
+      {
+        $limit: limit
+      }])
 
     return {
       jobs: data,
