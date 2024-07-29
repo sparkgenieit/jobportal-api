@@ -35,6 +35,8 @@ export class CompanyProfile {
     youtubeUrl?: string
     @Prop()
     banner?: string
+    @Prop()
+    info: string
 }
 
 export const CompanyProfileSchema = SchemaFactory.createForClass(CompanyProfile);

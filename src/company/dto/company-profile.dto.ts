@@ -15,5 +15,6 @@ export class CompanyProfileDto {
     phone: string
     youtubeUrl?: string
     banner?: string
+    info: string
 }
 
