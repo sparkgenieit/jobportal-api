@@ -36,7 +36,7 @@ export class CompanyProfile {
     @Prop()
     banner?: string
     @Prop()
-    info: string
+    info?: string
 }
 
 export const CompanyProfileSchema = SchemaFactory.createForClass(CompanyProfile);
