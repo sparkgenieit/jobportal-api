@@ -1,10 +1,12 @@
 import { MailerService } from '@nestjs-modules/mailer';
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { randomUUID } from 'crypto';
 import mongoose, { Model } from 'mongoose';
 import { CompanyProfile } from 'src/company/schema/companyProfile.schema';
+import { OrderDto } from 'src/orders/dto/Order.dto';
+import { Order } from 'src/orders/schema/Order.schema';
 import { User } from 'src/users/schema/user.schema';
+import { invoicePdfCreation } from 'src/utils/creatingInvoicePdf';
 import Stripe from 'stripe';
 
 @Injectable()
@@ -12,6 +14,7 @@ export class StripeService {
     private readonly stripe: Stripe;
     constructor(
         private emailService: MailerService,
+        @InjectModel(Order.name) private readonly ordersModel: Model<Order>,
         @InjectModel(User.name) private readonly userModel: Model<User>,
         @InjectModel(CompanyProfile.name) private readonly companyProfileModel: Model<CompanyProfile>,
     ) {
@@ -110,23 +113,49 @@ export class StripeService {
                     await this.userModel.findOneAndUpdate({ _id: user_id }, { credits: user.credits + +credits, token: null })
                     const profile = await this.companyProfileModel.findOne({ user_id: userId });
 
+                    const date = new Date()
+
+                    const count = await this.ordersModel.countDocuments()
+
+                    const details = {
+                        CompanyName: profile.name || "",
+                        CompanyEmail: user.email,
+                        date: date.toLocaleDateString("en-GB"),
+                        Address1: profile.address1,
+                        Address2: profile.address2,
+                        Address3: profile.address3,
+                        price: +price / 100,
+                        gstPrice: +gst / 100,
+                        totalPrice: +total / 100,
+                        invoiceNumber: `${date.getMinutes()}${date.getSeconds()}${date.getMilliseconds()}${count}`
+                    }
+
+                    const pdf = await invoicePdfCreation(details);
+
                     await this.emailService.sendMail({
                         to: user.email,
                         subject: `[${process.env.APP_NAME}] Payment Completed`,
                         // The `.pug`, `.ejs` or `.hbs` extension is appended automatically.
                         template: 'user/payment_invoice',
-                        context: {
-                            CompanyName: profile.name || "",
-                            date: new Date().toLocaleDateString("en-GB"),
-                            Address1: profile.address1,
-                            Address2: profile.address2,
-                            Address3: profile.address3,
-                            price: +price / 100,
-                            gstPrice: +gst / 100,
-                            totalPrice: +total / 100,
-                            invoiceNumber: `WH${randomUUID()}`
-                        },
+                        context: details,
+                        attachments: [{
+                            filename: `${details.invoiceNumber}.pdf`,
+                            content: pdf,
+                            contentType: 'application/pdf'
+                        }]
                     });
+
+                    const data: OrderDto = {
+                        companyId: user._id,
+                        description: "Purchased Job Ad Credits",
+                        invoiceNumber: details.invoiceNumber,
+                        credits: user.credits + +credits,
+                        creditsPurchased: +credits,
+                        creditsUsed: 0,
+                        amount: +total / 100
+                    }
+
+                    await this.ordersModel.create(data)
                 }
 
             }

@@ -5,24 +5,29 @@ export type OrderDocument = HydratedDocument<Order>;
 
 @Schema()
 export class Order {
-    @Prop({ type: Date, default: Date.now})
+    @Prop({ type: Date, default: Date.now })
     created_date?: Date
-    @Prop()
-    orderId: string
+
     @Prop()
     companyId: Types.ObjectId
+
     @Prop()
-    companyName: string
+    description: string
+
     @Prop()
-    jobId: Types.ObjectId
+    amount?: number
+
     @Prop()
-    jobTitle: string
+    invoiceNumber?: string
+
     @Prop()
-    planName: string
+    credits: number
+
     @Prop()
-    paymentStatus?: string
+    creditsPurchased?: number
+
     @Prop()
-    credits?: number
+    creditsUsed?: number
 }
 
 export const OrderSchema = SchemaFactory.createForClass(Order);

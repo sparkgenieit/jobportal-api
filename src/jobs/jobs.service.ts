@@ -8,6 +8,8 @@ import { UserJobs } from 'src/users/schema/userJobs.schema';
 import { CompanyProfile } from 'src/company/schema/companyProfile.schema';
 import { Cron } from '@nestjs/schedule';
 import { MailerService } from '@nestjs-modules/mailer';
+import { Order } from 'src/orders/schema/Order.schema';
+import { OrderDto } from 'src/orders/dto/Order.dto';
 
 @Injectable()
 export class JobsService implements OnModuleInit {
@@ -16,7 +18,8 @@ export class JobsService implements OnModuleInit {
     @InjectModel(Jobs.name) private readonly jobsModel: Model<Jobs>,
     @InjectModel(CompanyProfile.name) private readonly companyProfileModel: Model<CompanyProfile>,
     @InjectModel(UserJobs.name) private readonly UserJobsModel: Model<UserJobs>,
-    @InjectModel(User.name) private userModel: Model<User>
+    @InjectModel(User.name) private userModel: Model<User>,
+    @InjectModel(Order.name) private ordersModel: Model<Order>,
   ) { }
 
   async onModuleInit() {
@@ -35,14 +38,30 @@ export class JobsService implements OnModuleInit {
       jobsDto.status = 'queue';
       await this.userModel.findOneAndUpdate({ _id: jobsDto.companyId }, { usedFreeCredit: true });
       await this.jobsModel.create(jobsDto);
+      const details = {
+        description: "Free Job Ad",
+        credits: user.credits,
+        creditsUsed: 0,
+        companyId: user._id
+      }
+      await this.CreateOrder(details)
       return ({ message: "Job Posted" })
-
     }
     if (user.credits > 0) {
       jobsDto.status = 'queue';
       let credits = user.credits - 1;
       await this.userModel.findOneAndUpdate({ _id: jobsDto.companyId }, { credits: credits });
       await this.jobsModel.create(jobsDto);
+
+      const details = {
+        description: `Job Ad Posted - ${jobsDto.jobTitle}`,
+        credits: user.credits - 1,
+        creditsUsed: 1,
+        companyId: user._id
+      }
+
+      await this.CreateOrder(details)
+
       return ({ message: "Job Posted", credits: credits })
     }
     if (user.usedFreeCredit === true && user.credits == 0) {
@@ -459,11 +478,25 @@ export class JobsService implements OnModuleInit {
       jobUserSent = isEqual ? { ...jobUserSent, status: "approved" } : { ...jobUserSent, status: "queue", adminName: "", adminId: null }
       await this.jobsModel.findOneAndUpdate({ _id: jobInDB._id }, jobUserSent);
       await this.userModel.findOneAndUpdate({ _id: jobId }, { credits: company.credits - 1 })
+
+      const details = {
+        companyId: company._id,
+        description: `Job Ad Reposted - ${jobUserSent.jobTitle}`,
+        credits: company.credits - 1,
+        creditsUsed: 1,
+      }
+
+      await this.CreateOrder(details);
+
       return { message: "Update Success" }
 
     } else {
       throw new HttpException({ message: "Not Enough Credits to Post the Job" }, HttpStatus.NOT_ACCEPTABLE);
     }
+  }
+
+  async CreateOrder(details: OrderDto) {
+    await this.ordersModel.create(details)
   }
 
   @Cron('0 0 * * *') // Every day at midnight

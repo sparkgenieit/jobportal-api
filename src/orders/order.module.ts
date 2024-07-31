@@ -17,6 +17,6 @@ import { UserJobs, UserJobsSchema } from 'src/users/schema/userJobs.schema';
     ])
   ],
   providers: [Order, OrderService, User, UserJobs, JwtService],
-  controllers: [OrderController]
+  controllers: [OrderController],
 })
 export class OrderModule { }
