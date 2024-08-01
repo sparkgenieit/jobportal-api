@@ -9,7 +9,7 @@ export async function invoicePdfCreation(details: any) {
         const templateContent = await fs.promises.readFile(templatePath, 'utf8');
         const template = HandleBars.compile(templateContent)
         const html = template(details)
-        const tempHTMLFile = join(__dirname, "..", "..", "pdf", 'temp.html');
+        const tempHTMLFile = join(__dirname, "..", "..", "pdf", `${details.invoiceNumber}.html`);
         await fs.promises.writeFile(tempHTMLFile, html)
 
         const browser = await puppeteer.launch();

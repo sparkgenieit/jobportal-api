@@ -5,6 +5,7 @@ import { Order } from './schema/Order.schema';
 import { OrderDto } from './dto/Order.dto';
 import { User } from 'src/users/schema/user.schema';
 import { UserJobs } from 'src/users/schema/userJobs.schema';
+import { defaultArgs } from 'puppeteer';
 
 @Injectable()
 export class OrderService {
@@ -26,9 +27,22 @@ export class OrderService {
   }
 
 
-  async getOrders(companyId): Promise<Order[]> {
+  async getOrders(companyId, searchTerm: string, skip: number, limit: number) {
     companyId = new Types.ObjectId(companyId);
-    return await this.ordersModel.find({ companyId })
+    let query: any = {
+      companyId,
+    }
+    let word = new RegExp(searchTerm, 'g')
+    if (searchTerm && searchTerm.trim() !== "") {
+      query.$or = [{ invoiceNumber: word }, { amount: word }]
+    }
+    const count = await this.ordersModel.countDocuments({ companyId })
+    const details = await this.ordersModel.find(query).skip(skip).limit(limit);
+    return {
+      total: count,
+      details,
+      status: 200
+    }
   }
 
   // async getOrder(orderId): Promise<Order> {
