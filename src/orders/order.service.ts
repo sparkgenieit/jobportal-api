@@ -29,18 +29,45 @@ export class OrderService {
 
   async getOrders(companyId, searchTerm: string, skip: number, limit: number) {
     companyId = new Types.ObjectId(companyId);
-    let query: any = {
-      companyId,
-    }
-    let word = new RegExp(searchTerm, 'g')
-    if (searchTerm && searchTerm.trim() !== "") {
-      query.$or = [{ invoiceNumber: word }, { amount: word }]
-    }
-    const count = await this.ordersModel.countDocuments({ companyId })
-    const details = await this.ordersModel.find(query).skip(skip).limit(limit);
+    let query = new RegExp(searchTerm, 'i')
+
+    const details = await this.ordersModel.aggregate([
+      {
+        $addFields: {
+          invoiceNumberString: { $toString: "$invoiceNumber" },
+          amountString: { $toString: "$amount" },
+          createdDateString: {
+            $dateToString: {
+              format: "%d/%m/%Y",
+              date: "$created_date"
+            }
+          }
+        }
+      },
+      {
+        $match: {
+          companyId,
+          $or: [
+            { invoiceNumberString: { $regex: query } },
+            { amountString: { $regex: query } },
+            { createdDateString: { $regex: query } }
+          ]
+        }
+      },
+      { $sort: { created_date: -1 } },
+      {
+        $facet: {
+          data: [
+            { $skip: skip },
+            { $limit: limit }
+          ],
+          count: [{ $count: "total" }]
+        }
+      }
+    ])
     return {
-      total: count,
-      details,
+      total: details[0].count[0].total,
+      details: details[0].data,
       status: 200
     }
   }
