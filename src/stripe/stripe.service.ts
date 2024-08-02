@@ -2,11 +2,12 @@ import { MailerService } from '@nestjs-modules/mailer';
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model } from 'mongoose';
+import { join } from 'path';
 import { CompanyProfile } from 'src/company/schema/companyProfile.schema';
 import { OrderDto } from 'src/orders/dto/Order.dto';
 import { Order } from 'src/orders/schema/Order.schema';
 import { User } from 'src/users/schema/user.schema';
-import { invoicePdfCreation } from 'src/utils/creatingInvoicePdf';
+import { invoicePdfCreation, generateRandomUniqueNumber } from 'src/utils/functions';
 import Stripe from 'stripe';
 
 @Injectable()
@@ -115,7 +116,7 @@ export class StripeService {
 
                     const date = new Date()
 
-                    const count = await this.ordersModel.countDocuments()
+
 
                     const details = {
                         CompanyName: profile.name || "",
@@ -127,10 +128,10 @@ export class StripeService {
                         price: +price / 100,
                         gstPrice: +gst / 100,
                         totalPrice: +total / 100,
-                        invoiceNumber: `${date.getMinutes()}${date.getSeconds()}${date.getMilliseconds()}${count}`
+                        invoiceNumber: generateRandomUniqueNumber()
                     }
 
-                    const pdf = await invoicePdfCreation(details);
+                    invoicePdfCreation(details);
 
                     await this.emailService.sendMail({
                         to: user.email,
@@ -140,7 +141,7 @@ export class StripeService {
                         context: details,
                         attachments: [{
                             filename: `${details.invoiceNumber}.pdf`,
-                            content: pdf,
+                            path: join(__dirname, "..", "..", "public", "invoices", `${details.invoiceNumber}.pdf`),
                             contentType: 'application/pdf'
                         }]
                     });
