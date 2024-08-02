@@ -5,7 +5,6 @@ import { Order } from './schema/Order.schema';
 import { OrderDto } from './dto/Order.dto';
 import { User } from 'src/users/schema/user.schema';
 import { UserJobs } from 'src/users/schema/userJobs.schema';
-import { defaultArgs } from 'puppeteer';
 
 @Injectable()
 export class OrderService {
