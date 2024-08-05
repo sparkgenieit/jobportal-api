@@ -135,4 +135,10 @@ export class jobsController {
     async deleteJob(@Param() data) {
         return await this.jobsService.deleteJob(data.id);
     }
+
+
+    @Get('/job-count/info-details')
+    async getJobsCount() {
+        return await this.jobsService.getCompaniesInfoAndPostedJobsCount()
+    }
 }

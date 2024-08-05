@@ -425,6 +425,33 @@ export class JobsService implements OnModuleInit {
     }
   }
 
+  async getCompaniesInfoAndPostedJobsCount() {
+    const companiesWIthInfo = await this.companyProfileModel.find({ info: { $gt: '' } }, { info: 1, user_id: 1, _id: 0 });
+
+    const JobsCount = await this.jobsModel.aggregate([
+      {
+        $match: { status: "approved" }
+      },
+      {
+        $group: {
+          _id: '$companyId',
+          count: { $sum: 1 }
+        }
+      },
+      {
+        $match: { count: { $gt: 1 } }
+      }]
+    )
+
+    return {
+      companiesWIthInfo,
+      JobsCount,
+      status: 200
+    }
+  }
+
+
+
   async reportJob({ userId, jobId, reportReason }) {
     jobId = new mongoose.Types.ObjectId(jobId);
     userId = new mongoose.Types.ObjectId(userId);
