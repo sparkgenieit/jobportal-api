@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import { HydratedDocument } from "mongoose";
+import mongoose, { HydratedDocument } from "mongoose";
+import { Jobs } from "src/jobs/schema/jobs.schema";
 
 export type ContactDocument = HydratedDocument<Contact>;
 
@@ -14,9 +15,15 @@ export class Contact {
     @Prop()
     message: string
     @Prop()
-    email: string
+    email?: string
+    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Jobs' })
+    jobId?: Jobs
     @Prop()
-    phone: number
+    phone?: number
+    @Prop()
+    reply?: string
+    @Prop()
+    enquirer: string
 }
 
 export const ContactSchema = SchemaFactory.createForClass(Contact);

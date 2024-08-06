@@ -1,6 +1,7 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { ContactSerivce } from './contact';
-import { ContactDto } from './contact.dto';
+import { ContactDto, EmployerContactDto, JobInquiryDto } from './contact.dto';
+import { AuthGuard } from 'src/auth/auth.guard';
 
 @Controller('contact')
 export class ContactController {
@@ -8,8 +9,25 @@ export class ContactController {
     constructor(private readonly contactService: ContactSerivce) { }
 
     @Post('contact-us')
-    async contactUs(@Body() ContactDto: ContactDto) {
-        return await this.contactService.contactUs(ContactDto)
+    async contactUs(@Body() contactData: ContactDto) {
+        return await this.contactService.contactUs(contactData)
     }
 
+    @UseGuards(AuthGuard)
+    @Post('/employer/query')
+    async contactUsEmployer(@Body() employerContactData: EmployerContactDto) {
+        return await this.contactService.employerContactUs(employerContactData)
+    }
+
+    @UseGuards(AuthGuard)
+    @Post('/job/query')
+    async jobInquiry(@Body() jobInquiryData: JobInquiryDto) {
+        return await this.contactService.jobInquiry(jobInquiryData)
+    }
+
+    @UseGuards(AuthGuard)
+    @Get('/all-queries')
+    async allQueries(@Query() { search, limit, skip }) {
+        return await this.contactService.getAllQueries(search, +limit, +skip)
+    }
 }
