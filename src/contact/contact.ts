@@ -40,6 +40,18 @@ export class ContactSerivce {
         }
     }
 
+    async postReply(query_id, reply: string) {
+        query_id = new Types.ObjectId(query_id)
+        try {
+
+            const query = await this.contactModel.updateOne({ _id: query_id }, { reply });
+            console.log(query)
+            return { message: "Reply posted" }
+        } catch (error) {
+            throw new HttpException({ message: "Internal Server Error" }, HttpStatus.INTERNAL_SERVER_ERROR)
+        }
+    }
+
     async jobInquiry(jobInquiryDto: JobInquiryDto) {
         try {
             await this.contactModel.create(jobInquiryDto);
