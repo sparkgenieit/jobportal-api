@@ -515,8 +515,8 @@ export class JobsService implements OnModuleInit {
     const company = await this.userModel.findOne({ _id: jobId })
 
     if (company.credits > 0) {
-
       jobUserSent = isEqual ? { ...jobUserSent, status: "approved" } : { ...jobUserSent, status: "queue", adminName: "", adminId: null }
+      jobUserSent.creationdate = new Date()
       await this.jobsModel.findOneAndUpdate({ _id: jobInDB._id }, jobUserSent);
       await this.userModel.findOneAndUpdate({ _id: jobId }, { credits: company.credits - 1 })
 

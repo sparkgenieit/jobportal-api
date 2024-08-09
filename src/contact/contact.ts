@@ -43,7 +43,6 @@ export class ContactSerivce {
     async postReply(query_id, reply: string) {
         query_id = new Types.ObjectId(query_id)
         try {
-
             const query = await this.contactModel.updateOne({ _id: query_id }, { reply });
             console.log(query)
             return { message: "Reply posted" }
@@ -107,7 +106,7 @@ export class ContactSerivce {
                 $facet: {
                     data: [
                         { $match: query },
-                        { $sort: { createdAt: -1 } },
+                        { $sort: { updatedAt: -1 } },
                         { $skip: skip },
                         { $limit: limit }
                     ],
