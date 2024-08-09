@@ -7,7 +7,8 @@ import { CompanyProfile } from 'src/company/schema/companyProfile.schema';
 import { OrderDto } from 'src/orders/dto/Order.dto';
 import { Order } from 'src/orders/schema/Order.schema';
 import { User } from 'src/users/schema/user.schema';
-import { invoicePdfCreation, generateRandomUniqueNumber } from 'src/utils/functions';
+import { invoicePdfCreation } from 'src/utils/functions';
+import { Counter } from 'src/utils/Counter.schema';
 import Stripe from 'stripe';
 
 @Injectable()
@@ -18,6 +19,7 @@ export class StripeService {
         @InjectModel(Order.name) private readonly ordersModel: Model<Order>,
         @InjectModel(User.name) private readonly userModel: Model<User>,
         @InjectModel(CompanyProfile.name) private readonly companyProfileModel: Model<CompanyProfile>,
+        @InjectModel('Counter') private readonly counterModel: Model<Counter>,
     ) {
         this.stripe = new Stripe('sk_test_51PKHdMSIkLQ1QpWMKj1xClSWqcOgyIQsd28qfTkD7scrtjZ5Nf2dAijNlyHXlq5a5CCHzEzqwuqJnV9XydBGYz4z00rBFUPxZc');
     }
@@ -111,12 +113,18 @@ export class StripeService {
                 let userId = new mongoose.Types.ObjectId(user_id);
                 const user = await this.userModel.findOne({ _id: userId })
                 if (user.token === session.id) {
-                    await this.userModel.findOneAndUpdate({ _id: user_id }, { credits: user.credits + +credits, token: null })
-                    const profile = await this.companyProfileModel.findOne({ user_id: userId });
+
+                    let [, profile, response] = await Promise.all([
+                        this.userModel.findOneAndUpdate({ _id: user_id }, { credits: user.credits + +credits, token: null }),
+                        this.companyProfileModel.findOne({ user_id: userId }),
+                        this.counterModel.findOneAndUpdate({ counterName: "invoice" }, { $inc: { counterValue: 1 } }, { new: true })
+                    ])
+
+                    if (!response) {
+                        response = await this.counterModel.create({ counterName: "invoice", counterValue: 1000001 })
+                    }
 
                     const date = new Date()
-
-
 
                     const details = {
                         CompanyName: profile.name || "",
@@ -128,23 +136,10 @@ export class StripeService {
                         price: +price / 100,
                         gstPrice: +gst / 100,
                         totalPrice: +total / 100,
-                        invoiceNumber: generateRandomUniqueNumber()
+                        invoiceNumber: response.counterValue.toString()
                     }
 
                     invoicePdfCreation(details);
-
-                    await this.emailService.sendMail({
-                        to: user.email,
-                        subject: `[${process.env.APP_NAME}] Payment Completed`,
-                        // The `.pug`, `.ejs` or `.hbs` extension is appended automatically.
-                        template: 'user/payment_invoice',
-                        context: details,
-                        attachments: [{
-                            filename: `${details.invoiceNumber}.pdf`,
-                            path: join(__dirname, "..", "..", "public", "invoices", `${details.invoiceNumber}.pdf`),
-                            contentType: 'application/pdf'
-                        }]
-                    });
 
                     const data: OrderDto = {
                         companyId: user._id,
@@ -155,14 +150,24 @@ export class StripeService {
                         creditsUsed: 0,
                         amount: +total / 100
                     }
-
-                    await this.ordersModel.create(data)
+                    await Promise.all(
+                        [
+                            this.ordersModel.create(data),
+                            this.emailService.sendMail({
+                                to: user.email,
+                                subject: `[${process.env.APP_NAME}] Payment Completed`,
+                                template: 'user/payment_invoice',
+                                context: details,
+                                attachments: [{
+                                    filename: `${details.invoiceNumber}.pdf`,
+                                    path: join(__dirname, "..", "..", "public", "invoices", `${details.invoiceNumber}.pdf`),
+                                    contentType: 'application/pdf'
+                                }]
+                            })
+                        ])
                 }
-
             }
             return session;
-            // const paymentIntent = await this.stripe.paymentIntents.retrieve(paymentIntentId);
-            // return (paymentIntent); // Send payment intent details
         } catch (err) {
             throw new HttpException({ message: 'Cannot get the Payment Status' }, HttpStatus.BAD_REQUEST);
         }
