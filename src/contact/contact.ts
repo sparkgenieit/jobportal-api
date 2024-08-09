@@ -96,4 +96,30 @@ export class ContactSerivce {
         }
 
     }
+
+    async getCompanyQueries(companyId: string, limit: number, skip: number) {
+        const query = {
+            companyId,
+            reply: { $exists: true }
+        }
+        const data = await this.contactModel.aggregate([
+            {
+                $facet: {
+                    data: [
+                        { $match: query },
+                        { $sort: { createdAt: -1 } },
+                        { $skip: skip },
+                        { $limit: limit }
+                    ],
+                    count: [{ $match: query }, { $count: 'total' }]
+                }
+            }
+        ])
+
+        return {
+            total: data[0].count[0].total,
+            data: data[0].data,
+            status: 200
+        }
+    }
 }

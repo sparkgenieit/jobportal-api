@@ -16,6 +16,8 @@ export class Contact {
     message: string
     @Prop()
     email?: string
+    @Prop()
+    companyId?: string
     @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Jobs' })
     jobId?: Jobs
     @Prop()

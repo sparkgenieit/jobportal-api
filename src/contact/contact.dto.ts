@@ -15,6 +15,7 @@ export class EmployerContactDto {
     subject: string
     name: string
     message: string
+    companyId: string
     organisation: string
     email: string
     reply?: string
@@ -27,6 +28,7 @@ export class JobInquiryDto {
     name: string
     message: string
     organisation: string
+    companyId: string
     jobId: Types.ObjectId
     reply?: string
     enquirer: string

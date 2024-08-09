@@ -36,4 +36,10 @@ export class ContactController {
     async allQueries(@Query() { t, s, limit, skip }) {
         return await this.contactService.getAllQueries(t, s, +limit, +skip)
     }
+
+    @UseGuards(AuthGuard)
+    @Get('/company-queries/:companyId')
+    async companyQueries(@Param() data, @Query() { limit, skip }) {
+        return await this.contactService.getCompanyQueries(data.companyId, +limit, +skip)
+    }
 }
