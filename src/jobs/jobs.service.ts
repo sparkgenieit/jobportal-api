@@ -302,32 +302,42 @@ export class JobsService implements OnModuleInit {
   }
 
   async getQueueJobs(limit: number, skip: number) {
-    const count = await this.jobsModel.countDocuments({ 'status': 'queue' }).exec();
-    const data = await this.jobsModel
-      .find({
-        $or: [
-          { status: "approved", reportReason: { $ne: null } },
-          { status: "queue" }
-        ]
-      }).sort({
-        reportReason: -1, // if this exist it will be sorted first
-        creationdate: -1
-      })
-      .limit(limit).skip(skip);
-    return {
-      jobs: data,
-      total: count,
-      status: 200,
+    let query = {
+      $or: [
+        { status: "approved", reportReason: { $ne: null } },
+        { status: "queue" }
+      ]
     }
+
+    const response = await this.jobsModel.aggregate([{
+      $facet: {
+        data: [
+          { $match: query },
+          {
+            $sort:
+            {
+              reportReason: -1, // if this exist it will be sorted first
+              creationdate: -1
+            }
+          },
+          { $skip: skip },
+          { $limit: limit }
+        ],
+        count: [{ $match: query }, { $count: 'total' }]
+      }
+    }]);
+
+    return {
+      total: response[0].count[0].total,
+      jobs: response[0].data,
+      status: 200
+    }
+
   }
 
   async getAssignedJobs(adminId, limit: number, skip: number) {
     adminId = new mongoose.Types.ObjectId(adminId);
-    const count = await this.jobsModel.countDocuments({ adminId }).exec();
-    const data = await this.jobsModel.aggregate([
-      {
-        $match: { adminId }
-      },
+    const response = await this.jobsModel.aggregate([
       {
         $addFields: {
           sortPriority: {
@@ -335,10 +345,7 @@ export class JobsService implements OnModuleInit {
               branches: [
                 {
                   'case': {
-                    $eq: [
-                      '$status',
-                      'review'
-                    ]
+                    $eq: ['$status', 'review']
                   },
                   then: 1
                 },
@@ -348,20 +355,27 @@ export class JobsService implements OnModuleInit {
           }
         }
       }, {
-        $sort: {
-          sortPriority: 1,
-          creationdate: - 1,
+        $facet: {
+          data: [
+            { $match: { adminId } },
+            {
+              $sort:
+              {
+                sortPriority: 1,
+                creationdate: - 1,
+              }
+            },
+            { $skip: skip },
+            { $limit: limit }
+          ],
+          count: [{ $match: { adminId } }, { $count: 'total' }]
         }
-      },
-      {
-        $skip: skip
-      },
-      {
-        $limit: limit
-      }])
+      }
+    ])
+
     return {
-      jobs: data,
-      total: count,
+      jobs: response[0].data,
+      total: response[0].count[0].total,
       status: 200,
     }
   }

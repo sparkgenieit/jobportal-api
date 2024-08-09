@@ -61,14 +61,39 @@ export class ContactSerivce {
         }
     }
 
-    async getAllQueries(search: string, limit: number, skip: number) {
+    async getAllQueries(type: string, search: string, limit: number, skip: number) {
+        let query: any = {}
 
-        return await this.contactModel.find({})
+        const searchTerm = new RegExp(search, 'i');
+
+        if (type && type.trim() !== "") {
+            query.enquirer = type
+        }
+        if (search && search.trim() !== "") {
+            query.$or = [
+                { name: searchTerm },
+                { organisation: searchTerm }
+            ]
+        }
+
+        const data = await this.contactModel.aggregate([
+            {
+                $facet: {
+                    data: [
+                        { $match: query },
+                        { $skip: skip },
+                        { $limit: limit }
+                    ],
+                    count: [{ $match: query }, { $count: 'total' }]
+                }
+            }
+        ])
+
+        return {
+            total: data[0].count[0].total,
+            data: data[0].data,
+            status: 200
+        }
 
     }
-
-
-
-
-
 }

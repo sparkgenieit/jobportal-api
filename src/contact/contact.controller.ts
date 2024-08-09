@@ -32,8 +32,8 @@ export class ContactController {
     }
 
     @UseGuards(AuthGuard)
-    @Get('/all-queries')
-    async allQueries(@Query() { search, limit, skip }) {
-        return await this.contactService.getAllQueries(search, +limit, +skip)
+    @Get('/all-queries/')
+    async allQueries(@Query() { t, s, limit, skip }) {
+        return await this.contactService.getAllQueries(t, s, +limit, +skip)
     }
 }
