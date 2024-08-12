@@ -5,7 +5,7 @@ export class OrderDto {
     companyId: Types.ObjectId
     description: string
     amount?: number
-    invoiceNumber?: string
+    invoiceNumber?: number
     credits: number
     creditsPurchased?: number
     creditsUsed?: number

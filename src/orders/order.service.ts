@@ -26,9 +26,10 @@ export class OrderService {
   }
 
 
-  async getOrders(companyId, searchTerm: string, skip: number, limit: number) {
+  async getOrders(companyId, searchTerm: string, sort: string, skip: number, limit: number) {
     companyId = new Types.ObjectId(companyId);
     let query = new RegExp(searchTerm, 'i')
+    let sortingOrder: any = sort === "desc" ? { created_date: -1 } : { created_date: 1 }
 
     const details = await this.ordersModel.aggregate([
       {
@@ -57,6 +58,7 @@ export class OrderService {
       {
         $facet: {
           data: [
+            { $sort: sortingOrder },
             { $skip: skip },
             { $limit: limit }
           ],
@@ -71,18 +73,30 @@ export class OrderService {
     }
   }
 
-  // async getOrder(orderId): Promise<Order> {
-  //   orderId = new mongoose.Types.ObjectId(orderId);
+  async getAllOrders(companyId, from: string, to: string) {
+    companyId = new Types.ObjectId(companyId);
 
-  //   const isOrder = await this.ordersModel.findOne({ _id: orderId });
-  //   console.log(isOrder);
-  //   if (!isOrder) {
-  //     throw new HttpException({ message: "The given Order does not exsit" }, HttpStatus.BAD_REQUEST);
-  //   } else {
-  //     return await this.ordersModel.findOne({ _id: orderId });
-  //   }
-  // }
+    let query: any = {
+      companyId
+    }
 
+    if (from && to) {
+      let fromDate = new Date(from)
+      let toDate = new Date(to)
 
+      fromDate.setHours(0, 0, 0, 0);
+      toDate.setHours(23, 59, 59, 999);
+
+      query.created_date = {
+        $gte: fromDate,
+        $lte: toDate
+      }
+    }
+
+    const data = await this.ordersModel.find(query).sort({ created_date: -1 })
+
+    return data;
+
+  }
 
 }

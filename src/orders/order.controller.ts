@@ -1,5 +1,4 @@
 import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
-import { Order } from './schema/Order.schema';
 import { OrderService } from './order.service';
 import { AuthGuard } from 'src/auth/auth.guard';
 
@@ -12,8 +11,15 @@ export class OrderController {
     ) { }
 
     @Get("/get/:companyId")
-    async getOrders(@Param() { companyId }, @Query() { skip, searchTerm, limit }) {
-        return await this.orderService.getOrders(companyId, searchTerm, +skip, +limit)
+    async getOrders(@Param() { companyId }, @Query() { skip, searchTerm, limit, sort }) {
+        return await this.orderService.getOrders(companyId, searchTerm, sort, +skip, +limit)
     }
+
+    @Get("/download-transactions/:companyId")
+    async getAllOrders(@Param() { companyId, fromDate, toDate }, @Query() { from, to }) {
+        return await this.orderService.getAllOrders(companyId, from, to)
+    }
+
+
 
 }

@@ -136,7 +136,7 @@ export class StripeService {
                         price: +price / 100,
                         gstPrice: +gst / 100,
                         totalPrice: +total / 100,
-                        invoiceNumber: response.counterValue.toString()
+                        invoiceNumber: response.counterValue
                     }
 
                     invoicePdfCreation(details);
