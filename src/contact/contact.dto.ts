@@ -1,5 +1,12 @@
 import { Types } from "mongoose"
 
+export class Message {
+    date: Date
+    from: string
+    message: string
+    by: "Enquirer" | "Admin"
+}
+
 export class ContactDto {
     subject: string
     name: string
@@ -14,11 +21,10 @@ export class ContactDto {
 export class EmployerContactDto {
     subject: string
     name: string
-    message: string
+    chat: Message[]
     companyId: string
     organisation: string
     email: string
-    reply?: string
     enquirer: string
 }
 
@@ -26,10 +32,9 @@ export class EmployerContactDto {
 export class JobInquiryDto {
     subject: string
     name: string
-    message: string
+    chat: Message[]
     organisation: string
     companyId: string
     jobId: Types.ObjectId
-    reply?: string
     enquirer: string
 }

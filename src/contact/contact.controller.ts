@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { ContactSerivce } from './contact';
-import { ContactDto, EmployerContactDto, JobInquiryDto } from './contact.dto';
+import { ContactDto, EmployerContactDto, JobInquiryDto, Message } from './contact.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
 
 @Controller('contact')
@@ -27,8 +27,8 @@ export class ContactController {
 
     @UseGuards(AuthGuard)
     @Patch('/query/reply/:query_id')
-    async postReply(@Body() { reply }, @Param() { query_id }) {
-        return await this.contactService.postReply(query_id, reply)
+    async postReply(@Body() data: Message, @Param() { query_id }) {
+        return await this.contactService.postReply(query_id, data)
     }
 
     @UseGuards(AuthGuard)

@@ -2,6 +2,13 @@ import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import mongoose, { HydratedDocument } from "mongoose";
 import { Jobs } from "src/jobs/schema/jobs.schema";
 
+class Message {
+    date: Date
+    from: string
+    message: string
+    by: "Enquirer" | "Admin"
+}
+
 export type ContactDocument = HydratedDocument<Contact>;
 
 @Schema({ timestamps: true })
@@ -13,7 +20,9 @@ export class Contact {
     @Prop()
     organisation: string
     @Prop()
-    message: string
+    message?: string
+    @Prop()
+    chat?: Message[]
     @Prop()
     email?: string
     @Prop()

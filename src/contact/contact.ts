@@ -1,8 +1,8 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { ContactDto, EmployerContactDto, JobInquiryDto } from './contact.dto';
+import { ContactDto, EmployerContactDto, JobInquiryDto, Message } from './contact.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Contact } from './schema/contact.schema';
-import { Model, Types } from 'mongoose';
+import mongoose, { Model, Types } from 'mongoose';
 import { MailerService } from '@nestjs-modules/mailer';
 
 
@@ -40,11 +40,10 @@ export class ContactSerivce {
         }
     }
 
-    async postReply(query_id, reply: string) {
+    async postReply(query_id, reply: Message) {
         query_id = new Types.ObjectId(query_id)
         try {
-            const query = await this.contactModel.updateOne({ _id: query_id }, { reply });
-            console.log(query)
+            const query = await this.contactModel.updateOne({ _id: query_id }, { $push: { chat: reply } });
             return { message: "Reply posted" }
         } catch (error) {
             throw new HttpException({ message: "Internal Server Error" }, HttpStatus.INTERNAL_SERVER_ERROR)
@@ -99,7 +98,6 @@ export class ContactSerivce {
     async getCompanyQueries(companyId: string, limit: number, skip: number) {
         const query = {
             companyId,
-            reply: { $exists: true }
         }
         const data = await this.contactModel.aggregate([
             {
@@ -116,8 +114,8 @@ export class ContactSerivce {
         ])
 
         return {
-            total: data[0].count[0].total,
-            data: data[0].data,
+            total: data[0]?.count[0]?.total,
+            data: data[0]?.data,
             status: 200
         }
     }
