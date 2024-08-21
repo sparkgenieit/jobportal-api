@@ -79,6 +79,14 @@ export class ContactSerivce {
                 $facet: {
                     data: [
                         { $match: query },
+                        {
+                            $addFields: {
+                                chat: {
+                                    $slice: ["$chat", -1]
+                                },
+                            }
+                        },
+                        { $sort: { updatedAt: -1 } },
                         { $skip: skip },
                         { $limit: limit }
                     ],
@@ -104,6 +112,14 @@ export class ContactSerivce {
                 $facet: {
                     data: [
                         { $match: query },
+                        {
+                            $project: {
+                                chat: {
+                                    $slice: ["$chat", -1]
+                                },
+                                subject: 1
+                            }
+                        },
                         { $sort: { updatedAt: -1 } },
                         { $skip: skip },
                         { $limit: limit }
@@ -118,5 +134,37 @@ export class ContactSerivce {
             data: data[0]?.data,
             status: 200
         }
+    }
+
+
+    async getQuery(id: string | Types.ObjectId, type: string) {
+
+        id = new Types.ObjectId(id)
+
+        if (type === "Visitor") return await this.contactModel.findById(id)
+
+        const data = await this.contactModel.aggregate([
+            { $match: { _id: id } },
+            { $addFields: { company_id: { $toObjectId: "$companyId" } } },
+            {
+                $lookup: {
+                    from: "companyprofiles",
+                    localField: 'company_id',
+                    foreignField: "user_id",
+                    as: "companyprofile"
+                }
+            },
+            {
+                $unwind: '$companyprofile'
+            },
+            {
+                $project: {
+                    chat: 1,
+                    subject: 1,
+                    'companyprofile.logo': 1
+                }
+            },
+        ])
+        return data[0]
     }
 }
