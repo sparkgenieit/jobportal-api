@@ -495,7 +495,7 @@ export class JobsService implements OnModuleInit {
     const isJob = await this.jobsModel.findOne({ _id: jobId, companyId: userId })
     if (!isJob) throw new HttpException({ message: "No job found" }, HttpStatus.NOT_FOUND);
     isJob.status = "closed"
-    isJob.closedate = new Date().toString()
+    isJob.closedate = new Date().toISOString()
     await this.jobsModel.findOneAndUpdate({ _id: isJob._id }, isJob)
     return { message: "success" }
   }
@@ -544,6 +544,8 @@ export class JobsService implements OnModuleInit {
   @Cron('0 0 * * *') // Every day at midnight
   async checkExpiredJobs() {
     const closeDate = new Date().toISOString()
-    await this.jobsModel.updateMany({ closedate: { $gte: closeDate }, status: "approved" }, { status: "expired" });
+    // const jobs = await this.jobsModel.find({ closedate: { $lte: closeDate }, status: "approved" })
+
+    await this.jobsModel.updateMany({ closedate: { $lte: closeDate }, status: "approved" }, { status: "expired" });
   }
 }
