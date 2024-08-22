@@ -259,7 +259,12 @@ export class UsersService {
       total: count,
       status: 200,
     }
+  }
 
+  async getSavedJobsIDs(id: string | Types.ObjectId) {
+    id = new Types.ObjectId(id)
+    const savedJobsIds = await this.userJobsModel.find({ userId: id }, { jobId: 1, _id: 0 })
+    return savedJobsIds
   }
 
   async getUser(user_id): Promise<any> {

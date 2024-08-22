@@ -59,20 +59,16 @@ export class ContactSerivce {
         }
     }
 
-    async getAllQueries(type: string, search: string, limit: number, skip: number) {
+    async getAllQueries(search: string, limit: number, skip: number) {
         let query: any = {}
 
-        const searchTerm = new RegExp(search, 'i');
+        const searchRegex = new RegExp(search, 'i')
 
-        if (type && type.trim() !== "") {
-            query.enquirer = type
-        }
-        if (search && search.trim() !== "") {
-            query.$or = [
-                { name: searchTerm },
-                { organisation: searchTerm }
+        if (search && search?.trim() !== "") query.$or =
+            [
+                { subject: { $regex: searchRegex } },
+                { "chat.message": { $regex: searchRegex } }
             ]
-        }
 
         const data = await this.contactModel.aggregate([
             {
@@ -96,17 +92,26 @@ export class ContactSerivce {
         ])
 
         return {
-            total: data[0].count[0].total,
-            data: data[0].data,
+            total: data[0]?.count[0]?.total,
+            data: data[0]?.data,
             status: 200
         }
 
     }
 
-    async getCompanyQueries(companyId: string, limit: number, skip: number) {
-        const query = {
+    async getCompanyQueries(companyId: string, searchTerm: string, limit: number, skip: number) {
+        const query: any = {
             companyId,
         }
+
+        const searchRegex = new RegExp(searchTerm, 'i')
+
+        if (searchTerm && searchTerm?.trim() !== "") query.$or =
+            [
+                { subject: { $regex: searchRegex } },
+                { "chat.message": { $regex: searchRegex } }
+            ]
+
         const data = await this.contactModel.aggregate([
             {
                 $facet: {

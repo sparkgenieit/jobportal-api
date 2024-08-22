@@ -67,8 +67,8 @@ export class OrderService {
       }
     ])
     return {
-      total: details[0].count[0].total,
-      details: details[0].data,
+      total: details[0]?.count[0]?.total,
+      details: details[0]?.data,
       status: 200
     }
   }

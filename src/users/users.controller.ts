@@ -61,6 +61,13 @@ export class UsersController {
     async updateAdmin(@Param() data, @Body() userDto: CreateUserDto): Promise<User> {
         return await this.userService.updateAdmin(data.id, userDto);
     }
+
+    @UseGuards(AuthGuard)
+    @Get('get-saved-jobs/:id')
+    async getSavedJobs(@Param() data) {
+        return await this.userService.getSavedJobsIDs(data.id);
+    }
+
     @UseGuards(AuthGuard)
     @Get('get-credits/:id')
     async updateUser(@Param() data): Promise<User> {

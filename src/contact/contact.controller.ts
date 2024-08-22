@@ -33,8 +33,8 @@ export class ContactController {
 
     @UseGuards(AuthGuard)
     @Get('/all-queries/')
-    async allQueries(@Query() { t, s, limit, skip }) {
-        return await this.contactService.getAllQueries(t, s, +limit, +skip)
+    async allQueries(@Query() { s, limit, skip }) {
+        return await this.contactService.getAllQueries(s, +limit, +skip)
     }
 
     @UseGuards(AuthGuard)
@@ -45,7 +45,7 @@ export class ContactController {
 
     @UseGuards(AuthGuard)
     @Get('/company-queries/:companyId')
-    async companyQueries(@Param() data, @Query() { limit, skip }) {
-        return await this.contactService.getCompanyQueries(data.companyId, +limit, +skip)
+    async companyQueries(@Param() data, @Query() { q, limit, skip }) {
+        return await this.contactService.getCompanyQueries(data.companyId, q, +limit, +skip)
     }
 }

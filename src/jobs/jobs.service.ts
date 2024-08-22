@@ -328,14 +328,14 @@ export class JobsService implements OnModuleInit {
     }]);
 
     return {
-      total: response[0].count[0].total,
-      jobs: response[0].data,
+      total: response[0]?.count[0]?.total,
+      jobs: response[0]?.data,
       status: 200
     }
 
   }
 
-  async getAssignedJobs(adminId, limit: number, skip: number) {
+  async getAssignedJobs(adminId: string | Types.ObjectId, limit: number, skip: number) {
     adminId = new mongoose.Types.ObjectId(adminId);
     const response = await this.jobsModel.aggregate([
       {
@@ -374,8 +374,8 @@ export class JobsService implements OnModuleInit {
     ])
 
     return {
-      jobs: response[0].data,
-      total: response[0].count[0].total,
+      jobs: response[0]?.data,
+      total: response[0]?.count[0]?.total,
       status: 200,
     }
   }
@@ -415,7 +415,7 @@ export class JobsService implements OnModuleInit {
     }
   }
 
-  async getSavedJobs(userId, limit: number, skip: number): Promise<any> {
+  async getSavedJobs(userId: string | Types.ObjectId, limit: number, skip: number): Promise<any> {
     userId = new mongoose.Types.ObjectId(userId);
     const count = await this.UserJobsModel.countDocuments({ userId, saved: true });
     const jobs = await this.UserJobsModel.find({ userId, saved: true }).sort({ saved_date: -1 }).limit(limit).skip(skip).populate("jobId");
@@ -426,7 +426,7 @@ export class JobsService implements OnModuleInit {
     }
   }
 
-  async getJob(jobId): Promise<any> {
+  async getJob(jobId: Types.ObjectId | string): Promise<any> {
     jobId = new mongoose.Types.ObjectId(jobId);
     const isJob = await this.jobsModel.findOne({ _id: jobId });
     console.log(isJob);
@@ -495,6 +495,7 @@ export class JobsService implements OnModuleInit {
     const isJob = await this.jobsModel.findOne({ _id: jobId, companyId: userId })
     if (!isJob) throw new HttpException({ message: "No job found" }, HttpStatus.NOT_FOUND);
     isJob.status = "closed"
+    isJob.closedate = new Date().toString()
     await this.jobsModel.findOneAndUpdate({ _id: isJob._id }, isJob)
     return { message: "success" }
   }
@@ -542,8 +543,7 @@ export class JobsService implements OnModuleInit {
 
   @Cron('0 0 * * *') // Every day at midnight
   async checkExpiredJobs() {
-    const oneMonthAgo = new Date();
-    oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1); // Subtract one month from current date
-    await this.jobsModel.updateMany({ creationdate: { $lt: oneMonthAgo }, status: "approved" }, { status: "expired" });
+    const closeDate = new Date().toISOString()
+    await this.jobsModel.updateMany({ closedate: { $gte: closeDate }, status: "approved" }, { status: "expired" });
   }
 }
