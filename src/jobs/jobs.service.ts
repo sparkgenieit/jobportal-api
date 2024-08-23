@@ -8,8 +8,8 @@ import { UserJobs } from 'src/users/schema/userJobs.schema';
 import { CompanyProfile } from 'src/company/schema/companyProfile.schema';
 import { Cron } from '@nestjs/schedule';
 import { MailerService } from '@nestjs-modules/mailer';
-import { Order } from 'src/orders/schema/Order.schema';
-import { OrderDto } from 'src/orders/dto/Order.dto';
+import { Order } from 'src/orders/schema/order.schema';
+import { OrderDto } from 'src/orders/dto/order.dto';
 
 @Injectable()
 export class JobsService implements OnModuleInit {

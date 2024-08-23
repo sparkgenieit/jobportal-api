@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { JobsDto } from './dto/jobs.dto';
-import { Jobs } from './schema/jobs.schema';
+import { Jobs } from './schema/Jobs.schema';
 import { JobsService } from './jobs.service';
 import { AuthGuard } from 'src/auth/auth.guard';
 

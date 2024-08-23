@@ -1,8 +1,8 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { Order } from './schema/Order.schema';
-import { OrderDto } from './dto/Order.dto';
+import { Order } from './schema/order.schema';
+import { OrderDto } from './dto/order.dto';
 import { User } from 'src/users/schema/user.schema';
 import { UserJobs } from 'src/users/schema/userJobs.schema';
 

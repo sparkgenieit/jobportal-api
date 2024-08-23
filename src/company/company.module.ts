@@ -7,7 +7,7 @@ import { JwtService } from '@nestjs/jwt';
 import { CompanyProfile, CompanyProfileSchema } from './schema/companyProfile.schema';
 import { UserJobs, UserJobsSchema } from 'src/users/schema/userJobs.schema';
 import { User, UserSchema } from 'src/users/schema/user.schema';
-import { Jobs, JobsSchema } from 'src/jobs/schema/jobs.schema';
+import { Jobs, JobsSchema } from 'src/jobs/schema/Jobs.schema';
 
 @Module({
   imports: [

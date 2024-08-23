@@ -8,7 +8,7 @@ import { JobsService } from './jobs.service';
 import { User, UserSchema } from 'src/users/schema/user.schema';
 import { UserJobs, UserJobsSchema } from 'src/users/schema/userJobs.schema';
 import { CompanyProfile, CompanyProfileSchema } from 'src/company/schema/companyProfile.schema';
-import { Order, OrderSchema } from 'src/orders/schema/Order.schema';
+import { Order, OrderSchema } from 'src/orders/schema/order.schema';
 
 @Module({
   imports: [

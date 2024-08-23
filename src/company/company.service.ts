@@ -5,7 +5,7 @@ import { JwtService } from '@nestjs/jwt';
 import { CompanyProfile } from './schema/companyProfile.schema';
 import { CompanyProfileDto } from './dto/company-profile.dto';
 import { UserJobs } from 'src/users/schema/userJobs.schema';
-import { Jobs } from 'src/jobs/schema/jobs.schema';
+import { Jobs } from 'src/jobs/schema/Jobs.schema';
 import { User } from 'src/users/schema/user.schema';
 import * as fs from 'fs';
 import * as path from 'path';

@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
-import { SkillDto } from './dto/Skill.dto';
+import { SkillDto } from './dto/skill.dto';
 import { Skill } from './schema/Skill.schema';
 import { SkillService } from './skill.service';
 import { AuthGuard } from 'src/auth/auth.guard';

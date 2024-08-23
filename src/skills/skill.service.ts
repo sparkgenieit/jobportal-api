@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model } from 'mongoose';
 import { JwtService } from '@nestjs/jwt';
 import { Skill } from './schema/Skill.schema';
-import { SkillDto } from './dto/Skill.dto';
+import { SkillDto } from './dto/skill.dto';
 import { User } from 'src/users/schema/user.schema';
 import { UserJobs } from 'src/users/schema/userJobs.schema';
 import { UserJobsDto } from 'src/users/dto/user-jobs.dto';

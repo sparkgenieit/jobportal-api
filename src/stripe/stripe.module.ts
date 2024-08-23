@@ -5,7 +5,7 @@ import { User, UserSchema } from 'src/users/schema/user.schema';
 import { MongooseModule } from '@nestjs/mongoose';
 import { JwtService } from '@nestjs/jwt';
 import { CompanyProfile, CompanyProfileSchema } from 'src/company/schema/companyProfile.schema';
-import { Order, OrderSchema } from 'src/orders/schema/Order.schema';
+import { Order, OrderSchema } from 'src/orders/schema/order.schema';
 import { CounterSchema } from 'src/utils/Counter.schema';
 
 @Module({

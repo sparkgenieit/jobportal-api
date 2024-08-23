@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import mongoose, { HydratedDocument } from "mongoose";
-import { Jobs } from "src/jobs/schema/jobs.schema";
+import { Jobs } from "src/jobs/schema/Jobs.schema";
 
 class Message {
     date: Date

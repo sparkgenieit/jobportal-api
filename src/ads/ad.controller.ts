@@ -1,5 +1,5 @@
 import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
-import { AdDto } from './dto/Ad.dto';
+import { AdDto } from './dto/ad.dto';
 import { Ad } from './schema/Ad.schema';
 import { AdService } from './ad.service';
 import { AuthGuard } from 'src/auth/auth.guard';
