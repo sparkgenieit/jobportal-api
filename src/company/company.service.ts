@@ -97,54 +97,79 @@ export class CompanyService {
     if (name && name.trim() !== "") {
       query.$or = [{ jobTitle: { $regex: name, $options: 'i' } }, { employjobreference: { $regex: name, $options: 'i' } }]
     }
-    const count = await this.jobsModel.countDocuments(query).exec();
 
-    const data = await this.jobsModel.aggregate([
+    const response = await this.jobsModel.aggregate([
       {
-        $match: query
-      },
-      {
-        $addFields: {
-          sortPriority: {
-            $switch: {
-              branches: [
-                {
-                  'case': { $eq: ['$status', 'rejected'] },
-                  then: 0
-                },
-                {
-                  'case': { $eq: ['$status', 'approved'] },
-                  then: 3
-                },
-                {
-                  'case': { $eq: ['$status', 'closed'] },
-                  then: 4
-                },
-                {
-                  'case': { $eq: ['$status', 'expired'] },
-                  then: 5
-                },
-              ],
-              'default': 2
+        $facet: {
+          data: [{
+            $match: query
+          },
+          {
+            $lookup: {
+              from: 'userjobs',
+              localField: '_id',
+              foreignField: 'jobId',
+              as: 'appliedUsers'
             }
+          },
+          {
+            $addFields: {
+              sortPriority: {
+                $switch: {
+                  branches: [
+                    {
+                      'case': { $eq: ['$status', 'rejected'] },
+                      then: 0
+                    },
+                    {
+                      'case': { $eq: ['$status', 'approved'] },
+                      then: 3
+                    },
+                    {
+                      'case': { $eq: ['$status', 'closed'] },
+                      then: 4
+                    },
+                    {
+                      'case': { $eq: ['$status', 'expired'] },
+                      then: 5
+                    },
+                  ],
+                  'default': 2
+                }
+              },
+              appliedUsers: { $size: "$appliedUsers" },
+              shortlistedUsers: {
+                $size: {
+                  $filter: {
+                    input: '$appliedUsers',
+                    as: "users",
+                    cond: { $eq: ['$$users.shortlisted', true] }
+                  }
+                }
+              }
+            },
+          }, {
+            $sort: {
+              sortPriority: 1,
+              creationdate: - 1,
+            }
+          },
+          {
+            $skip: skip
+          },
+          {
+            $limit: limit
           }
+
+          ],
+          count: [{ $match: query }, { $count: 'total' }]
         }
-      }, {
-        $sort: {
-          sortPriority: 1,
-          creationdate: - 1,
-        }
-      },
-      {
-        $skip: skip
-      },
-      {
-        $limit: limit
-      }])
+      }
+    ])
 
     return {
-      jobs: data,
-      total: count,
+      total: response[0]?.count[0]?.total,
+      jobs: response[0]?.data,
       status: 200,
     }
   }
