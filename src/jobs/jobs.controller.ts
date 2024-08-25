@@ -3,6 +3,7 @@ import { JobsDto } from './dto/jobs.dto';
 import { Jobs } from './schema/Jobs.schema';
 import { JobsService } from './jobs.service';
 import { AuthGuard } from 'src/auth/auth.guard';
+import { Roles } from 'src/auth/roles.decorator';
 
 
 @Controller('jobs')

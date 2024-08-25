@@ -43,9 +43,8 @@ export class UsersService {
     if (!isMatch) {
       throw new HttpException({ message: 'Invalid password' }, HttpStatus.BAD_REQUEST);
     }
-    const payload = { username: user.first_name + " " + user.last_name, sub: user._id };
+    const payload = { username: user.first_name + " " + user.last_name, id: user._id, role: user.role };
     user.token = await this.jwtService.signAsync(payload, { secret: "JWT_SECRET_KEY" });
-    //user.token = '999';
     return user;
   }
 

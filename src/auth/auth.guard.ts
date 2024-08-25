@@ -1,24 +1,20 @@
-import {
-    CanActivate, ExecutionContext, Injectable, UnauthorizedException,
-    ForbiddenException,
-} from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { User } from 'src/users/schema/user.schema';
-import { Model } from 'mongoose';
+import { CanActivate, ExecutionContext, Injectable, HttpException, HttpStatus, } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { Reflector } from '@nestjs/core';
+import { Roles } from './roles.decorator';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-    constructor(private readonly jwtService: JwtService,
-    ) { }
+    constructor(private reflector: Reflector, private jwtService: JwtService) { }
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
         try {
+            const roles = this.reflector.get(Roles, context.getHandler())
             const request = context.switchToHttp().getRequest();
             const { authorization }: any = request.headers;
-            if (!authorization || authorization.trim() === '') {
-                throw new UnauthorizedException('Please provide token');
-            }
+
+            if (!authorization || authorization.trim() === '') throw new HttpException({ message: 'INVALID TOKEN! PLEASE SIGN IN' }, HttpStatus.UNAUTHORIZED);
+
             const authToken = authorization.replace(/bearer/gim, '').trim();
             const data = await this.jwtService.verifyAsync(
                 authToken,
@@ -27,10 +23,13 @@ export class AuthGuard implements CanActivate {
                 }
             );
 
-            return true;
+            if (!data) throw new HttpException({ message: 'INVALID TOKEN! PLEASE SIGN IN' }, HttpStatus.UNAUTHORIZED);
 
+            if (roles && !roles.includes(data.role)) throw new HttpException({ message: 'FORBIDDEN REQUEST' }, HttpStatus.FORBIDDEN);
+
+            return true;
         } catch (error) {
-            throw new ForbiddenException(error.message || 'session expired! Please sign In');
+            return false
         }
     }
 }

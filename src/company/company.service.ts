@@ -83,13 +83,6 @@ export class CompanyService {
     }
   }
 
-  async getAppliedUsersCount(jobId) {
-    jobId = new mongoose.Types.ObjectId(jobId);
-    let applied = await this.UserJobsModel.countDocuments({ jobId: jobId, applied: true });
-    let shortlisted = await this.UserJobsModel.countDocuments({ jobId: jobId, applied: true, shortlisted: true });
-    return { applied, shortlisted }
-  }
-
   async getPostedJobs(companyId: string, limit: number, skip: number, name: string) {
     let query: any = {
       companyId,
