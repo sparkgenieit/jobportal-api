@@ -23,7 +23,7 @@ export class AuthGuard implements CanActivate {
                 }
             );
 
-            if (!data) throw new HttpException({ message: 'INVALID TOKEN! PLEASE SIGN IN' }, HttpStatus.UNAUTHORIZED);
+            if (!data || !data.role) throw new HttpException({ message: 'INVALID TOKEN! PLEASE SIGN IN' }, HttpStatus.UNAUTHORIZED);
 
             if (roles && !roles.includes(data.role)) throw new HttpException({ message: 'FORBIDDEN REQUEST' }, HttpStatus.FORBIDDEN);
 

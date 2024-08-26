@@ -47,24 +47,7 @@ export class StripeService {
         });
         user_id = new mongoose.Types.ObjectId(user_id);
         await this.userModel.findOneAndUpdate({ _id: user_id }, { token: session.id })
-        return session
-        // let amount = (price * 1000) + +(Math.ceil((price * 1000) * (15 / 100)));
-        // const paymentIntent = await this.stripe.paymentIntents.create({
-        //     amount: amount,
-        //     currency: "usd",
-        //     metadata: {
-        //         user_id: user_id,
-        //         plan: plan,
-        //         price: price * 1000
-        //     },
-        //     // In the latest version of the API, specifying the `automatic_payment_methods` parameter is optional because Stripe enables its functionality by default.
-        //     automatic_payment_methods: {
-        //         enabled: true,
-        //     },
-        // });
-
-        // return { clientSecret: paymentIntent.client_secret }
-
+        return session;
     }
 
     async WebhookEvent(data, headers) {

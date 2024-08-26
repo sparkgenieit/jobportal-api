@@ -40,14 +40,52 @@ export class ContactSerivce {
         }
     }
 
-    async postReply(query_id, reply: Message) {
-        query_id = new Types.ObjectId(query_id)
+    async postReply(queryId: string, reply: Message) {
+        const query_id: Types.ObjectId = new Types.ObjectId(queryId)
         try {
             const query = await this.contactModel.updateOne({ _id: query_id }, { $push: { chat: reply } });
             return { message: "Reply posted" }
         } catch (error) {
             throw new HttpException({ message: "Internal Server Error" }, HttpStatus.INTERNAL_SERVER_ERROR)
         }
+    }
+
+    async getUnAssignedQueries(limit: number, skip: number) {
+        let query: any = {
+            assignedTo: { $exists: true }
+        }
+        try {
+            const response = await this.contactModel.aggregate([
+                {
+                    $facet: {
+                        data: [
+                            { $match: query },
+                            {
+                                $addFields: {
+                                    chat: {
+                                        $slice: ["$chat", -1]
+                                    },
+                                }
+                            },
+                            { $sort: { updatedAt: -1 } },
+                            // { $skip: skip },
+                            // { $limit: limit }
+                        ],
+                        count: [{ $match: query }, { $count: 'total' }]
+                    }
+                }
+            ])
+
+            return {
+                total: response[0]?.count[0]?.total,
+                queries: response[0]?.data,
+                status: 200
+            }
+
+        } catch (error) {
+            throw new HttpException({ message: "Internal Server Error" }, HttpStatus.INTERNAL_SERVER_ERROR)
+        }
+
     }
 
     async jobInquiry(jobInquiryDto: JobInquiryDto) {
@@ -59,8 +97,20 @@ export class ContactSerivce {
         }
     }
 
-    async getAllQueries(search: string, limit: number, skip: number) {
-        let query: any = {}
+    async assignQuery(user_id: string, queryId: string) {
+        const query_id: Types.ObjectId = new Types.ObjectId(queryId)
+        try {
+            await this.contactModel.updateOne({ _id: query_id }, { assignedTo: user_id })
+            return { message: "Query Assinged" }
+        } catch (error) {
+            throw new HttpException({ message: "Internal Server Error" }, HttpStatus.INTERNAL_SERVER_ERROR)
+        }
+    }
+
+    async getAssignedQueries(userId: string, search: string, limit: number, skip: number) {
+        let query: any = {
+            assignedTo: userId
+        }
 
         const searchRegex = new RegExp(search, 'i')
 
@@ -70,7 +120,7 @@ export class ContactSerivce {
                 { "chat.message": { $regex: searchRegex } }
             ]
 
-        const data = await this.contactModel.aggregate([
+        const response = await this.contactModel.aggregate([
             {
                 $facet: {
                     data: [
@@ -92,8 +142,8 @@ export class ContactSerivce {
         ])
 
         return {
-            total: data[0]?.count[0]?.total,
-            data: data[0]?.data,
+            total: response[0]?.count[0]?.total,
+            data: response[0]?.data,
             status: 200
         }
 
@@ -112,7 +162,7 @@ export class ContactSerivce {
                 { "chat.message": { $regex: searchRegex } }
             ]
 
-        const data = await this.contactModel.aggregate([
+        const response = await this.contactModel.aggregate([
             {
                 $facet: {
                     data: [
@@ -135,41 +185,16 @@ export class ContactSerivce {
         ])
 
         return {
-            total: data[0]?.count[0]?.total,
-            data: data[0]?.data,
+            total: response[0]?.count[0]?.total,
+            data: response[0]?.data,
             status: 200
         }
     }
 
 
     async getQuery(id: string | Types.ObjectId, type: string) {
-
         id = new Types.ObjectId(id)
-
-        if (type === "Visitor") return await this.contactModel.findById(id)
-
-        const data = await this.contactModel.aggregate([
-            { $match: { _id: id } },
-            { $addFields: { company_id: { $toObjectId: "$companyId" } } },
-            {
-                $lookup: {
-                    from: "companyprofiles",
-                    localField: 'company_id',
-                    foreignField: "user_id",
-                    as: "companyprofile"
-                }
-            },
-            {
-                $unwind: '$companyprofile'
-            },
-            {
-                $project: {
-                    chat: 1,
-                    subject: 1,
-                    'companyprofile.logo': 1
-                }
-            },
-        ])
-        return data[0]
+        return await this.contactModel.findById(id)
     }
+
 }

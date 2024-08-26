@@ -32,10 +32,23 @@ export class ContactController {
     }
 
     @UseGuards(AuthGuard)
-    @Get('/all-queries/')
-    async allQueries(@Query() { s, limit, skip }) {
-        return await this.contactService.getAllQueries(s, +limit, +skip)
+    @Get('/assigned-queries/:user_id')
+    async getAssignedQueries(@Param() { user_id }, @Query() { s, limit, skip }) {
+        return await this.contactService.getAssignedQueries(user_id, s, +limit, +skip)
     }
+
+    @UseGuards(AuthGuard)
+    @Get('/unassigned-queries')
+    async getUnAssignedQueries(@Query() { limit, skip }) {
+        return await this.contactService.getUnAssignedQueries(10, 0)
+    }
+
+    @UseGuards(AuthGuard)
+    @Patch('/assign-query/:user_id')
+    async assignQuery(@Param() { user_id }, @Query() { query_id }) {
+        return await this.contactService.assignQuery(user_id, query_id)
+    }
+
 
     @UseGuards(AuthGuard)
     @Get('/query/:id')

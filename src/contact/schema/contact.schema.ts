@@ -6,7 +6,7 @@ class Message {
     date: Date
     from: string
     message: string
-    by: "Enquirer" | "Admin"
+    by: "Visitor" | "Enquirer" | "Admin"
 }
 
 export type ContactDocument = HydratedDocument<Contact>;
@@ -20,8 +20,6 @@ export class Contact {
     @Prop()
     organisation: string
     @Prop()
-    message?: string
-    @Prop()
     chat?: Message[]
     @Prop()
     email?: string
@@ -32,9 +30,9 @@ export class Contact {
     @Prop()
     phone?: number
     @Prop()
-    reply?: string
-    @Prop()
     enquirer: string
+    @Prop()
+    assignedTo?: string
 }
 
 export const ContactSchema = SchemaFactory.createForClass(Contact);

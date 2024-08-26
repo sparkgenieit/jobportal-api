@@ -4,7 +4,7 @@ export class Message {
     date: Date
     from: string
     message: string
-    by: "Enquirer" | "Admin"
+    by: "Visitor" | "Enquirer" | "Admin"
 }
 
 export class ContactDto {
