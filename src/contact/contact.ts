@@ -52,7 +52,10 @@ export class ContactSerivce {
 
     async getUnAssignedQueries(limit: number, skip: number) {
         let query: any = {
-            assignedTo: { $exists: true }
+            $or: [
+                { assignedTo: null },
+                { assignedTo: { $regex: /^$/ } } // Matches empty strings
+            ]
         }
         try {
             const response = await this.contactModel.aggregate([
@@ -68,8 +71,8 @@ export class ContactSerivce {
                                 }
                             },
                             { $sort: { updatedAt: -1 } },
-                            // { $skip: skip },
-                            // { $limit: limit }
+                            { $skip: skip },
+                            { $limit: limit }
                         ],
                         count: [{ $match: query }, { $count: 'total' }]
                     }
