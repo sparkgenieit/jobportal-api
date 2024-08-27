@@ -27,5 +27,6 @@ export class JobsDto {
     adminName: string
     reportedBy?: Types.ObjectId
     reportReason?: string
+    views: number
 }
 

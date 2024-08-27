@@ -50,13 +50,33 @@ export class ContactSerivce {
         }
     }
 
-    async getUnAssignedQueries(limit: number, skip: number) {
+    async getUnAssignedQueries(search: string, limit: number, skip: number) {
         let query: any = {
-            $or: [
-                { assignedTo: null },
-                { assignedTo: { $regex: /^$/ } } // Matches empty strings
+            $and: [
+                {
+                    $or: [
+                        { assignedTo: null },
+                        { assignedTo: { $regex: /^$/ } } // Matches empty strings
+                    ]
+                },
+
             ]
         }
+
+        const searchRegex = new RegExp(search, 'i')
+
+        if (search && search?.trim() !== "") {
+            const searchQuery = {
+                $or:
+                    [
+                        { organisation: { $regex: searchRegex } },
+                        { subject: { $regex: searchRegex } },
+                        { "chat.message": { $regex: searchRegex } }
+                    ]
+            }
+            query.$and.push(searchQuery)
+        }
+
         try {
             const response = await this.contactModel.aggregate([
                 {
@@ -70,7 +90,7 @@ export class ContactSerivce {
                                     },
                                 }
                             },
-                            { $sort: { updatedAt: -1 } },
+                            { $sort: { createdAt: 1 } },
                             { $skip: skip },
                             { $limit: limit }
                         ],
@@ -114,90 +134,63 @@ export class ContactSerivce {
         let query: any = {
             assignedTo: userId
         }
+        return await this.getQueries(query, search, limit, skip)
+    }
 
-        const searchRegex = new RegExp(search, 'i')
-
-        if (search && search?.trim() !== "") query.$or =
-            [
-                { subject: { $regex: searchRegex } },
-                { "chat.message": { $regex: searchRegex } }
-            ]
-
-        const response = await this.contactModel.aggregate([
-            {
-                $facet: {
-                    data: [
-                        { $match: query },
-                        {
-                            $addFields: {
-                                chat: {
-                                    $slice: ["$chat", -1]
-                                },
-                            }
-                        },
-                        { $sort: { updatedAt: -1 } },
-                        { $skip: skip },
-                        { $limit: limit }
-                    ],
-                    count: [{ $match: query }, { $count: 'total' }]
+    async getQueries(query: any, search: string, limit: number, skip: number) {
+        try {
+            const searchRegex = new RegExp(search, 'i')
+            if (search && search?.trim() !== "") query.$or =
+                [
+                    { subject: { $regex: searchRegex } },
+                    { "chat.message": { $regex: searchRegex } }
+                ]
+            const response = await this.contactModel.aggregate([
+                {
+                    $facet: {
+                        data: [
+                            { $match: query },
+                            {
+                                $addFields: {
+                                    chat: {
+                                        $slice: ["$chat", -1]
+                                    },
+                                }
+                            },
+                            { $sort: { updatedAt: -1 } },
+                            { $skip: skip },
+                            { $limit: limit }
+                        ],
+                        count: [{ $match: query }, { $count: 'total' }]
+                    }
                 }
+            ])
+
+            return {
+                total: response[0]?.count[0]?.total,
+                data: response[0]?.data,
+                status: 200
             }
-        ])
-
-        return {
-            total: response[0]?.count[0]?.total,
-            data: response[0]?.data,
-            status: 200
+        } catch (e) {
+            throw new HttpException({ message: "Internal Server Error" }, HttpStatus.INTERNAL_SERVER_ERROR)
         }
-
     }
 
     async getCompanyQueries(companyId: string, searchTerm: string, limit: number, skip: number) {
         const query: any = {
             companyId,
         }
-
-        const searchRegex = new RegExp(searchTerm, 'i')
-
-        if (searchTerm && searchTerm?.trim() !== "") query.$or =
-            [
-                { subject: { $regex: searchRegex } },
-                { "chat.message": { $regex: searchRegex } }
-            ]
-
-        const response = await this.contactModel.aggregate([
-            {
-                $facet: {
-                    data: [
-                        { $match: query },
-                        {
-                            $project: {
-                                chat: {
-                                    $slice: ["$chat", -1]
-                                },
-                                subject: 1
-                            }
-                        },
-                        { $sort: { updatedAt: -1 } },
-                        { $skip: skip },
-                        { $limit: limit }
-                    ],
-                    count: [{ $match: query }, { $count: 'total' }]
-                }
-            }
-        ])
-
-        return {
-            total: response[0]?.count[0]?.total,
-            data: response[0]?.data,
-            status: 200
-        }
+        return await this.getQueries(query, searchTerm, limit, skip)
     }
 
 
     async getQuery(id: string | Types.ObjectId, type: string) {
         id = new Types.ObjectId(id)
-        return await this.contactModel.findById(id)
+        try {
+            return await this.contactModel.findById(id)
+        } catch (e) {
+            throw new HttpException({ message: "Internal Server Error" }, HttpStatus.INTERNAL_SERVER_ERROR)
+        }
     }
 
 }

@@ -127,7 +127,6 @@ export class jobsController {
 
     @Get(':id')
     async getJob(@Param() data): Promise<Jobs[]> {
-        console.log(data.id);
         return await this.jobsService.getJob(data.id);
     }
 
@@ -135,6 +134,11 @@ export class jobsController {
     @Delete('delete/:id')
     async deleteJob(@Param() data) {
         return await this.jobsService.deleteJob(data.id);
+    }
+
+    @Patch('/increase-view-count/:jobId')
+    async increaseViewCount(@Param() data) {
+        return await this.jobsService.increaseViewCount(data.jobId);
     }
 
 

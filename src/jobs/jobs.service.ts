@@ -541,6 +541,12 @@ export class JobsService implements OnModuleInit {
     await this.ordersModel.create(details)
   }
 
+  async increaseViewCount(id: string) {
+    const _id = new Types.ObjectId(id)
+    await this.jobsModel.updateOne({ _id }, { $inc: { views: 1 } })
+    return { message: "View Count Updated" }
+  }
+
   @Cron('0 0 * * *') // Every day at midnight
   async checkExpiredJobs() {
     const closeDate = new Date().toISOString()

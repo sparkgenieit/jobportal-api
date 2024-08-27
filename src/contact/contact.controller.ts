@@ -45,8 +45,8 @@ export class ContactController {
     @UseGuards(AuthGuard)
     @Roles(["admin"])
     @Get('/unassigned-queries')
-    async getUnAssignedQueries(@Query() { limit, skip }) {
-        return await this.contactService.getUnAssignedQueries(+limit, +skip)
+    async getUnAssignedQueries(@Query() { s: searchedTerm, limit, skip }) {
+        return await this.contactService.getUnAssignedQueries(searchedTerm, +limit, +skip)
     }
 
     @UseGuards(AuthGuard)
@@ -67,7 +67,7 @@ export class ContactController {
     @UseGuards(AuthGuard)
     @Roles(["employer"])
     @Get('/company-queries/:companyId')
-    async companyQueries(@Param() data, @Query() { q, limit, skip }) {
-        return await this.contactService.getCompanyQueries(data.companyId, q, +limit, +skip)
+    async companyQueries(@Param() data, @Query() { q: searchedTerm, limit, skip }) {
+        return await this.contactService.getCompanyQueries(data.companyId, searchedTerm, +limit, +skip)
     }
 }
