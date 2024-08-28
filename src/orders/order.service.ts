@@ -14,19 +14,7 @@ export class OrderService {
     @InjectModel(User.name) private userModel: Model<User>
   ) { }
 
-  async createOrder(ordersDto: OrderDto): Promise<any> {
-    // const isJob = await this.userModel.findOne({email});
-    // if (isUser) {
-    //   throw new HttpException({message: "The given email "+email+" already exsit"}, HttpStatus.BAD_REQUEST);
-    // }
-
-    //CreateUserDto.token = '';
-    return await this.ordersModel.create(ordersDto);
-
-  }
-
-
-  async getOrders(companyId, searchTerm: string, sort: string, skip: number, limit: number) {
+  async getOrders(companyId: string | Types.ObjectId, searchTerm: string, sort: string, skip: number, limit: number) {
     companyId = new Types.ObjectId(companyId);
     let query = new RegExp(searchTerm, 'i')
     let sortingOrder: any = sort === "desc" ? { created_date: -1 } : { created_date: 1 }
@@ -73,7 +61,7 @@ export class OrderService {
     }
   }
 
-  async getAllOrders(companyId, from: string, to: string) {
+  async getAllCompanyOrders(companyId: string | Types.ObjectId, from: string, to: string) {
     companyId = new Types.ObjectId(companyId);
 
     let query: any = {
@@ -93,10 +81,74 @@ export class OrderService {
       }
     }
 
-    const data = await this.ordersModel.find(query).sort({ created_date: -1 })
+    return await this.ordersModel.find(query).sort({ created_date: -1 })
+  }
 
-    return data;
+  async getAllOrders(search: string, limit: number, skip: number) {
+
+    const data = await this.ordersModel.aggregate([{
+
+      $facet: {
+        orders: [
+          {
+            $lookup: {
+              from: 'companyprofiles',
+              localField: 'companyId',
+              foreignField: 'user_id',
+              as: 'companyName'
+            }
+          },
+          {
+            $addFields: {
+              companyName: { $arrayElemAt: ['$companyName.name', 0] }
+            }
+          },
+          { $sort: { created_date: -1 } }
+        ]
+      }
+    }
+    ])
+
+
+    return data[0].orders
 
   }
 
+
+  async refundCredits(creditsToRefund: number) {
+    try {
+      const companies = await this.ordersModel.aggregate([
+        {
+          $match: {
+            invoiceNumber: { $exists: true }
+          },
+        },
+        {
+          $group: {
+            _id: '$companyId',
+          }
+        }
+      ])
+
+      const companyId = companies.map(company => (company._id))
+
+      await this.userModel.updateMany({ _id: { $in: companyId } }, { $inc: { credits: creditsToRefund } })
+
+      const updatedCredits = await this.userModel.find({ _id: { $in: companyId } }, { credits: 1 })
+
+      const creatingOrders: OrderDto[] = updatedCredits.map(company => ({
+        created_date: new Date(),
+        companyId: company._id,
+        description: "Credit Refund",
+        amount: 0,
+        creditsPurchased: creditsToRefund,
+        credits: company.credits
+      }))
+      await this.ordersModel.insertMany(creatingOrders, { ordered: false })
+
+    } catch (error) {
+      throw new HttpException({ message: "Internal Server Error" }, HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+  }
 }
+
