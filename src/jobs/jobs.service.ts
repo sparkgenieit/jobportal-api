@@ -428,15 +428,25 @@ export class JobsService implements OnModuleInit {
 
   async getJob(jobId: Types.ObjectId | string): Promise<any> {
     jobId = new mongoose.Types.ObjectId(jobId);
-    const isJob = await this.jobsModel.findOne({ _id: jobId });
-    console.log(isJob);
-    if (!isJob) {
-      throw new HttpException({ message: "The given Job does not exist" }, HttpStatus.BAD_REQUEST);
-    } else {
-      let companyId = new mongoose.Types.ObjectId(isJob.companyId);
-      const company = await this.companyProfileModel.findOne({ user_id: companyId }, { banner: 1, youtubeUrl: 1, _id: 0 });
-      return { ...isJob.toObject(), ...company.toObject() }
-    }
+    const jobs = await this.jobsModel.aggregate([
+      { $match: { _id: jobId } },
+      { $addFields: { company_id: { $toObjectId: "$companyId" } } },
+      {
+        $lookup: {
+          from: 'companyprofiles',
+          localField: "company_id",
+          foreignField: 'user_id',
+          as: 'banner'
+        }
+      },
+      {
+        $addFields: {
+          banner: { $arrayElemAt: ['$banner.banner', 0] },
+          youtubeUrl: { $arrayElemAt: ['$banner.youtubeUrl', 0] }
+        }
+      }
+    ])
+    return jobs[0]
   }
 
   async getCompaniesInfoAndPostedJobsCount() {
