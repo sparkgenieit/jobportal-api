@@ -1,5 +1,5 @@
 import { UsersService } from './users.service';
-import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query, UseGuards, ValidationPipe } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './schema/user.schema';
 import { UserProfile } from './schema/userProfile.schema';
@@ -8,6 +8,8 @@ import { UserProfileDto } from './dto/user-profile.dto';
 import { UserJobsDto } from './dto/user-jobs.dto';
 import { UserJobs } from './schema/userJobs.schema';
 import { AuthGuard } from 'src/auth/auth.guard';
+import { forgotOrResetPasswordDto } from './dto/forgotOrResetPassword.dto';
+import { Roles } from 'src/auth/roles.decorator';
 
 
 @Controller('users')
@@ -16,24 +18,23 @@ export class UsersController {
         private readonly userService: UsersService
     ) { }
 
-
     @Post('login')
-    async LoginUserDto(@Body() loginUserDto: LoginUserDto): Promise<User> {
+    async LoginUserDto(@Body(ValidationPipe) loginUserDto: LoginUserDto): Promise<User> {
         return await this.userService.findOne(loginUserDto);
     }
 
     @Post('forgot-password')
-    async UserForgotPassword(@Body() email): Promise<any> {
+    async UserForgotPassword(@Body(ValidationPipe) { email }: forgotOrResetPasswordDto): Promise<any> {
         return await this.userService.forgotPassword(email);
     }
 
     @Patch('reset-password')
-    async UserResetPassword(@Query() { email, token }, @Body() password): Promise<any> {
+    async UserResetPassword(@Query() { email, token }, @Body(ValidationPipe) { password }: forgotOrResetPasswordDto): Promise<any> {
         return await this.userService.resetPassword(email, token, password)
     }
 
     @Post('verify-email')
-    async VerifyEmail(@Query() { email }): Promise<any> {
+    async VerifyEmail(@Query(ValidationPipe) { email }: forgotOrResetPasswordDto): Promise<any> {
         return await this.userService.verifyEmail(email)
     }
 
@@ -43,57 +44,71 @@ export class UsersController {
     }
 
     @Post('register')
-    async createUserDto(@Body() createUserDto: CreateUserDto): Promise<User> {
+    async createUserDto(@Body(ValidationPipe) createUserDto: CreateUserDto): Promise<User> {
         return await this.userService.createUser(createUserDto);
     }
+
     @UseGuards(AuthGuard)
+    @Roles(["superadmin"])
     @Get("all")
     async getAllUsers(@Query() { role, limit, skip }): Promise<any> {
         return await this.userService.getAllUsers(role, +limit, +skip)
     }
+
     @UseGuards(AuthGuard)
+    @Roles(["superadmin"])
     @Get("admins/all")
     async getAllAdmins(@Query() { limit, skip }) {
         return await this.userService.getAllAdmins(+limit, +skip)
     }
+
     @UseGuards(AuthGuard)
+    @Roles(["superadmin"])
     @Put('admin/update/:id')
-    async updateAdmin(@Param() data, @Body() userDto: CreateUserDto): Promise<User> {
+    async updateAdmin(@Param() data, @Body(ValidationPipe) userDto: CreateUserDto): Promise<User> {
         return await this.userService.updateAdmin(data.id, userDto);
     }
 
     @UseGuards(AuthGuard)
+    @Roles(["user"])
     @Get('get-saved-jobs/:id')
     async getSavedJobs(@Param() data) {
         return await this.userService.getSavedJobsIDs(data.id);
     }
 
     @UseGuards(AuthGuard)
+    @Roles(["employer"])
     @Get('get-credits/:id')
     async updateUser(@Param() data): Promise<User> {
         return await this.userService.getUserCredits(data.id);
     }
 
-
     @UseGuards(AuthGuard)
+    @Roles(["superadmin"])
     @Delete('admin/delete/:id')
     async deleteAdmin(@Param() data): Promise<User> {
         return await this.userService.deleteAdmin(data.id);
     }
+
     @UseGuards(AuthGuard)
+    @Roles(["user"])
     @Put('profile/update/:id')
     async userProfileDto(@Param() data, @Body() userProfileDto: UserProfileDto): Promise<UserProfile> {
         return await this.userService.updateProfile(data.id, userProfileDto);
     }
+
     @UseGuards(AuthGuard)
+    @Roles(["user"])
     @Get('profile/:id')
     async getUser(@Param() data): Promise<UserProfile> {
         console.log(data.id);
         return await this.userService.getUser(data.id);
     }
+
     @UseGuards(AuthGuard)
+    @Roles(["user"])
     @Post('profile/update/:id')
-    async userJobsDto(@Param() data, @Body() userJobsDto: UserJobsDto): Promise<UserJobs> {
+    async userJobsDto(@Param() data, @Body(ValidationPipe) userJobsDto: UserJobsDto): Promise<UserJobs> {
         return await this.userService.updateUserJobs(data.id, userJobsDto);
     }
 }

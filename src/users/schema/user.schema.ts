@@ -16,19 +16,15 @@ export class User {
     @Prop()
     password: string
     @Prop()
-    role: 'string'
-    @Prop()
-    plan: string
-    @Prop()
-    price: string
+    role: string
     @Prop()
     activated: boolean
     @Prop()
     token?: string
     @Prop()
-    credits: number
+    credits?: number
     @Prop()
-    usedFreeCredit: boolean
+    usedFreeCredit?: boolean
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

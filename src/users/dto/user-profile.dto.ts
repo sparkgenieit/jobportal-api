@@ -1,41 +1,41 @@
 import { Types } from "mongoose";
 
-class WorkHistory{
-    jobTitle:string;
-    employer:string;
-    location:string;
+class WorkHistory {
+    jobTitle: string;
+    employer: string;
+    location: string;
     fromDate: Date;
     toDate: Date;
     description: string;
 }
 
-class Education{
-    provider:string;
-    qualification:string;
-    completedYear:string;
+class Education {
+    provider: string;
+    qualification: string;
+    completedYear: string;
     validInNz: string;
     description: string;
 }
 
-class Licence{
-    name:string;
-    issuingAuthority:string;
-    issueDate:Date;
-    expiryDate:Date;
+class Licence {
+    name: string;
+    issuingAuthority: string;
+    issueDate: Date;
+    expiryDate: Date;
     validInNz: string;
     description: string;
 }
 
-class Certificate{
-    name:string;
-    issuingAuthority:string;
-    issueDate:Date;
-    expiryDate:Date;
+class Certificate {
+    name: string;
+    issuingAuthority: string;
+    issueDate: Date;
+    expiryDate: Date;
     validInNz: string;
     description: string;
 }
 
-export class UserProfileDto{
+export class UserProfileDto {
     user_id: Types.ObjectId
     first_name: string
     last_name: string
@@ -45,10 +45,10 @@ export class UserProfileDto{
     work_history?: Array<WorkHistory>
     education?: Array<Education>
     licences?: Array<Licence>
-    certification?: Array<Licence>
+    certification?: Array<Certificate>
     skills?: Array<string>
     availability?: string
-    noticePeriod?:number
+    noticePeriod?: number
     preferredJobTypes?: Array<string>
     preferredJobLocations?: Array<string>
     preferredJobCategories?: Array<string>

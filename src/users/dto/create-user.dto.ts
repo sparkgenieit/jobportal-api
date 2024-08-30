@@ -1,15 +1,32 @@
+import { IsEmail, IsEnum, isNotEmpty, IsNotEmpty, IsString } from "class-validator"
+
 export class CreateUserDto {
   created_date: Date
+
+  @IsNotEmpty()
+  @IsString()
   first_name: string
+
+  @IsNotEmpty()
+  @IsString()
   last_name: string
+
+  @IsNotEmpty()
+  @IsEmail()
   email: string
+
+  @IsNotEmpty()
+  @IsString()
   password: string
-  phone: number
-  role: string
-  plan: string
-  amount_paid: string
+
+  @IsNotEmpty()
+  @IsEnum(["superadmin", "admin", "employer", "user"], {
+    message: "Valid Role Required"
+  })
+  role: "superadmin" | "admin" | "employer" | "user"
+
   activated: boolean
-  token: string
-  credits:number 
-  usedFreeCredit:boolean
+  token?: string
+  credits?: number
+  usedFreeCredit?: boolean
 }

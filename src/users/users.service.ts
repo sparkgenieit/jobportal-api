@@ -15,6 +15,7 @@ import { UploadController } from 'src/upload/upload.controller';
 import * as bcrypt from 'bcrypt';
 import { MailerService } from '@nestjs-modules/mailer';
 import { randomUUID } from 'crypto';
+import { forgotOrResetPasswordDto } from './dto/forgotOrResetPassword.dto';
 
 @Injectable()
 export class UsersService {
@@ -33,7 +34,7 @@ export class UsersService {
     const user = await this.userModel.findOne({ email });
 
     if (!user) {
-      throw new HttpException({ message: 'Invalid email' }, HttpStatus.BAD_REQUEST);
+      throw new HttpException({ message: 'User does not exist' }, HttpStatus.NOT_FOUND);
     }
     if (!user.activated) {
       throw new HttpException({ message: 'User Not Activated' }, HttpStatus.BAD_REQUEST);
@@ -48,7 +49,7 @@ export class UsersService {
     return user;
   }
 
-  async forgotPassword({ email }): Promise<any> {
+  async forgotPassword(email: string): Promise<any> {
     const user = await this.userModel.findOne({ email });
     if (!user) {
       throw new HttpException({ message: 'No User Found' }, HttpStatus.NOT_FOUND);
@@ -56,7 +57,6 @@ export class UsersService {
       let token = randomUUID()
       await this.userModel.findOneAndUpdate({ _id: user._id }, { token: token })
 
-      const promises = [];
       await this.emailService.sendMail({
         to: user.email,
         subject: `[${process.env.APP_NAME}] Email Confirmation`,
@@ -65,14 +65,13 @@ export class UsersService {
         context: {
           name: `${user.first_name} ${user.last_name}`,
           url: `http://localhost:3000/reset-password?email=${user.email}&token=${token}`,
-
         },
       });
       return { status: 200 }
     }
   }
 
-  async resetPassword(email: string, token: string, { password }): Promise<any> {
+  async resetPassword(email: string, token: string, password: string): Promise<any> {
     const user = await this.userModel.findOne({ email });
     if (!user) {
       throw new HttpException({ message: 'No User Found' }, HttpStatus.NOT_FOUND);
@@ -92,8 +91,10 @@ export class UsersService {
 
   async verifyEmail(email: string) {
     const token = randomUUID()
-    const user = await this.userModel.findOneAndUpdate({ email }, { token })
-    console.log(user)
+    const user = await this.userModel.findOneAndUpdate({ email }, { token }, { new: true })
+
+    if (!user) throw new HttpException({ message: 'No User Found' }, HttpStatus.NOT_FOUND);
+
     await this.emailService.sendMail({
       to: email,
       subject: `[${process.env.APP_NAME}] Email Confirmation`,
@@ -119,9 +120,8 @@ export class UsersService {
     } else {
       const activated = true;
       const token = "";
-      return await this.userModel.findOneAndUpdate({ _id: user._id }, { activated: activated, token: token });
+      return await this.userModel.findOneAndUpdate({ _id: user._id }, { activated, token });
     }
-
   }
 
   async createUser(createUserDto: CreateUserDto): Promise<any> {
@@ -132,9 +132,10 @@ export class UsersService {
     createUserDto.credits = 0;
     createUserDto.usedFreeCredit = false;
 
+
     const isUser = await this.userModel.findOne({ email });
     if (isUser) {
-      throw new HttpException({ message: "The given email " + email + " already exsit" }, HttpStatus.BAD_REQUEST);
+      throw new HttpException({ message: "The given email " + email + " already exist" }, HttpStatus.BAD_REQUEST);
     }
 
     //CreateUserDto.token = '';
@@ -183,7 +184,7 @@ export class UsersService {
 
   }
 
-  async updateProfile(user_id, userProfileDto: UserProfileDto): Promise<any> {
+  async updateProfile(user_id: string | Types.ObjectId, userProfileDto: UserProfileDto): Promise<any> {
     user_id = new mongoose.Types.ObjectId(user_id);
     //userProfileDto.user_id = user_id;
     const isUser = await this.userProfileModel.findOne({ user_id });
@@ -227,7 +228,6 @@ export class UsersService {
     if (!isUser) {
       throw new HttpException({ message: "The given user does not exist" }, HttpStatus.NOT_FOUND);
     } else {
-
       return await this.userModel.deleteOne({ _id: user_id })
     }
   }
