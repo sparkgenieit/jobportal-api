@@ -80,12 +80,10 @@ export class OrderService {
         $lte: toDate
       }
     }
-
     return await this.ordersModel.find(query).sort({ created_date: -1 })
   }
 
   async getAllOrders(search: string, limit: number, skip: number) {
-
     const data = await this.ordersModel.aggregate([{
 
       $facet: {
@@ -108,10 +106,7 @@ export class OrderService {
       }
     }
     ])
-
-
     return data[0].orders
-
   }
 
 

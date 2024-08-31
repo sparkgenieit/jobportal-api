@@ -138,61 +138,48 @@ export class UsersService {
       throw new HttpException({ message: "The given email " + email + " already exist" }, HttpStatus.BAD_REQUEST);
     }
 
-    //CreateUserDto.token = '';
-    //const user =   await this.userModel.create(createUserDto);
-    return await this.userModel.create(createUserDto).then(async (res) => {
+    return await this.userModel.create(createUserDto)
+      .then(async (res) => {
 
-      const user = res;
-      const payload = { username: res.first_name + " " + res.last_name, sub: res._id };
+        const user = res;
+        const payload = { username: res.first_name + " " + res.last_name, sub: res._id };
+        user._id = res._id;
 
-      user._id = res._id;
-      //user.token  = this.jwtService.sign(payload);
-      // user.token = '999';
-      console.log("role", role);
+        if (role == 'user') {
+          console.log(createUserDto)
+          const userProfileDto: UserProfileDto = { user_id: res._id, first_name: res.first_name, last_name: res.last_name, email: res.email };
+          this.userProfileModel.create(userProfileDto);
+        }
 
-      if (role == 'user') {
-        console.log(createUserDto)
-        const userProfileDto: UserProfileDto = { user_id: res._id, first_name: res.first_name, last_name: res.last_name, email: res.email };
-        console.log("userr");
-        console.log(userProfileDto);
-        this.userProfileModel.create(userProfileDto);
-      }
-
-      if (role == 'employer') {
-        const companyProfileDto: CompanyProfileDto = {
-          user_id: res._id,
-          email: res.email,
-          name: createUserDto.first_name + " " + createUserDto.last_name,
-          address1: '',
-          address2: '',
-          address3: '',
-          city: '',
-          phone: '',
-          postalCode: '',
-          contact: '',
-          website: '',
-          logo: '',
-        };
-        console.log(companyProfileDto);
-
-        this.companyProfileModel.create(companyProfileDto);
-      }
-
-      await this.verifyEmail(email)
-      return user;
-    })
+        if (role == 'employer') {
+          const companyProfileDto: CompanyProfileDto = {
+            user_id: res._id,
+            email: res.email,
+            name: createUserDto.first_name + " " + createUserDto.last_name,
+            address1: '',
+            address2: '',
+            address3: '',
+            city: '',
+            phone: '',
+            postalCode: '',
+            contact: '',
+            website: '',
+            logo: '',
+          };
+          this.companyProfileModel.create(companyProfileDto);
+        }
+        await this.verifyEmail(email)
+        return user;
+      })
 
   }
 
   async updateProfile(user_id: string | Types.ObjectId, userProfileDto: UserProfileDto): Promise<any> {
     user_id = new mongoose.Types.ObjectId(user_id);
-    //userProfileDto.user_id = user_id;
     const isUser = await this.userProfileModel.findOne({ user_id });
     if (!isUser) {
       throw new HttpException({ message: "The given user does not exist" }, HttpStatus.NOT_FOUND);
     } else {
-      console.log("update");
-      console.log(userProfileDto);
       await this.userModel.findOneAndUpdate({ _id: user_id }, { first_name: userProfileDto.first_name, last_name: userProfileDto.last_name })
       return await this.userProfileModel.findOneAndUpdate({ user_id }, userProfileDto)
     }
@@ -204,24 +191,19 @@ export class UsersService {
     return { credits: user.credits }
   }
 
-  async updateAdmin(user_id, userDto: CreateUserDto): Promise<any> {
-    console.log(user_id);
+  async updateAdmin(user_id: string | Types.ObjectId, userDto: CreateUserDto): Promise<any> {
     user_id = new mongoose.Types.ObjectId(user_id);
-    //userProfileDto.user_id = user_id;
     const isUser = await this.userModel.findOne({ _id: user_id });
     if (!isUser) {
       throw new HttpException({ message: "The given user does not exist" }, HttpStatus.NOT_FOUND);
     } else {
-      console.log("update");
-      console.log(userDto);
       const encryptedPassword = await bcrypt.hash(userDto.password, 10);
       userDto.password = encryptedPassword;
       return await this.userModel.findOneAndUpdate({ _id: user_id }, userDto)
     }
   }
 
-  async deleteAdmin(user_id): Promise<any> {
-    console.log(user_id);
+  async deleteAdmin(user_id: string | Types.ObjectId): Promise<any> {
     user_id = new mongoose.Types.ObjectId(user_id);
     //userProfileDto.user_id = user_id;
     const isUser = await this.userModel.findOne({ _id: user_id });
@@ -241,22 +223,46 @@ export class UsersService {
   }
 
   async getAllUsers(role: string, limit: number, skip: number): Promise<any> {
-    const count = await this.userModel.countDocuments({ role }).exec();
-    const users = await this.userModel.find({ role }).skip(skip).limit(limit);
+    const users = await this.userModel.aggregate([
+      {
+        $facet: {
+          data: [{
+            $match: { role }
+          },
+          { $skip: skip },
+          { $limit: limit }
+          ],
+          count: [{ $match: { role } }, { $count: "total" }]
+        }
+      }
+    ])
+
     return {
-      users: users,
-      total: count,
+      users: users[0].data,
+      total: users[0].count[0].total,
       status: 200
     }
   }
 
   async getAllAdmins(limit: number, skip: number): Promise<any> {
-    const count = await this.userModel.countDocuments({ role: 'admin' }).exec();
-    const data = await this.userModel.find({ role: 'admin' }).skip(skip).limit(limit).exec();
+    const users = await this.userModel.aggregate([
+      {
+        $facet: {
+          data: [{
+            $match: { role: "admin" }
+          },
+          { $skip: skip },
+          { $limit: limit }
+          ],
+          count: [{ $match: { role: "admin" } }, { $count: "total" }]
+        }
+      }
+    ])
+
     return {
-      admins: data,
-      total: count,
-      status: 200,
+      admins: users[0].data,
+      total: users[0].count[0].total,
+      status: 200
     }
   }
 
@@ -268,29 +274,12 @@ export class UsersService {
 
   async getUser(user_id): Promise<any> {
     user_id = new mongoose.Types.ObjectId(user_id);
-
-    console.log(user_id);
     const isUser = await this.userProfileModel.findOne({ user_id });
-    console.log(isUser);
+
     if (!isUser) {
       throw new HttpException({ message: "The given user does not exist" }, HttpStatus.NOT_FOUND);
     } else {
       return await this.userProfileModel.findOne({ user_id });
     }
   }
-  async updateUserJobs(user_id, userJobsDto: UserJobsDto): Promise<any> {
-    console.log(user_id);
-    user_id = new mongoose.Types.ObjectId(user_id);
-    //userProfileDto.user_id = user_id;
-    const isUser = await this.userJobsModel.findOne({ user_id });
-    if (!isUser) {
-      throw new HttpException({ message: "The given user does not exist" }, HttpStatus.NOT_FOUND);
-    } else {
-      //console.log(userProfileDto);
-      return await this.userJobsModel.findOneAndUpdate({ user_id }, userJobsDto)
-    }
-  }
-
-
-
 }

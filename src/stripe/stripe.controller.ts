@@ -2,11 +2,13 @@ import { Body, Controller, Get, Headers, Param, Post, RawBodyRequest, Req, UseGu
 import { StripeService } from './stripe.service';
 import { Request } from 'express';
 import { AuthGuard } from 'src/auth/auth.guard';
+import { Roles } from 'src/auth/roles.decorator';
 
 @Controller('payment')
 export class StripeController {
     constructor(private readonly stripeService: StripeService,) { }
     @UseGuards(AuthGuard)
+    @Roles(["employer"])
     @Post('make-payment')
     async CreatePaymentIntent(@Body() { plan, credits, price, user_id }) {
         return await this.stripeService.makePayment(plan, credits, price, user_id);
@@ -18,7 +20,9 @@ export class StripeController {
         const sign = req.headers['stripe-signature'];
         return await this.stripeService.WebhookEvent(data, sign);
     }
+
     @UseGuards(AuthGuard)
+    @Roles(["employer"])
     @Get('session-complete/:id')
     async etPaymentIntent(@Param() { id }) {
         return await this.stripeService.getSessionDetails(id)
