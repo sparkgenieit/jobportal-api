@@ -551,6 +551,51 @@ export class JobsService implements OnModuleInit {
     await this.ordersModel.create(details)
   }
 
+  async refundCredits() {
+    const companies = await this.jobsModel.aggregate([
+      {
+        $match: { status: "approved" },
+      },
+      {
+        $group: {
+          _id: '$companyId',
+          jobCount: { $sum: 1 }
+        }
+      },
+      {
+        $addFields: {
+          _id: { $toObjectId: '$_id' }
+        }
+      }
+    ])
+
+    const updatedCreditsData = companies.map(({ _id, jobCount }) => (
+      {
+        updateOne: {
+          filter: { _id },
+          update: { $inc: { credits: jobCount } }
+        }
+      }
+    ));
+
+    await this.userModel.bulkWrite(updatedCreditsData, { ordered: false });
+
+    const companyIds = companies.map(company => (company._id))
+
+    const companiesWithUpdatedCredits = await this.userModel.find({ _id: { $in: companyIds } }, { credits: 1 })
+
+    const creatingOrders: OrderDto[] = companiesWithUpdatedCredits.map(company => ({
+      created_date: new Date(),
+      companyId: company._id,
+      description: "Credit Refund",
+      amount: 0,
+      creditsPurchased: companies.filter((c) => c._id.toString() === company._id.toString())[0].jobCount,
+      credits: company.credits
+    }))
+
+    await this.ordersModel.insertMany(creatingOrders, { ordered: false })
+  }
+
   async increaseViewCount(id: string) {
     const _id = new Types.ObjectId(id)
     await this.jobsModel.updateOne({ _id }, { $inc: { views: 1 } })

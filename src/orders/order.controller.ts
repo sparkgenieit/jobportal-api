@@ -30,14 +30,5 @@ export class OrderController {
         return await this.orderService.getAllOrders(search, +limit, +skip)
     }
 
-
-    @Roles(["superadmin"])
-    @Put("/refund-credits/:credits")
-    async refundCredits(@Param() { credits }) {
-        return await this.orderService.refundCredits(+credits)
-    }
-
-
-
 }
 

@@ -109,41 +109,5 @@ export class OrderService {
     return data[0].orders
   }
 
-
-  async refundCredits(creditsToRefund: number) {
-    try {
-      const companies = await this.ordersModel.aggregate([
-        {
-          $match: {
-            invoiceNumber: { $exists: true }
-          },
-        },
-        {
-          $group: {
-            _id: '$companyId',
-          }
-        }
-      ])
-
-      const companyId = companies.map(company => (company._id))
-
-      await this.userModel.updateMany({ _id: { $in: companyId } }, { $inc: { credits: creditsToRefund } })
-
-      const updatedCredits = await this.userModel.find({ _id: { $in: companyId } }, { credits: 1 })
-
-      const creatingOrders: OrderDto[] = updatedCredits.map(company => ({
-        created_date: new Date(),
-        companyId: company._id,
-        description: "Credit Refund",
-        amount: 0,
-        creditsPurchased: creditsToRefund,
-        credits: company.credits
-      }))
-      await this.ordersModel.insertMany(creatingOrders, { ordered: false })
-
-    } catch (error) {
-      throw new HttpException({ message: "Internal Server Error" }, HttpStatus.INTERNAL_SERVER_ERROR)
-    }
-  }
 }
 

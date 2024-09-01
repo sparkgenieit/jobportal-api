@@ -136,6 +136,13 @@ export class jobsController {
         return await this.jobsService.getSavedJobs(data.userId, +limit, +skip);
     }
 
+
+    @Roles(["superadmin"])
+    @Put("/refund-credits")
+    async refundCredits() {
+        return await this.jobsService.refundCredits()
+    }
+
     @Get('user-job-status/:userId')
     async getUserJobStatus(@Param() { userId }, @Query() { jobId }): Promise<any> {
         return await this.jobsService.getUserJobStatus(userId, jobId);

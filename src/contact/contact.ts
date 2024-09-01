@@ -134,17 +134,20 @@ export class ContactSerivce {
         let query: any = {
             assignedTo: userId
         }
-        return await this.getQueries(query, search, limit, skip)
-    }
-
-    async getQueries(query: any, search: string, limit: number, skip: number) {
-        try {
-            const searchRegex = new RegExp(search, 'i')
-            if (search && search?.trim() !== "") query.$or =
+        const searchRegex = new RegExp(search, 'i')
+        if (search && search?.trim() !== "") {
+            query.$or =
                 [
+                    { organisation: { $regex: searchRegex } },
                     { subject: { $regex: searchRegex } },
                     { "chat.message": { $regex: searchRegex } }
                 ]
+        }
+        return await this.getQueries(query, limit, skip)
+    }
+
+    async getQueries(query: any, limit: number, skip: number) {
+        try {
             const response = await this.contactModel.aggregate([
                 {
                     $facet: {
@@ -176,11 +179,22 @@ export class ContactSerivce {
         }
     }
 
-    async getCompanyQueries(companyId: string, searchTerm: string, limit: number, skip: number) {
+    async getCompanyQueries(companyId: string, search: string, limit: number, skip: number) {
         const query: any = {
             companyId,
         }
-        return await this.getQueries(query, searchTerm, limit, skip)
+
+        const searchRegex = new RegExp(search, 'i')
+        if (search && search?.trim() !== "") {
+            query.$or =
+                [
+                    { subject: { $regex: searchRegex } },
+                    { "chat.message": { $regex: searchRegex } }
+                ]
+        }
+
+
+        return await this.getQueries(query, limit, skip)
     }
 
 
