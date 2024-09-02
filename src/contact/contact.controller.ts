@@ -70,4 +70,11 @@ export class ContactController {
     async companyQueries(@Param() data, @Query() { q: searchedTerm, limit, skip }) {
         return await this.contactService.getCompanyQueries(data.companyId, searchedTerm, +limit, +skip)
     }
+
+    @UseGuards(AuthGuard)
+    @Roles(["superadmin"])
+    @Post('/mail-all-employers')
+    async MailAllEmployers(@Body() data: { message: string, subject: string }) {
+        return await this.contactService.mailAllEmployers(data.message, data.subject)
+    }
 }

@@ -2,13 +2,17 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { ContactDto, EmployerContactDto, JobInquiryDto, Message } from './contact.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Contact } from './schema/contact.schema';
-import mongoose, { Model, Types } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { MailerService } from '@nestjs-modules/mailer';
+import { CompanyProfile } from 'src/company/schema/companyProfile.schema';
 
 
 @Injectable()
 export class ContactSerivce {
-    constructor(private emailService: MailerService, @InjectModel(Contact.name) private contactModel: Model<Contact>) { }
+    constructor(private emailService: MailerService,
+        @InjectModel(Contact.name) private contactModel: Model<Contact>,
+        @InjectModel(CompanyProfile.name) private readonly companyProfileModel: Model<CompanyProfile>,
+    ) { }
 
     async contactUs(contactDto: ContactDto) {
         try {
@@ -43,9 +47,16 @@ export class ContactSerivce {
     async postReply(queryId: string, reply: Message) {
         const query_id: Types.ObjectId = new Types.ObjectId(queryId)
         try {
-            const query = await this.contactModel.updateOne({ _id: query_id }, { $push: { chat: reply } });
+            const contact = await this.contactModel.findById(query_id)
+
+            if (contact.assignedTo === "Super Admin") {
+                contact.assignedTo = ""
+            }
+            await this.contactModel.findOneAndUpdate({ _id: query_id }, { $push: { chat: reply }, assignedTo: contact.assignedTo })
+
             return { message: "Reply posted" }
         } catch (error) {
+            console.log(error);
             throw new HttpException({ message: "Internal Server Error" }, HttpStatus.INTERNAL_SERVER_ERROR)
         }
     }
@@ -206,5 +217,32 @@ export class ContactSerivce {
             throw new HttpException({ message: "Internal Server Error" }, HttpStatus.INTERNAL_SERVER_ERROR)
         }
     }
+
+
+    async mailAllEmployers(message: string, subject: string) {
+
+        const companies: CompanyProfile[] = await this.companyProfileModel.find({})
+
+        const sendingMessages = companies.map(company => ({
+            subject,
+            name: company.contact,
+            chat: [
+                {
+                    date: new Date(),
+                    from: "Super Admin",
+                    message,
+                    by: "Admin",
+                }
+            ],
+            companyId: company.user_id.toString(),
+            organisation: company.name,
+            email: company.email,
+            enquirer: "Enquirer",
+            assignedTo: "Super Admin"
+        }))
+
+        await this.contactModel.insertMany(sendingMessages, { ordered: false })
+    }
+
 
 }
