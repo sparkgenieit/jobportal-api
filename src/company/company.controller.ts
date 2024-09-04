@@ -1,9 +1,10 @@
-import { Body, Controller, Get, Param, ParseBoolPipe, Patch, Put, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseBoolPipe, Patch, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { CompanyService } from './company.service';
 import { CompanyProfileDto } from './dto/company-profile.dto';
 import { CompanyProfile } from './schema/companyProfile.schema';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { Roles } from 'src/auth/roles.decorator';
+import { RecruiterDto } from './dto/recruiter.dto';
 
 @UseGuards(AuthGuard)
 @Controller('companies')
@@ -15,6 +16,12 @@ export class CompaniesController {
     @Get("all")
     async getAllCompanies(): Promise<CompanyProfile[]> {
         return await this.companyService.getAllCompanies()
+    }
+
+    @Roles(["employer"])
+    @Post('add-recruiter')
+    async addRecruiter(@Body() data: RecruiterDto) {
+        return await this.companyService.addRecruiter(data)
     }
 
     @Roles(["employer"])

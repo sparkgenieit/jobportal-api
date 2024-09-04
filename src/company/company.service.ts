@@ -9,6 +9,9 @@ import { Jobs } from 'src/jobs/schema/Jobs.schema';
 import { User } from 'src/users/schema/user.schema';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as bcrypt from 'bcrypt';
+import { RecruiterDto } from './dto/recruiter.dto';
+import { Recruiter } from './schema/recruiter.schema';
 
 @Injectable()
 export class CompanyService {
@@ -17,6 +20,7 @@ export class CompanyService {
     @InjectModel(CompanyProfile.name) private readonly companyProfileModel: Model<CompanyProfile>,
     @InjectModel(UserJobs.name) private readonly UserJobsModel: Model<UserJobs>,
     @InjectModel(User.name) private readonly UserModel: Model<User>,
+    @InjectModel(Recruiter.name) private readonly recruiterModel: Model<Recruiter>,
     private jwtService: JwtService
   ) { }
 
@@ -27,6 +31,18 @@ export class CompanyService {
     } catch (err) {
       return false; // File not found or other error
     }
+  }
+
+  async addRecruiter(recruiterData: RecruiterDto) {
+    const recruiter = await this.recruiterModel.findOne({ email: recruiterData.email }).catch(e => {
+      throw new HttpException({ message: "Something went wrong!" }, HttpStatus.INTERNAL_SERVER_ERROR)
+    })
+    if (recruiter) throw new HttpException({ message: `Recruiter with ${recruiterData.email} already exists` }, HttpStatus.BAD_REQUEST)
+
+    recruiterData.password = await bcrypt.hash(recruiterData.password, 10);
+
+    const user = await this.recruiterModel.create(recruiterData)
+    return { message: "Recruiter Added" }
   }
 
   async updateProfile(user_id, companyProfileDto: CompanyProfileDto): Promise<any> {
@@ -191,4 +207,6 @@ export class CompanyService {
 
     return { message: value ? "Candidate Shortlisted" : "Candidate removed from the Shortlist" }
   }
+
+
 }

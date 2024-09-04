@@ -8,6 +8,7 @@ import { CompanyProfile, CompanyProfileSchema } from './schema/companyProfile.sc
 import { UserJobs, UserJobsSchema } from 'src/users/schema/userJobs.schema';
 import { User, UserSchema } from 'src/users/schema/user.schema';
 import { Jobs, JobsSchema } from 'src/jobs/schema/Jobs.schema';
+import { Recruiter, RecruiterSchema } from './schema/recruiter.schema';
 
 @Module({
   imports: [
@@ -16,9 +17,10 @@ import { Jobs, JobsSchema } from 'src/jobs/schema/Jobs.schema';
       { name: User.name, schema: UserSchema },
       { name: Jobs.name, schema: JobsSchema },
       { name: UserJobs.name, schema: UserJobsSchema },
+      { name: Recruiter.name, schema: RecruiterSchema },
     ])
   ],
-  providers: [CompanyProfile, CompanyService, User, Jobs, UserJobs, JwtService],
+  providers: [CompanyProfile, CompanyService, User, Jobs, UserJobs, Recruiter, JwtService],
   controllers: [CompaniesController]
 })
 export class CompanyModule { }
