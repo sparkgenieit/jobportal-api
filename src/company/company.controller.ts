@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, ParseBoolPipe, Patch, Post, Put, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { CompanyService } from './company.service';
 import { CompanyProfileDto } from './dto/company-profile.dto';
 import { CompanyProfile } from './schema/companyProfile.schema';
@@ -19,10 +19,30 @@ export class CompaniesController {
     }
 
     @Roles(["employer"])
-    @Post('add-recruiter')
+    @Post('/recruiter')
     async addRecruiter(@Body() data: RecruiterDto) {
         return await this.companyService.addRecruiter(data)
     }
+
+    @Roles(["employer"])
+    @Get('/recruiters/:companyId')
+    async getCompanyRecruiters(@Param() { companyId }) {
+        return await this.companyService.getCompanyRecruiters(companyId)
+    }
+
+    @Roles(["employer"])
+    @Delete('/recruiter/:id')
+    async deleteRecruiter(@Param() { id }) {
+        return await this.companyService.deleteRecruiter(id)
+    }
+
+    @Roles(["employer"])
+    @Put('/recruiter/:id')
+    async editRecruiter(@Param() { id }, @Body() data: RecruiterDto) {
+        return await this.companyService.editRecruiter(id, data)
+    }
+
+
 
     @Roles(["employer"])
     @Put('profile/update/:id')

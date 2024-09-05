@@ -33,17 +33,6 @@ export class CompanyService {
     }
   }
 
-  async addRecruiter(recruiterData: RecruiterDto) {
-    const recruiter = await this.recruiterModel.findOne({ email: recruiterData.email }).catch(e => {
-      throw new HttpException({ message: "Something went wrong!" }, HttpStatus.INTERNAL_SERVER_ERROR)
-    })
-    if (recruiter) throw new HttpException({ message: `Recruiter with ${recruiterData.email} already exists` }, HttpStatus.BAD_REQUEST)
-
-    recruiterData.password = await bcrypt.hash(recruiterData.password, 10);
-
-    const user = await this.recruiterModel.create(recruiterData)
-    return { message: "Recruiter Added" }
-  }
 
   async updateProfile(user_id, companyProfileDto: CompanyProfileDto): Promise<any> {
     console.log(user_id);
@@ -198,6 +187,57 @@ export class CompanyService {
       total: count,
       status: 200
     }
+  }
+
+  async addRecruiter(recruiterData: RecruiterDto) {
+    const recruiter = await this.recruiterModel.findOne({ email: recruiterData.email })
+      .catch(e => {
+        throw new HttpException({ message: "Something went wrong!" }, HttpStatus.INTERNAL_SERVER_ERROR)
+      })
+
+    if (recruiter) throw new HttpException({ message: `Recruiter with ${recruiterData.email} already exists` }, HttpStatus.BAD_REQUEST)
+
+    recruiterData.password = await bcrypt.hash(recruiterData.password, 10);
+
+    await this.recruiterModel.create(recruiterData).catch(e => {
+      throw new HttpException({ message: "Something went wrong!" }, HttpStatus.INTERNAL_SERVER_ERROR)
+    })
+    return { message: "Recruiter Added" }
+  }
+
+  async editRecruiter(id: string | Types.ObjectId, recruiterData: RecruiterDto) {
+    id = new Types.ObjectId(id)
+
+    const recruiter = await this.recruiterModel.findById(id).catch(e => {
+      throw new HttpException({ message: "Something went wrong!" }, HttpStatus.INTERNAL_SERVER_ERROR)
+    })
+
+    if (!recruiter) throw new HttpException({ message: `Recruiter with ${recruiterData.email} does not exists` }, HttpStatus.NOT_FOUND)
+
+    recruiterData.password = await bcrypt.hash(recruiterData.password, 10);
+
+    await this.recruiterModel.findOneAndUpdate({ _id: id }, recruiterData).catch(e => {
+      throw new HttpException({ message: "Something went wrong!" }, HttpStatus.INTERNAL_SERVER_ERROR)
+    })
+
+    return { message: "Recruiter Edited" }
+
+  }
+
+  async deleteRecruiter(id: string | Types.ObjectId) {
+    id = new Types.ObjectId(id)
+    const recruiter = await this.recruiterModel.findById(id)
+
+    if (!recruiter) throw new HttpException({ message: "The given recruiter does not exist" }, HttpStatus.NOT_FOUND);
+
+    await this.recruiterModel.deleteOne({ _id: id })
+
+    return { message: "Recruiter deleted succesfully" }
+  }
+
+  async getCompanyRecruiters(companyId: string | Types.ObjectId) {
+    companyId = new Types.ObjectId(companyId)
+    return await this.recruiterModel.find({ companyId }, { password: 0 })
   }
 
 
