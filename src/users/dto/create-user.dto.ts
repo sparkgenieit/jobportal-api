@@ -1,4 +1,4 @@
-import { IsEmail, IsEnum, isNotEmpty, IsNotEmpty, IsString } from "class-validator"
+import { IsEmail, IsEnum, IsNotEmpty, IsString } from "class-validator"
 
 export class CreateUserDto {
   created_date: Date

@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory, raw } from "@nestjs/mongoose";
-import { HydratedDocument, Types } from "mongoose";
+import mongoose, { HydratedDocument, Types } from "mongoose";
+import { User } from "src/users/schema/user.schema";
 
 export type CompanyProfileDocument = HydratedDocument<CompanyProfile>;
 
@@ -7,8 +8,8 @@ export type CompanyProfileDocument = HydratedDocument<CompanyProfile>;
 export class CompanyProfile {
     @Prop({ type: Date })
     created_date?: Date
-    @Prop()
-    user_id: Types.ObjectId
+    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: User.name })
+    user_id: User
     @Prop()
     name: string
     @Prop()

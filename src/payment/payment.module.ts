@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
-import { StripeController } from './stripe.controller';
-import { StripeService } from './stripe.service';
+import { PaymentController } from './payment.controller';
+import { PaymentService } from './payment.service';
 import { User, UserSchema } from 'src/users/schema/user.schema';
 import { MongooseModule } from '@nestjs/mongoose';
 import { JwtService } from '@nestjs/jwt';
@@ -17,7 +17,7 @@ import { CounterSchema } from 'src/utils/Counter.schema';
       { name: 'Counter', schema: CounterSchema },
     ]),
   ],
-  controllers: [StripeController],
-  providers: [User, CompanyProfile, StripeService, JwtService]
+  controllers: [PaymentController],
+  providers: [User, CompanyProfile, PaymentService, JwtService]
 })
-export class StripeModule { }
+export class PaymentModule { }

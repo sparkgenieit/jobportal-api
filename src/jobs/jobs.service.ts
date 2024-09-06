@@ -26,13 +26,7 @@ export class JobsService implements OnModuleInit {
     this.checkExpiredJobs()
   }
 
-  async createJob(jobsDto: JobsDto): Promise<any> {
-    // const isJob = await this.userModel.findOne({email});
-    // if (isUser) {
-    //   throw new HttpException({message: "The given email "+email+" already exsit"}, HttpStatus.BAD_REQUEST);
-    // }
-
-    //CreateUserDto.token = '';
+  async postJob(jobsDto: JobsDto): Promise<any> {
     let user = await this.userModel.findOne({ _id: jobsDto.companyId })
     if (user.usedFreeCredit === false) {
       jobsDto.status = 'queue';
@@ -64,7 +58,7 @@ export class JobsService implements OnModuleInit {
 
       return ({ message: "Job Posted", credits: credits })
     }
-    if (user.usedFreeCredit === true && user.credits == 0) {
+    if (user.usedFreeCredit === true && user.credits <= 0) {
       throw new HttpException({ message: "Not Enough Credits, Can't Post this Job" }, HttpStatus.BAD_REQUEST);
     }
   }
@@ -514,12 +508,11 @@ export class JobsService implements OnModuleInit {
   async repostExpiredJob(jobInDB, jobUserSent) {
     let isEqual = true
 
-    for (let field in jobUserSent) {
-      if (field === "creationdate") {
-        JSON.stringify(jobUserSent[field]) !== JSON.stringify(jobInDB[field]) ? isEqual = false : null
-      } else {
-        jobUserSent[field] !== jobInDB[field] ? isEqual = false : null
-      }
+    const valueToBeCheckedForEquality = ["jobType", "location", "employjobreference", "numberofvacancies", "jobTitle", "rateperhour",
+      "duration", "jobCategory", "subCategory", "weeklyperhour", "benifits", "training", "description", "employerquestions", "employer"]
+
+    for (let field of valueToBeCheckedForEquality) {
+      jobUserSent[field] !== jobInDB[field] ? isEqual = false : null
     }
 
     const jobId = new mongoose.Types.ObjectId(jobInDB.companyId)

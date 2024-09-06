@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import mongoose, { Model, Types } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { JwtService } from '@nestjs/jwt';
 import { CompanyProfile } from './schema/companyProfile.schema';
 import { CompanyProfileDto } from './dto/company-profile.dto';
@@ -34,18 +34,21 @@ export class CompanyService {
   }
 
 
-  async updateProfile(user_id, companyProfileDto: CompanyProfileDto): Promise<any> {
-    console.log(user_id);
-    user_id = new mongoose.Types.ObjectId(user_id);
+  async updateProfile(user_id: string | Types.ObjectId, companyProfileDto: CompanyProfileDto) {
+    user_id = new Types.ObjectId(user_id);
     const isUser = await this.companyProfileModel.findOne({ user_id });
     if (!isUser) {
-      throw new HttpException({ message: "The given user does not exist" }, HttpStatus.BAD_REQUEST);
+      throw new HttpException({ message: "The given user does not exist" }, HttpStatus.NOT_FOUND);
     } else {
       await this.companyProfileModel.findOneAndUpdate({ user_id }, companyProfileDto);
+
       if (isUser.name !== companyProfileDto.name) { // checking if the user name is changed or not
+
         const name = companyProfileDto.name.split(" ")  // Updating the name in Users Collection
+
         let [first_name, ...lastName] = name;
         let last_name = lastName.join(" ");
+
         await this.UserModel.findOneAndUpdate({ _id: user_id }, { first_name, last_name });
       }
 
@@ -74,12 +77,8 @@ export class CompanyService {
     }
   }
 
-  async getAllCompanies(): Promise<CompanyProfile[]> {
-    return await this.companyProfileModel.find().exec()
-  }
-
-  async getCompany(user_id): Promise<any> {
-    user_id = new mongoose.Types.ObjectId(user_id);
+  async getCompany(user_id: string | Types.ObjectId): Promise<CompanyProfile> {
+    user_id = new Types.ObjectId(user_id);
     const isUser = await this.companyProfileModel.findOne({ user_id });
     if (!isUser) {
       throw new HttpException({ message: "The given user does not exist" }, HttpStatus.BAD_REQUEST);
@@ -88,12 +87,12 @@ export class CompanyService {
     }
   }
 
-  async getPostedJobs(companyId: string, limit: number, skip: number, name: string) {
+  async getPostedJobs(companyId: string, limit: number, skip: number, searchTerm: string) {
     let query: any = {
       companyId,
     }
-    if (name && name.trim() !== "") {
-      query.$or = [{ jobTitle: { $regex: name, $options: 'i' } }, { employjobreference: { $regex: name, $options: 'i' } }]
+    if (searchTerm && searchTerm.trim() !== "") {
+      query.$or = [{ jobTitle: { $regex: searchTerm, $options: 'i' } }, { employjobreference: { $regex: searchTerm, $options: 'i' } }]
     }
 
     const response = await this.jobsModel.aggregate([
@@ -180,7 +179,7 @@ export class CompanyService {
 
     if (shortlisted === "true") query.shortlisted = true
 
-    let count = await this.UserJobsModel.countDocuments({ jobId: jobId, applied: true });
+    let count = await this.UserJobsModel.countDocuments(query);
     let users = await this.UserJobsModel.find(query).sort({ shortlisted: -1, applied_date: - 1 }).limit(limit).skip(skip).populate('userId').populate("jobId", "jobTitle");
     return {
       users: users,
@@ -205,6 +204,8 @@ export class CompanyService {
     return { message: "Recruiter Added" }
   }
 
+
+
   async editRecruiter(id: string | Types.ObjectId, recruiterData: RecruiterDto) {
     id = new Types.ObjectId(id)
 
@@ -220,7 +221,7 @@ export class CompanyService {
       throw new HttpException({ message: "Something went wrong!" }, HttpStatus.INTERNAL_SERVER_ERROR)
     })
 
-    return { message: "Recruiter Edited" }
+    return { message: "Recruiter Updated" }
 
   }
 

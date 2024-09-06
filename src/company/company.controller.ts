@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseBoolPipe, Patch, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { CompanyService } from './company.service';
 import { CompanyProfileDto } from './dto/company-profile.dto';
 import { CompanyProfile } from './schema/companyProfile.schema';
@@ -6,17 +6,13 @@ import { AuthGuard } from 'src/auth/auth.guard';
 import { Roles } from 'src/auth/roles.decorator';
 import { RecruiterDto } from './dto/recruiter.dto';
 
+
 @UseGuards(AuthGuard)
 @Controller('companies')
 export class CompaniesController {
     constructor(
         private readonly companyService: CompanyService
     ) { }
-
-    @Get("all")
-    async getAllCompanies(): Promise<CompanyProfile[]> {
-        return await this.companyService.getAllCompanies()
-    }
 
     @Roles(["employer"])
     @Post('/recruiter')
@@ -42,20 +38,15 @@ export class CompaniesController {
         return await this.companyService.editRecruiter(id, data)
     }
 
-
-
     @Roles(["employer"])
     @Put('profile/update/:id')
-    async companyProfileDto(@Param() data, @Body() companyProfileDto: CompanyProfileDto): Promise<CompanyProfile[]> {
-        console.log('data', data);
-        console.log("update company id", data.id)
+    async companyProfileDto(@Param() data, @Body() companyProfileDto: CompanyProfileDto) {
         return await this.companyService.updateProfile(data.id, companyProfileDto);
     }
 
     @Roles(["employer"])
     @Get('profile/:id')
-    async getCompany(@Param() data): Promise<CompanyProfile[]> {
-        console.log(data.id);
+    async getCompany(@Param() data): Promise<CompanyProfile> {
         return await this.companyService.getCompany(data.id);
     }
 

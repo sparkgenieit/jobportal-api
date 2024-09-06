@@ -21,6 +21,11 @@ export class UsersController {
         return await this.userService.findOne(loginUserDto);
     }
 
+    @Post('/login/recruiter')
+    async loginRecruiter(@Body(ValidationPipe) loginUserDto: LoginUserDto) {
+        return await this.userService.recruiterLogin(loginUserDto);
+    }
+
     @Post('forgot-password')
     async UserForgotPassword(@Body(ValidationPipe) { email }: forgotOrResetPasswordDto): Promise<any> {
         return await this.userService.forgotPassword(email);

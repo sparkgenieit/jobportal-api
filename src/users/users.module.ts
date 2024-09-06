@@ -10,6 +10,7 @@ import { JwtService } from '@nestjs/jwt';
 import { CompanyProfile, CompanyProfileSchema } from 'src/company/schema/companyProfile.schema';
 import { UploadController } from 'src/upload/upload.controller';
 import { AuthGuard } from 'src/auth/auth.guard';
+import { Recruiter, RecruiterSchema } from 'src/company/schema/recruiter.schema';
 
 @Module({
   imports: [
@@ -17,7 +18,8 @@ import { AuthGuard } from 'src/auth/auth.guard';
       { name: User.name, schema: UserSchema },
       { name: UserProfile.name, schema: UserProfileSchema },
       { name: UserJobs.name, schema: UserJobsSchema },
-      { name: CompanyProfile.name, schema: CompanyProfileSchema }
+      { name: CompanyProfile.name, schema: CompanyProfileSchema },
+      { name: Recruiter.name, schema: RecruiterSchema }
     ]),
   ],
   providers: [User, UploadController, UserProfile, UserJobs, UsersService, JwtService],

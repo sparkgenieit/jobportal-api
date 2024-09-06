@@ -6,7 +6,6 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { UserProfileDto } from './dto/user-profile.dto';
 import { UserProfile } from './schema/userProfile.schema';
-import { UserJobsDto } from './dto/user-jobs.dto';
 import { UserJobs } from './schema/userJobs.schema';
 import { JwtService } from '@nestjs/jwt';
 import { CompanyProfileDto } from 'src/company/dto/company-profile.dto';
@@ -15,7 +14,7 @@ import { UploadController } from 'src/upload/upload.controller';
 import * as bcrypt from 'bcrypt';
 import { MailerService } from '@nestjs-modules/mailer';
 import { randomUUID } from 'crypto';
-import { forgotOrResetPasswordDto } from './dto/forgotOrResetPassword.dto';
+import { Recruiter } from 'src/company/schema/recruiter.schema';
 
 @Injectable()
 export class UsersService {
@@ -24,8 +23,8 @@ export class UsersService {
     private emailService: MailerService,
     @InjectModel(User.name) private readonly userModel: Model<User>,
     @InjectModel(UserProfile.name) private readonly userProfileModel: Model<UserProfile>,
+    @InjectModel(Recruiter.name) private readonly recruiterModel: Model<Recruiter>,
     @InjectModel(UserJobs.name) private readonly userJobsModel: Model<UserJobs>,
-
     @InjectModel(CompanyProfile.name) private readonly companyProfileModel: Model<CompanyProfile>,
     private jwtService: JwtService
   ) { }
@@ -48,6 +47,25 @@ export class UsersService {
     user.token = await this.jwtService.signAsync(payload, { secret: "JWT_SECRET_KEY" });
     return user;
   }
+
+  async recruiterLogin({ email, password }: LoginUserDto): Promise<any> {
+    const recruiter: any = await this.recruiterModel.findOne({ email });
+
+    if (!recruiter) {
+      throw new HttpException({ message: 'Recruiter does not exist' }, HttpStatus.NOT_FOUND);
+    }
+
+    const isMatch: boolean = await bcrypt.compare(password, recruiter.password);
+
+    if (!isMatch) {
+      throw new HttpException({ message: 'Invalid password' }, HttpStatus.BAD_REQUEST);
+    }
+
+    const payload = { username: recruiter.name, id: recruiter._id, role: "recruiter" };
+    recruiter.token = await this.jwtService.signAsync(payload, { secret: "JWT_SECRET_KEY" });
+    return recruiter;
+  }
+
 
   async forgotPassword(email: string): Promise<any> {
     const user = await this.userModel.findOne({ email });

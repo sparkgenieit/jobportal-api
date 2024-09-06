@@ -12,7 +12,7 @@ import { Counter } from 'src/utils/Counter.schema';
 import Stripe from 'stripe';
 
 @Injectable()
-export class StripeService {
+export class PaymentService {
     private readonly stripe: Stripe;
     constructor(
         private emailService: MailerService,

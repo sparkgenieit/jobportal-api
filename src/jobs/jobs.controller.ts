@@ -11,23 +11,19 @@ export class jobsController {
     constructor(
         private readonly jobsService: JobsService
     ) { }
+
     @UseGuards(AuthGuard)
     @Roles(["employer"])
     @Post('create')
-    async createUserDto(@Body() jobsDto: JobsDto): Promise<Jobs> {
-        return await this.jobsService.createJob(jobsDto);
+    async postJob(@Body() jobsDto: JobsDto): Promise<Jobs> {
+        return await this.jobsService.postJob(jobsDto);
     }
 
     @UseGuards(AuthGuard)
     @Roles(["superadmin"])
     @Get("all")
-    async getAllAdmins(@Query() { limit, skip, adminName }) {
+    async getAllJobs(@Query() { limit, skip, adminName }) {
         return await this.jobsService.getAllJobs(+limit, +skip, adminName)
-    }
-
-    @Get("approved")
-    async getApprovedjobs(@Query() { limit, skip }) {
-        return await this.jobsService.getApprovedJobs(+limit, +skip)
     }
 
     @Get('suggestions')
