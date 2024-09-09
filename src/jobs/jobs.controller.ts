@@ -13,7 +13,7 @@ export class jobsController {
     ) { }
 
     @UseGuards(AuthGuard)
-    @Roles(["employer"])
+    @Roles(["employer", "recruiter"])
     @Post('create')
     async postJob(@Body() jobsDto: JobsDto): Promise<Jobs> {
         return await this.jobsService.postJob(jobsDto);
@@ -105,7 +105,7 @@ export class jobsController {
     }
 
     @UseGuards(AuthGuard)
-    @Roles(["employer"])
+    @Roles(["employer", "recruiter"])
     @Patch('close')
     async closeJob(@Body() { userId, jobId }): Promise<any> {
         return await this.jobsService.closeJob(jobId, userId);
@@ -145,7 +145,7 @@ export class jobsController {
     }
 
     @UseGuards(AuthGuard)
-    @Roles(["employer"])
+    @Roles(["employer", "recruiter"])
     @Put('update/:id')
     async jobsDto(@Param() data, @Body() jobsDto: JobsDto): Promise<Jobs[]> {
         console.log("update jobs id", data.id)
@@ -158,7 +158,7 @@ export class jobsController {
     }
 
     @UseGuards(AuthGuard)
-    @Roles(["employer"])
+    @Roles(["employer", "recruiter"])
     @Delete('delete/:id')
     async deleteJob(@Param() data) {
         return await this.jobsService.deleteJob(data.id);

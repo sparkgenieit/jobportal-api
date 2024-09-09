@@ -15,21 +15,21 @@ export class ContactController {
     }
 
     @UseGuards(AuthGuard)
-    @Roles(["employer"])
+    @Roles(["employer", "recruiter"])
     @Post('/employer/query')
     async contactUsEmployer(@Body() employerContactData: EmployerContactDto) {
         return await this.contactService.employerContactUs(employerContactData)
     }
 
     @UseGuards(AuthGuard)
-    @Roles(["employer"])
+    @Roles(["employer", "recruiter"])
     @Post('/job/query')
     async jobInquiry(@Body() jobInquiryData: JobInquiryDto) {
         return await this.contactService.jobInquiry(jobInquiryData)
     }
 
     @UseGuards(AuthGuard)
-    @Roles(["employer", "admin"])
+    @Roles(["employer", "admin", "recruiter"])
     @Patch('/query/reply/:query_id')
     async postReply(@Body() data: Message, @Param() { query_id }) {
         return await this.contactService.postReply(query_id, data)
@@ -58,14 +58,14 @@ export class ContactController {
 
 
     @UseGuards(AuthGuard)
-    @Roles(["employer", "admin"])
+    @Roles(["employer", "admin", "recruiter"])
     @Get('/query/:id')
     async getQuery(@Param() { id }, @Query() { type }) {
         return await this.contactService.getQuery(id, type)
     }
 
     @UseGuards(AuthGuard)
-    @Roles(["employer"])
+    @Roles(["employer", "recruiter"])
     @Get('/company-queries/:companyId')
     async companyQueries(@Param() data, @Query() { q: searchedTerm, limit, skip }) {
         return await this.contactService.getCompanyQueries(data.companyId, searchedTerm, +limit, +skip)

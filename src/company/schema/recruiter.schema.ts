@@ -14,7 +14,8 @@ export class Recruiter {
     password: string
     @Prop({ type: mongoose.Schema.Types.ObjectId, ref: User.name })
     companyId: User
-
+    @Prop()
+    token?: string
 }
 
 export const RecruiterSchema = SchemaFactory.createForClass(Recruiter);

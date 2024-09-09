@@ -15,6 +15,7 @@ import * as bcrypt from 'bcrypt';
 import { MailerService } from '@nestjs-modules/mailer';
 import { randomUUID } from 'crypto';
 import { Recruiter } from 'src/company/schema/recruiter.schema';
+import { RecruiterDto } from 'src/company/dto/recruiter.dto';
 
 @Injectable()
 export class UsersService {
@@ -49,7 +50,7 @@ export class UsersService {
   }
 
   async recruiterLogin({ email, password }: LoginUserDto): Promise<any> {
-    const recruiter: any = await this.recruiterModel.findOne({ email });
+    const recruiter = await this.recruiterModel.findOne({ email });
 
     if (!recruiter) {
       throw new HttpException({ message: 'Recruiter does not exist' }, HttpStatus.NOT_FOUND);
@@ -65,7 +66,6 @@ export class UsersService {
     recruiter.token = await this.jwtService.signAsync(payload, { secret: "JWT_SECRET_KEY" });
     return recruiter;
   }
-
 
   async forgotPassword(email: string): Promise<any> {
     const user = await this.userModel.findOne({ email });
@@ -206,7 +206,7 @@ export class UsersService {
   async getUserCredits(user_id: Types.ObjectId): Promise<any> {
     const user = await this.userModel.findOne({ _id: user_id })
     if (!user) throw new HttpException({ message: "The given user does not exist" }, HttpStatus.NOT_FOUND);
-    return { credits: user.credits }
+    return { credits: user.credits, usedFreeCredit: user.usedFreeCredit }
   }
 
   async updateAdmin(user_id: string | Types.ObjectId, userDto: CreateUserDto): Promise<any> {

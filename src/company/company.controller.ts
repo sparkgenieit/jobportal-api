@@ -44,25 +44,25 @@ export class CompaniesController {
         return await this.companyService.updateProfile(data.id, companyProfileDto);
     }
 
-    @Roles(["employer"])
+    @Roles(["employer", "recruiter"])
     @Get('profile/:id')
     async getCompany(@Param() data): Promise<CompanyProfile> {
         return await this.companyService.getCompany(data.id);
     }
 
-    @Roles(["employer"])
+    @Roles(["employer", "recruiter"])
     @Get('postedJobs/:companyId')
     async getPostedJobs(@Param() data, @Query() { limit, skip, name }) {
         return await this.companyService.getPostedJobs(data.companyId, +limit, +skip, name);
     }
 
-    @Roles(["employer"])
+    @Roles(["employer", "recruiter"])
     @Get('/applied-users/:id')
     async getAppliedUsers(@Param() data, @Query() { limit, skip, shortlisted }) {
         return await this.companyService.getAppliedUsers(data.id, shortlisted, +limit, +skip);
     }
 
-    @Roles(["employer"])
+    @Roles(["employer", "recruiter"])
     @Patch('/shortlist-candidate')
     async shortListCandidate(@Body() { userId, jobId, value }) {
         return await this.companyService.shortListCandidate(jobId, userId, value);
