@@ -170,8 +170,8 @@ export class jobsController {
         return await this.jobsService.increaseViewCount(jobId);
     }
 
-    @Get('/job-count/info-details')
+    @Get('/job-count')
     async getJobsCount() {
-        return await this.jobsService.getCompaniesInfoAndPostedJobsCount()
+        return await this.jobsService.PostedJobsCount()
     }
 }

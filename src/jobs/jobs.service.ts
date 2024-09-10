@@ -263,12 +263,29 @@ export class JobsService implements OnModuleInit {
       today.setDate(today.getDate() - data.date); // Subtracts the specified number of days
       query.creationdate = { $gte: today }
     }
-
     let sorting: any = { [data.sort]: -1 }
+
+
+    const response = await this.jobsModel.aggregate([
+      { $match: query },
+      { $sort: sorting },
+      { $skip: skip },
+      { $limit: limit },
+      { $addFields: { companyId: { $toObjectId: "$companyId" } } },
+      {
+        $lookup: {
+          from: 'companyprofiles',
+          localField: "companyId",
+          foreignField: 'user_id',
+          as: 'info'
+        }
+      },
+      { $addFields: { info: { $arrayElemAt: ['$info.info', 0] } } },
+    ])
+
     const total = await this.jobsModel.countDocuments(query).exec();
-    const jobs = await this.jobsModel.find(query).sort(sorting).skip(skip).limit(limit).exec();
     return {
-      jobs: jobs,
+      jobs: response,
       total: total,
       status: 200,
     }
@@ -443,8 +460,7 @@ export class JobsService implements OnModuleInit {
     return jobs[0]
   }
 
-  async getCompaniesInfoAndPostedJobsCount() {
-    const companiesWIthInfo = await this.companyProfileModel.find({ info: { $gt: '' } }, { info: 1, user_id: 1, _id: 0 });
+  async PostedJobsCount() {
 
     const JobsCount = await this.jobsModel.aggregate([
       {
@@ -462,7 +478,6 @@ export class JobsService implements OnModuleInit {
     )
 
     return {
-      companiesWIthInfo,
       JobsCount,
       status: 200
     }
