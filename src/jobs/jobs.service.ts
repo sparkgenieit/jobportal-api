@@ -267,26 +267,36 @@ export class JobsService implements OnModuleInit {
 
 
     const response = await this.jobsModel.aggregate([
-      { $match: query },
-      { $sort: sorting },
-      { $skip: skip },
-      { $limit: limit },
-      { $addFields: { companyId: { $toObjectId: "$companyId" } } },
       {
-        $lookup: {
-          from: 'companyprofiles',
-          localField: "companyId",
-          foreignField: 'user_id',
-          as: 'info'
+        $facet: {
+          jobs: [
+            { $match: query },
+            { $sort: sorting },
+            { $skip: skip },
+            { $limit: limit },
+            { $addFields: { companyId: { $toObjectId: "$companyId" } } },
+            {
+              $lookup: {
+                from: 'companyprofiles',
+                localField: "companyId",
+                foreignField: 'user_id',
+                as: 'info'
+              }
+            },
+            {
+              $addFields:
+              {
+                info: { $arrayElemAt: ['$info.info', 0] },
+              }
+            }
+          ],
+          count: [{ $match: query }, { $count: 'total' }]
         }
-      },
-      { $addFields: { info: { $arrayElemAt: ['$info.info', 0] } } },
+      }
     ])
-
-    const total = await this.jobsModel.countDocuments(query).exec();
     return {
-      jobs: response,
-      total: total,
+      jobs: response[0].jobs,
+      total: response[0].count[0].total,
       status: 200,
     }
   }

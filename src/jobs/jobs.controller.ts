@@ -152,6 +152,11 @@ export class jobsController {
         return await this.jobsService.updateJob(data.id, jobsDto);
     }
 
+    @Get('/job-count')
+    async getJobsCount() {
+        return await this.jobsService.PostedJobsCount()
+    }
+
     @Get(':id')
     async getJob(@Param() data): Promise<Jobs[]> {
         return await this.jobsService.getJob(data.id);
@@ -170,8 +175,5 @@ export class jobsController {
         return await this.jobsService.increaseViewCount(jobId);
     }
 
-    @Get('/job-count')
-    async getJobsCount() {
-        return await this.jobsService.PostedJobsCount()
-    }
+
 }
