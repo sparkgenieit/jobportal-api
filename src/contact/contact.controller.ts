@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Query, Request, UseGuards } from '@nestjs/common';
 import { ContactSerivce } from './contact';
 import { ContactDto, EmployerContactDto, JobInquiryDto, Message } from './contact.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
@@ -37,9 +37,11 @@ export class ContactController {
 
     @UseGuards(AuthGuard)
     @Roles(["admin"])
-    @Get('/assigned-queries/:user_id')
-    async getAssignedQueries(@Param() { user_id }, @Query() { s, limit, skip }) {
-        return await this.contactService.getAssignedQueries(user_id, s, +limit, +skip)
+    @Get('/assigned-queries')
+    async getAssignedQueries(@Request() req) {
+        const { s, limit, skip } = req.query
+        const { id } = req.user
+        return await this.contactService.getAssignedQueries(id, s, +limit, +skip)
     }
 
     @UseGuards(AuthGuard)
@@ -51,9 +53,11 @@ export class ContactController {
 
     @UseGuards(AuthGuard)
     @Roles(["admin"])
-    @Patch('/assign-query/:user_id')
-    async assignQuery(@Param() { user_id }, @Query() { query_id }) {
-        return await this.contactService.assignQuery(user_id, query_id)
+    @Patch('/assign-query')
+    async assignQuery(@Request() req) {
+        const { id } = req.user
+        const { query_id } = req.query
+        return await this.contactService.assignQuery(id, query_id)
     }
 
 

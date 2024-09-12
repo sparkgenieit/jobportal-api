@@ -33,6 +33,7 @@ export class AuthGuard implements CanActivate {
 
         if (roles && !roles.includes(data.role)) throw new HttpException({ message: 'FORBIDDEN REQUEST' }, HttpStatus.FORBIDDEN);
 
+        request.user = data
         return true;
     }
 }
