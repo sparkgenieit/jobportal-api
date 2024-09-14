@@ -16,6 +16,7 @@ import { MailerService } from '@nestjs-modules/mailer';
 import { randomUUID } from 'crypto';
 import { Recruiter } from 'src/company/schema/recruiter.schema';
 import { RecruiterDto } from 'src/company/dto/recruiter.dto';
+import { updateUserDto } from './dto/updateUser.dto';
 
 @Injectable()
 export class UsersService {
@@ -230,6 +231,14 @@ export class UsersService {
     } else {
       return await this.userModel.deleteOne({ _id: user_id })
     }
+  }
+
+  async updateUser(userData: updateUserDto, id: Types.ObjectId | string) {
+    id = new Types.ObjectId(id)
+    const user = await this.userModel.findById(id)
+    if (!user) throw new HttpException({ message: "The given user does not exist" }, HttpStatus.NOT_FOUND);
+    await this.userModel.findOneAndUpdate({ _id: id }, userData)
+    return { message: "Update Success" }
   }
 
   async uploadCv(cv) {

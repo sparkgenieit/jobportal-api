@@ -8,6 +8,7 @@ import { UserProfileDto } from './dto/user-profile.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { forgotOrResetPasswordDto } from './dto/forgotOrResetPassword.dto';
 import { Roles } from 'src/auth/roles.decorator';
+import { updateUserDto } from './dto/updateUser.dto';
 
 
 @Controller('users')
@@ -82,7 +83,7 @@ export class UsersController {
     @UseGuards(AuthGuard)
     @Roles(["employer"])
     @Get('get-credits/:id')
-    async updateUser(@Param() data): Promise<User> {
+    async getCredits(@Param() data): Promise<User> {
         return await this.userService.getUserCredits(data.id);
     }
 
@@ -98,6 +99,13 @@ export class UsersController {
     @Put('profile/update/:id')
     async userProfileDto(@Param() data, @Body() userProfileDto: UserProfileDto): Promise<UserProfile> {
         return await this.userService.updateProfile(data.id, userProfileDto);
+    }
+
+    @UseGuards(AuthGuard)
+    @Roles(["superadmin"])
+    @Put('update/:id')
+    async updateUser(@Body(ValidationPipe) updateUser: updateUserDto, @Param() data) {
+        return await this.userService.updateUser(updateUser, data.id);
     }
 
     @UseGuards(AuthGuard)
