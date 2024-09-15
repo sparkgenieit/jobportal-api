@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post, Query, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Query, Request, UseGuards, ValidationPipe } from '@nestjs/common';
 import { ContactSerivce } from './contact';
 import { ContactDto, EmployerContactDto, JobInquiryDto, Message } from './contact.dto';
 import { AuthGuard } from 'src/auth/auth.guard';
@@ -15,9 +15,9 @@ export class ContactController {
     }
 
     @UseGuards(AuthGuard)
-    @Roles(["employer", "recruiter"])
+    @Roles(["employer", "recruiter", "superadmin"])
     @Post('/employer/query')
-    async contactUsEmployer(@Body() employerContactData: EmployerContactDto) {
+    async contactUsEmployer(@Body(ValidationPipe) employerContactData: EmployerContactDto) {
         return await this.contactService.employerContactUs(employerContactData)
     }
 

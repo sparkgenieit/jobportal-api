@@ -1,3 +1,4 @@
+import { IsEmail, IsNotEmpty } from "class-validator"
 import { Types } from "mongoose"
 
 export class Message {
@@ -19,13 +20,29 @@ export class ContactDto {
 
 
 export class EmployerContactDto {
+    @IsNotEmpty()
     subject: string
+
+    @IsNotEmpty()
     name: string
+
+    @IsNotEmpty()
     chat: Message[]
+
+    @IsNotEmpty()
     companyId: string
+
+    @IsNotEmpty()
     organisation: string
+
+    @IsNotEmpty()
+    @IsEmail()
     email: string
+
+    @IsNotEmpty()
     enquirer: string
+
+    assignedTo?: string
 }
 
 

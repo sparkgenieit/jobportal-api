@@ -14,6 +14,11 @@ export class OrderService {
     @InjectModel(User.name) private userModel: Model<User>
   ) { }
 
+  async createOrder(data: OrderDto) {
+    data.companyId = new Types.ObjectId(data.companyId)
+    return await this.ordersModel.create(data)
+  }
+
   async getOrders(companyId: string | Types.ObjectId, searchTerm: string, sort: string, skip: number, limit: number) {
     companyId = new Types.ObjectId(companyId);
     let query = new RegExp(searchTerm, 'i')

@@ -1,7 +1,8 @@
-import { Controller, Get, Param, Put, Query, Search, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put, Query, Search, UseGuards, ValidationPipe } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { Roles } from 'src/auth/roles.decorator';
+import { OrderDto } from './dto/order.dto';
 
 
 @Controller('orders')
@@ -10,6 +11,13 @@ export class OrderController {
     constructor(
         private readonly orderService: OrderService
     ) { }
+
+    @Roles(["superadmin"])
+    @Post("/create")
+    async createOrder(@Body(ValidationPipe) createOrder: OrderDto) {
+        return await this.orderService.createOrder(createOrder)
+    }
+
 
     @Roles(["employer"])
     @Get("/get/:companyId")
