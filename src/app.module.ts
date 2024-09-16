@@ -18,6 +18,7 @@ import { GlobalModule } from './global/global.module';
 import { NotificationModule } from './notifications/notifications.module';
 import { ContactModule } from './contact/contact.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { MailModule } from './mails/mail.module';
 
 
 @Module({
@@ -37,7 +38,8 @@ import { ScheduleModule } from '@nestjs/schedule';
     CategoryModule,
     PaymentModule,
     NotificationModule,
-    ContactModule
+    ContactModule,
+    MailModule
   ],
   controllers: [AppController],
   providers: [AppService],
