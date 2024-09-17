@@ -1,6 +1,8 @@
-import { IsArray, IsNotEmpty, IsString } from "class-validator";
+import { Type } from "class-transformer";
+import { IsArray, IsNotEmpty, IsString, ValidateNested } from "class-validator";
 
-class Chat {
+export class Chat {
+    @IsNotEmpty()
     date: Date
 
     @IsNotEmpty()
@@ -22,9 +24,11 @@ export class MailDto {
     subject: string
 
     @IsArray()
+    @IsNotEmpty()
     participants: string[]
 
-    @IsArray()
+    @ValidateNested({ each: true })
+    @Type(() => Chat)
     chat: Chat[]
 
 }

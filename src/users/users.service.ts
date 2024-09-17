@@ -272,16 +272,22 @@ export class UsersService {
   }
 
   async getAllAdmins(limit: number, skip: number): Promise<any> {
+    const query = {
+      $or: [
+        { role: "admin" },
+        { role: "superadmin" },
+      ]
+    }
     const users = await this.userModel.aggregate([
       {
         $facet: {
           data: [{
-            $match: { role: "admin" }
+            $match: query
           },
           { $skip: skip },
           { $limit: limit }
           ],
-          count: [{ $match: { role: "admin" } }, { $count: "total" }]
+          count: [{ $match: query }, { $count: "total" }]
         }
       }
     ])

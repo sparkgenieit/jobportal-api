@@ -38,7 +38,7 @@ export class UsersController {
     }
 
     @Post('verify-email')
-    async VerifyEmail(@Query(ValidationPipe) { email }: forgotOrResetPasswordDto): Promise<any> {
+    async VerifyEmail(@Query() { email }: forgotOrResetPasswordDto): Promise<any> {
         return await this.userService.verifyEmail(email)
     }
 
@@ -60,7 +60,7 @@ export class UsersController {
     }
 
     @UseGuards(AuthGuard)
-    @Roles(["superadmin"])
+    @Roles(["superadmin", "admin"])
     @Get("admins/all")
     async getAllAdmins(@Query() { limit, skip }) {
         return await this.userService.getAllAdmins(+limit, +skip)
