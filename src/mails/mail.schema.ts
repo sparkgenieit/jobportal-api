@@ -18,6 +18,8 @@ export class Mail {
     participants: string[]
     @Prop()
     chat?: Chat[]
+    @Prop()
+    readBy: string[]
 }
 
 export const MailSchema = SchemaFactory.createForClass(Mail);

@@ -12,6 +12,7 @@ export class MailService {
         mailDto.participants.push(user.id)
         mailDto.chat[0].by = user.role
         mailDto.chat[0].from = user.username
+        mailDto.readBy = [user.id]
         try {
             await this.mailModel.create(mailDto)
             return { message: "Mail Sent" }
@@ -54,7 +55,6 @@ export class MailService {
                     }
                 }
             ])
-
             return {
                 total: response[0]?.count[0]?.total,
                 mails: response[0]?.data,
@@ -67,8 +67,12 @@ export class MailService {
     }
 
     async getMail(id: string, userid: string) {
+        const query = {
+            _id: id,
+            participants: { $in: userid }
+        }
         try {
-            const res = await this.mailModel.findOne({ _id: id, participants: { $in: userid } })
+            const res = await this.mailModel.findOneAndUpdate(query, { $addToSet: { readBy: userid } }, { new: true })
             return res
         } catch (error) {
             throw new HttpException({ message: "Something went wrong! Please try again" }, HttpStatus.INTERNAL_SERVER_ERROR)
@@ -81,10 +85,18 @@ export class MailService {
         try {
             data.from = user.username
             data.by = user.role
-            return await this.mailModel.updateOne({ _id, participants: { $in: user.id } }, { $push: { chat: data } })
+            return await this.mailModel.updateOne({ _id, participants: { $in: user.id } }, { $push: { chat: data }, readBy: [user.id] })
         } catch (error) {
             throw new HttpException({ message: "Something went wrong! Please try again" }, HttpStatus.INTERNAL_SERVER_ERROR)
         }
     }
 
+    async unreadMails(id: string) {
+        try {
+            const unreadCount = await this.mailModel.countDocuments({ participants: { $in: id }, readBy: { $nin: id } })
+            return unreadCount
+        } catch (error) {
+            throw new HttpException({ message: "Something went wrong! Please try again" }, HttpStatus.INTERNAL_SERVER_ERROR)
+        }
+    }
 }

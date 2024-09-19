@@ -31,4 +31,5 @@ export class MailDto {
     @Type(() => Chat)
     chat: Chat[]
 
+    readBy: string[]
 }

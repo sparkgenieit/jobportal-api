@@ -44,5 +44,12 @@ export class MailController {
         return await this.mailService.postReply(mailId, req.user, data)
     }
 
+    @UseGuards(AuthGuard)
+    @Roles(["admin", "superadmin"])
+    @Get('/unread-mails')
+    async unreadMails(@Request() req) {
+        const { id } = req.user
+        return await this.mailService.unreadMails(id)
+    }
 
 }
