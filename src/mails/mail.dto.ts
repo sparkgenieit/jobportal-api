@@ -33,3 +33,19 @@ export class MailDto {
 
     readBy: string[]
 }
+
+export class EmployerMailDto {
+    @IsNotEmpty()
+    @IsString()
+    subject: string
+
+    @IsArray()
+    @IsNotEmpty()
+    participants: string[]
+
+    @ValidateNested({ each: true })
+    @Type(() => Chat)
+    chat: Chat[]
+
+    readBy: string[]
+}

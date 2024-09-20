@@ -1,12 +1,18 @@
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model, Types } from "mongoose";
-import { Mail } from "./mail.schema";
-import { Chat, MailDto } from "./mail.dto";
+import { Chat, EmployerMailDto, MailDto } from "./mail.dto";
+import { Mail } from "./schema/mail.schema";
+import { EmployerMail } from "./schema/employerMail.schema";
 
 @Injectable()
 export class MailService {
-    constructor(@InjectModel("Mail") private mailModel: Model<Mail>) { }
+    constructor(
+        @InjectModel("Mail") private mailModel: Model<Mail>,
+        @InjectModel("EmployerMail") private employerMailModel: Model<EmployerMail>
+    ) { }
+
+    //Admin - Admin Methods
 
     async createMessage(user: any, mailDto: MailDto) {
         mailDto.participants.push(user.id)
@@ -66,6 +72,18 @@ export class MailService {
         }
     }
 
+
+    async postReply(_id: string | Types.ObjectId, user: any, data: Chat) {
+        _id = new Types.ObjectId(_id)
+        try {
+            data.from = user.username
+            data.by = user.role
+            return await this.mailModel.updateOne({ _id, participants: { $in: user.id } }, { $push: { chat: data }, readBy: [user.id] })
+        } catch (error) {
+            throw new HttpException({ message: "Something went wrong! Please try again" }, HttpStatus.INTERNAL_SERVER_ERROR)
+        }
+    }
+
     async getMail(id: string, userid: string) {
         const query = {
             _id: id,
@@ -80,17 +98,6 @@ export class MailService {
 
     }
 
-    async postReply(_id: string | Types.ObjectId, user: any, data: Chat) {
-        _id = new Types.ObjectId(_id)
-        try {
-            data.from = user.username
-            data.by = user.role
-            return await this.mailModel.updateOne({ _id, participants: { $in: user.id } }, { $push: { chat: data }, readBy: [user.id] })
-        } catch (error) {
-            throw new HttpException({ message: "Something went wrong! Please try again" }, HttpStatus.INTERNAL_SERVER_ERROR)
-        }
-    }
-
     async unreadMails(id: string) {
         try {
             const unreadCount = await this.mailModel.countDocuments({ participants: { $in: id }, readBy: { $nin: id } })
@@ -99,4 +106,97 @@ export class MailService {
             throw new HttpException({ message: "Something went wrong! Please try again" }, HttpStatus.INTERNAL_SERVER_ERROR)
         }
     }
+
+
+    //Employer - Admin Methods
+
+    async createEmployerMail(mail: EmployerMailDto) {
+        try {
+            await this.employerMailModel.create(mail)
+            return { message: "Mail Sent" }
+        } catch (error) {
+            throw new HttpException({ message: 'Something went wrong! Please try again' }, HttpStatus.INTERNAL_SERVER_ERROR)
+        }
+    }
+
+    async getEmployerMails(userid: string, search: string, limit: number, skip: number) {
+        const query: any = {
+            participants: { $in: [userid] }
+        }
+        const searchRegex = new RegExp(search, 'i')
+        if (search && search?.trim() !== "") {
+            query.$or =
+                [
+                    { subject: { $regex: searchRegex } },
+                    { "chat.message": { $regex: searchRegex } },
+                    { "chat.from": { $regex: searchRegex } }
+                ]
+        }
+        try {
+            const response = await this.employerMailModel.aggregate([
+                {
+                    $facet: {
+                        data: [
+                            { $match: query },
+                            {
+                                $addFields: {
+                                    chat: {
+                                        $slice: ["$chat", -1]
+                                    },
+                                }
+                            },
+                            { $sort: { updatedAt: -1 } },
+                            { $skip: skip },
+                            { $limit: limit }
+                        ],
+                        count: [{ $match: query }, { $count: 'total' }]
+                    }
+                }
+            ])
+            return {
+                total: response[0]?.count[0]?.total,
+                mails: response[0]?.data,
+                status: 200
+            }
+
+        } catch (error) {
+            throw new HttpException({ message: "Something went wrong! Please try again" }, HttpStatus.INTERNAL_SERVER_ERROR)
+        }
+    }
+
+    async getEmployerMail(id: string, userid: string) {
+        const query = {
+            _id: id,
+            participants: { $in: userid }
+        }
+        try {
+            const res = await this.employerMailModel.findOneAndUpdate(query, { $addToSet: { readBy: userid } }, { new: true })
+            return res
+        } catch (error) {
+            throw new HttpException({ message: "Something went wrong! Please try again" }, HttpStatus.INTERNAL_SERVER_ERROR)
+        }
+    }
+
+
+
+    async postReplyEmployer(_id: string | Types.ObjectId, user: any, data: Chat) {
+        _id = new Types.ObjectId(_id)
+        try {
+            data.from = user.username
+            data.by = user.role
+            return await this.employerMailModel.updateOne({ _id, participants: { $in: user.id } }, { $push: { chat: data }, readBy: [user.id] })
+        } catch (error) {
+            throw new HttpException({ message: "Something went wrong! Please try again" }, HttpStatus.INTERNAL_SERVER_ERROR)
+        }
+    }
+
+    async unreadMailsEmployer(id: string) {
+        try {
+            const unreadCount = await this.employerMailModel.countDocuments({ participants: { $in: id }, readBy: { $nin: id } })
+            return unreadCount
+        } catch (error) {
+            throw new HttpException({ message: "Something went wrong! Please try again" }, HttpStatus.INTERNAL_SERVER_ERROR)
+        }
+    }
+
 }
