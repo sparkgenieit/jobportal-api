@@ -48,7 +48,9 @@ export class UsersService {
     const payload = { username: user.first_name + " " + user.last_name, id: user._id, role: user.role };
     const token = await this.jwtService.signAsync(payload, { secret: "JWT_SECRET_KEY" });
 
-    const { password: pass, ...results } = user  // Should not send password string to the client
+    let userObject = user.toObject()
+
+    const { password: pass, ...results } = userObject  // Should not send password string to the client
 
     res.cookie('Token', token, { httpOnly: true, sameSite: 'strict', maxAge: 3 * 24 * 60 * 60 * 1000 }) // Cookie will expire after 3 days
     res.send(results)
@@ -70,10 +72,12 @@ export class UsersService {
     const payload = { username: recruiter.name, id: recruiter._id, role: "recruiter" };
     const token = await this.jwtService.signAsync(payload, { secret: "JWT_SECRET_KEY" });
 
-    const { password: pass, ...results } = recruiter
+    const { password: pass, ...results } = recruiter.toObject()
+
+    const user = { ...results, role: "recruiter" }
 
     res.cookie('Token', token, { httpOnly: true, sameSite: 'strict', maxAge: 3 * 24 * 60 * 60 * 1000 })
-    res.send(results)
+    res.send(user)
   }
 
   async forgotPassword(email: string): Promise<any> {
@@ -212,7 +216,8 @@ export class UsersService {
     }
   }
 
-  async getUserCredits(user_id: Types.ObjectId): Promise<any> {
+  async getUserCredits(user_id: Types.ObjectId | string): Promise<any> {
+    user_id = new Types.ObjectId(user_id)
     const user = await this.userModel.findOne({ _id: user_id })
     if (!user) throw new HttpException({ message: "The given user does not exist" }, HttpStatus.NOT_FOUND);
     return { credits: user.credits, usedFreeCredit: user.usedFreeCredit }
@@ -324,15 +329,15 @@ export class UsersService {
     }
   }
 
-
   async getUser(user: any) {
     const _id = new Types.ObjectId(user.id)
-    let currentUser;
+    let currentUser: any;
     if (user.role === "recruiter") {
       currentUser = await this.recruiterModel.findOne({ _id }, { password: 0 })
+      return { ...currentUser.toObject(), role: "recruiter" }
     } else {
       currentUser = await this.userModel.findOne({ _id }, { password: 0 })
+      return currentUser
     }
-    return currentUser
   }
 }

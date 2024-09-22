@@ -82,9 +82,9 @@ export class UsersController {
     }
 
     @UseGuards(AuthGuard)
-    @Roles(["employer"])
+    @Roles(["employer", "recruiter"])
     @Get('get-credits/:id')
-    async getCredits(@Param() data): Promise<User> {
+    async getCredits(@Param() data) {
         return await this.userService.getUserCredits(data.id);
     }
 
