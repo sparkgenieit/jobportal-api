@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Patch, Post, Put, Request, UseGuards, ValidationPipe } from "@nestjs/common";
+import { Body, Controller, Get, Patch, Post, Put, Query, Request, UseGuards, ValidationPipe } from "@nestjs/common";
 import { AuthGuard } from "src/auth/auth.guard";
 import { Roles } from "src/auth/roles.decorator";
 import { Chat, EmployerMailDto, MailDto } from "./mail.dto";
@@ -55,14 +55,14 @@ export class MailController {
     // Employer - Admin Mail routes
 
     @UseGuards(AuthGuard)
-    @Roles(["employer"])
+    @Roles(["employer", "recruiter", "superadmin"])
     @Post('/employer/create')
     async createEmployerMail(@Body(ValidationPipe) mailDto: EmployerMailDto) {
         return await this.mailService.createEmployerMail(mailDto)
     }
 
     @UseGuards(AuthGuard)
-    @Roles(["admin", "employer"])
+    @Roles(["admin", "employer", "recruiter"])
     @Get('/employer/all')
     async getEmployerMails(@Request() req) {
         const { id } = req.user
@@ -71,7 +71,7 @@ export class MailController {
     }
 
     @UseGuards(AuthGuard)
-    @Roles(["admin", "employer"])
+    @Roles(["admin", "employer", "recruiter"])
     @Get('/employer/details/:mailId')
     async getEmployerMail(@Request() req) {
         const { id } = req.user
@@ -80,7 +80,7 @@ export class MailController {
     }
 
     @UseGuards(AuthGuard)
-    @Roles(["admin", "employer"])
+    @Roles(["admin", "employer", "recruiter"])
     @Put('/employer/reply/:mailId')
     async postReplyEmployer(@Body(ValidationPipe) data: Chat, @Request() req) {
         const { mailId } = req.params
@@ -88,11 +88,34 @@ export class MailController {
     }
 
     @UseGuards(AuthGuard)
-    @Roles(["admin", "employer"])
+    @Roles(["admin", "employer", "recruiter"])
     @Get('/employer/unread-mails')
     async unreadMailsEmployer(@Request() req) {
         const { id } = req.user
         return await this.mailService.unreadMailsEmployer(id)
+    }
+
+    @UseGuards(AuthGuard)
+    @Roles(["admin"])
+    @Get('/unassigned-mails')
+    async getUnAssignedMails(@Query() { s: searchedTerm, limit, skip }) {
+        return await this.mailService.getUnAssignedQueries(searchedTerm, +limit, +skip)
+    }
+
+    @UseGuards(AuthGuard)
+    @Roles(["admin"])
+    @Patch('/assign-mail')
+    async assignQuery(@Request() req) {
+        const { id } = req.user
+        const { query_id } = req.query
+        return await this.mailService.assignQuery(id, query_id)
+    }
+
+    @UseGuards(AuthGuard)
+    @Roles(["superadmin"])
+    @Post('/mail-all-employers')
+    async MailAllEmployers(@Body() data: { message: string, subject: string }) {
+        return await this.mailService.mailAllEmployers(data.message, data.subject)
     }
 
 }

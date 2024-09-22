@@ -57,7 +57,7 @@ export class UsersService {
   }
 
   async recruiterLogin({ email, password }: LoginUserDto, res: Response): Promise<any> {
-    const recruiter = await this.recruiterModel.findOne({ email });
+    const recruiter = await this.recruiterModel.findOne({ email }).populate("companyId", { password: 0, activated: 0, token: 0, role: 0 })
 
     if (!recruiter) {
       throw new HttpException({ message: 'Recruiter does not exist' }, HttpStatus.NOT_FOUND);
@@ -333,7 +333,7 @@ export class UsersService {
     const _id = new Types.ObjectId(user.id)
     let currentUser: any;
     if (user.role === "recruiter") {
-      currentUser = await this.recruiterModel.findOne({ _id }, { password: 0 })
+      currentUser = await this.recruiterModel.findOne({ _id }, { password: 0 }).populate("companyId", { password: 0, activated: 0, token: 0, role: 0 })
       return { ...currentUser.toObject(), role: "recruiter" }
     } else {
       currentUser = await this.userModel.findOne({ _id }, { password: 0 })

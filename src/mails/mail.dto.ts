@@ -1,5 +1,5 @@
 import { Type } from "class-transformer";
-import { IsArray, IsNotEmpty, IsString, ValidateNested } from "class-validator";
+import { IsArray, IsNotEmpty, IsOptional, IsString, ValidateNested } from "class-validator";
 
 export class Chat {
     @IsNotEmpty()
@@ -47,5 +47,10 @@ export class EmployerMailDto {
     @Type(() => Chat)
     chat: Chat[]
 
+
     readBy: string[]
+
+    @IsOptional()
+    @IsString()
+    assignedTo?: string
 }

@@ -6,12 +6,14 @@ import { MailSchema } from './schema/mail.schema';
 import { MailController } from './mail.controller';
 import { MailService } from './mail.services';
 import { EmployerMailSchema } from './schema/employerMail.schema';
+import { CompanyProfileSchema } from 'src/company/schema/companyProfile.schema';
 
 @Module({
     imports: [
         MongooseModule.forFeature([
             { name: "Mail", schema: MailSchema },
             { name: "EmployerMail", schema: EmployerMailSchema },
+            { name: "CompanyProfile", schema: CompanyProfileSchema },
         ])
     ],
     controllers: [MailController],

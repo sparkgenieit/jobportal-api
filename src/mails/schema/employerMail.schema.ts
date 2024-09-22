@@ -20,6 +20,8 @@ export class EmployerMail {
     chat?: Chat[]
     @Prop()
     readBy: string[]
+    @Prop()
+    assignedTo: string
 }
 
 export const EmployerMailSchema = SchemaFactory.createForClass(EmployerMail);
