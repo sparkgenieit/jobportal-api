@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
 import { JobsDto } from './dto/jobs.dto';
 import { Jobs } from './schema/Jobs.schema';
 import { JobsService } from './jobs.service';
@@ -114,8 +114,9 @@ export class jobsController {
     @UseGuards(AuthGuard)
     @Roles(["admin"])
     @Get('assignedJobs/:adminId')
-    async getAssignedJobs(@Param() data, @Query() { limit, skip }) {
-        return await this.jobsService.getAssignedJobs(data.adminId, +limit, +skip);
+    async getAssignedJobs(@Query() { limit, skip }, @Req() req) {
+        const { id } = req.user.id
+        return await this.jobsService.getAssignedJobs(id, +limit, +skip);
     }
 
     @UseGuards(AuthGuard)

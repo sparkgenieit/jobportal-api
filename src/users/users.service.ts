@@ -17,6 +17,7 @@ import { randomUUID } from 'crypto';
 import { Recruiter } from 'src/company/schema/recruiter.schema';
 import { RecruiterDto } from 'src/company/dto/recruiter.dto';
 import { updateUserDto } from './dto/updateUser.dto';
+import { Response } from 'express';
 
 @Injectable()
 export class UsersService {
@@ -31,9 +32,8 @@ export class UsersService {
     private jwtService: JwtService
   ) { }
 
-  async findOne({ email, password }: LoginUserDto): Promise<any> {
+  async findOne({ email, password }: LoginUserDto, res: Response): Promise<any> {
     const user = await this.userModel.findOne({ email });
-
     if (!user) {
       throw new HttpException({ message: 'User does not exist' }, HttpStatus.NOT_FOUND);
     }
@@ -46,11 +46,15 @@ export class UsersService {
       throw new HttpException({ message: 'Invalid password' }, HttpStatus.BAD_REQUEST);
     }
     const payload = { username: user.first_name + " " + user.last_name, id: user._id, role: user.role };
-    user.token = await this.jwtService.signAsync(payload, { secret: "JWT_SECRET_KEY" });
-    return user;
+    const token = await this.jwtService.signAsync(payload, { secret: "JWT_SECRET_KEY" });
+
+    const { password: pass, ...results } = user  // Should not send password string to the client
+
+    res.cookie('Token', token, { httpOnly: true, sameSite: 'strict', maxAge: 3 * 24 * 60 * 60 * 1000 }) // Cookie will expire after 3 days
+    res.send(results)
   }
 
-  async recruiterLogin({ email, password }: LoginUserDto): Promise<any> {
+  async recruiterLogin({ email, password }: LoginUserDto, res: Response): Promise<any> {
     const recruiter = await this.recruiterModel.findOne({ email });
 
     if (!recruiter) {
@@ -64,8 +68,12 @@ export class UsersService {
     }
 
     const payload = { username: recruiter.name, id: recruiter._id, role: "recruiter" };
-    recruiter.token = await this.jwtService.signAsync(payload, { secret: "JWT_SECRET_KEY" });
-    return recruiter;
+    const token = await this.jwtService.signAsync(payload, { secret: "JWT_SECRET_KEY" });
+
+    const { password: pass, ...results } = recruiter
+
+    res.cookie('Token', token, { httpOnly: true, sameSite: 'strict', maxAge: 3 * 24 * 60 * 60 * 1000 })
+    res.send(results)
   }
 
   async forgotPassword(email: string): Promise<any> {
@@ -305,7 +313,7 @@ export class UsersService {
     return savedJobsIds
   }
 
-  async getUser(user_id): Promise<any> {
+  async getUserProfile(user_id): Promise<any> {
     user_id = new mongoose.Types.ObjectId(user_id);
     const isUser = await this.userProfileModel.findOne({ user_id });
 
@@ -314,5 +322,17 @@ export class UsersService {
     } else {
       return await this.userProfileModel.findOne({ user_id });
     }
+  }
+
+
+  async getUser(user: any) {
+    const _id = new Types.ObjectId(user.id)
+    let currentUser;
+    if (user.role === "recruiter") {
+      currentUser = await this.recruiterModel.findOne({ _id }, { password: 0 })
+    } else {
+      currentUser = await this.userModel.findOne({ _id }, { password: 0 })
+    }
+    return currentUser
   }
 }

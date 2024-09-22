@@ -1,5 +1,5 @@
 import { UsersService } from './users.service';
-import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query, UseGuards, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query, Res, Req, UseGuards, ValidationPipe } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './schema/user.schema';
 import { UserProfile } from './schema/userProfile.schema';
@@ -9,6 +9,7 @@ import { AuthGuard } from 'src/auth/auth.guard';
 import { forgotOrResetPasswordDto } from './dto/forgotOrResetPassword.dto';
 import { Roles } from 'src/auth/roles.decorator';
 import { updateUserDto } from './dto/updateUser.dto';
+import { Response, Request } from 'express';
 
 
 @Controller('users')
@@ -18,13 +19,13 @@ export class UsersController {
     ) { }
 
     @Post('login')
-    async LoginUserDto(@Body(ValidationPipe) loginUserDto: LoginUserDto): Promise<User> {
-        return await this.userService.findOne(loginUserDto);
+    async LoginUserDto(@Body(ValidationPipe) loginUserDto: LoginUserDto, @Res({ passthrough: true }) res: Response): Promise<User> {
+        return await this.userService.findOne(loginUserDto, res);
     }
 
     @Post('/login/recruiter')
-    async loginRecruiter(@Body(ValidationPipe) loginUserDto: LoginUserDto) {
-        return await this.userService.recruiterLogin(loginUserDto);
+    async loginRecruiter(@Body(ValidationPipe) loginUserDto: LoginUserDto, @Res({ passthrough: true }) res: Response) {
+        return await this.userService.recruiterLogin(loginUserDto, res);
     }
 
     @Post('forgot-password')
@@ -109,10 +110,23 @@ export class UsersController {
     }
 
     @UseGuards(AuthGuard)
+    @Post("/logout")
+    async logoutUser(@Res() res: Response) {
+        res.clearCookie("Token")
+        res.send({ message: "Logout Successfull" })
+    }
+
+    @UseGuards(AuthGuard)
+    @Get('/user')
+    async getUser(@Req() req: Request) {
+        return await this.userService.getUser(req.user);
+    }
+
+    @UseGuards(AuthGuard)
     @Roles(["user", "employer", "recruiter"])
     @Get('profile/:id')
-    async getUser(@Param() data): Promise<UserProfile> {
-        console.log(data.id);
-        return await this.userService.getUser(data.id);
+    async getUserProfile(@Param() data): Promise<UserProfile> {
+        return await this.userService.getUserProfile(data.id);
     }
+
 }
