@@ -216,13 +216,6 @@ export class UsersService {
     }
   }
 
-  async getUserCredits(user_id: Types.ObjectId | string): Promise<any> {
-    user_id = new Types.ObjectId(user_id)
-    const user = await this.userModel.findOne({ _id: user_id })
-    if (!user) throw new HttpException({ message: "The given user does not exist" }, HttpStatus.NOT_FOUND);
-    return { credits: user.credits, usedFreeCredit: user.usedFreeCredit }
-  }
-
   async updateAdmin(user_id: string | Types.ObjectId, userDto: CreateUserDto): Promise<any> {
     user_id = new mongoose.Types.ObjectId(user_id);
     const isUser = await this.userModel.findOne({ _id: user_id });

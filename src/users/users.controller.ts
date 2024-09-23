@@ -82,13 +82,6 @@ export class UsersController {
     }
 
     @UseGuards(AuthGuard)
-    @Roles(["employer", "recruiter"])
-    @Get('get-credits/:id')
-    async getCredits(@Param() data) {
-        return await this.userService.getUserCredits(data.id);
-    }
-
-    @UseGuards(AuthGuard)
     @Roles(["superadmin"])
     @Delete('admin/delete/:id')
     async deleteAdmin(@Param() data): Promise<User> {

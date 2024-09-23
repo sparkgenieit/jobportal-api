@@ -463,7 +463,8 @@ export class JobsService implements OnModuleInit {
       {
         $addFields: {
           banner: { $arrayElemAt: ['$banner.banner', 0] },
-          youtubeUrl: { $arrayElemAt: ['$banner.youtubeUrl', 0] }
+          youtubeUrl: { $arrayElemAt: ['$banner.youtubeUrl', 0] },
+          info: { $arrayElemAt: ['$banner.info', 0] }
         }
       }
     ])
