@@ -8,6 +8,12 @@ import { MailService } from "./mail.services";
 export class MailController {
     constructor(private readonly mailService: MailService) { }
 
+
+    @Post('/contact-us')
+    async ContactUsMail(@Body(ValidationPipe) mailDto: EmployerMailDto) {
+        return await this.mailService.createEmployerMail(mailDto)
+    }
+
     // Admin to Admin Mail Routes
 
     @UseGuards(AuthGuard)

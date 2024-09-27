@@ -6,6 +6,7 @@ import { Mail } from "./schema/mail.schema";
 import { EmployerMail } from "./schema/employerMail.schema";
 import { CompanyProfile } from "src/company/schema/companyProfile.schema";
 import { CompanyProfileDto } from "src/company/dto/company-profile.dto";
+import { MailerService } from "@nestjs-modules/mailer";
 
 @Injectable()
 export class MailService {
@@ -13,6 +14,7 @@ export class MailService {
         @InjectModel("Mail") private mailModel: Model<Mail>,
         @InjectModel("EmployerMail") private employerMailModel: Model<EmployerMail>,
         @InjectModel("CompanyProfile") private companyProfileModel: Model<CompanyProfile>,
+        private emailService: MailerService
     ) { }
 
     //Admin - Admin Methods
@@ -184,12 +186,18 @@ export class MailService {
     async postReplyEmployer(_id: string | Types.ObjectId, user: any, data: Chat) {
         _id = new Types.ObjectId(_id)
         try {
-            const contact = await this.employerMailModel.findOne({ _id }, { assignedTo: 1 })
+            const contact: EmployerMailDto = await this.employerMailModel.findOne({ _id })
+
+            if (contact.participants?.includes("Visitor")) {
+                await this.sendReplyMail(contact, data)
+            }
+
             if (contact.assignedTo === "Super Admin") {
                 contact.assignedTo = ""
             }
             return await this.employerMailModel.updateOne({ _id, participants: { $in: user.id } }, { $push: { chat: data }, readBy: [user.id], assignedTo: contact.assignedTo })
         } catch (error) {
+            console.log(error);
             throw new HttpException({ message: "Something went wrong! Please try again" }, HttpStatus.INTERNAL_SERVER_ERROR)
         }
     }
@@ -297,4 +305,18 @@ export class MailService {
         await this.employerMailModel.insertMany(sendingMessages, { ordered: false })
     }
 
+
+    // Sending reply to the visitor 
+    async sendReplyMail(contact: EmployerMailDto, reply: Chat) {
+        await this.emailService.sendMail({
+            to: contact.chat[0].by,
+            subject: contact.subject,
+            // The `.pug`, `.ejs` or `.hbs` extension is appended automatically.
+            template: 'user/contact_us',
+            context: {
+                message: reply.message,
+                name: contact.chat[0].from
+            },
+        })
+    }
 }

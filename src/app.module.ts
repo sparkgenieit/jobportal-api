@@ -16,7 +16,6 @@ import { PaymentModule } from './payment/payment.module';
 import { ConfigModule } from '@nestjs/config';
 import { GlobalModule } from './global/global.module';
 import { NotificationModule } from './notifications/notifications.module';
-import { ContactModule } from './contact/contact.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { MailModule } from './mails/mail.module';
 
@@ -38,7 +37,6 @@ import { MailModule } from './mails/mail.module';
     CategoryModule,
     PaymentModule,
     NotificationModule,
-    ContactModule,
     MailModule
   ],
   controllers: [AppController],
