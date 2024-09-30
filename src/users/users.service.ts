@@ -45,7 +45,7 @@ export class UsersService {
     if (!isMatch) {
       throw new HttpException({ message: 'Invalid password' }, HttpStatus.BAD_REQUEST);
     }
-    const payload = { username: user.first_name + " " + user.last_name, id: user._id, role: user.role };
+    const payload = { username: user.first_name + " " + user.last_name, id: user._id, role: user.role, email: user.email };
     const token = await this.jwtService.signAsync(payload, { secret: "JWT_SECRET_KEY" });
 
     let userObject = user.toObject()
@@ -69,7 +69,7 @@ export class UsersService {
       throw new HttpException({ message: 'Invalid password' }, HttpStatus.BAD_REQUEST);
     }
 
-    const payload = { username: recruiter.name, id: recruiter._id, role: "recruiter" };
+    const payload = { username: recruiter.name, id: recruiter._id, role: "recruiter", email: recruiter.email };
     const token = await this.jwtService.signAsync(payload, { secret: "JWT_SECRET_KEY" });
 
     const { password: pass, ...results } = recruiter.toObject()
@@ -272,7 +272,7 @@ export class UsersService {
 
     return {
       users: users[0].data,
-      total: users[0].count[0].total,
+      total: users[0].count[0]?.total || 0,
       status: 200
     }
   }
@@ -300,7 +300,7 @@ export class UsersService {
 
     return {
       admins: users[0].data,
-      total: users[0].count[0].total,
+      total: users[0].count[0]?.total || 0,
       status: 200
     }
   }

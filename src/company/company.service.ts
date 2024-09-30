@@ -12,6 +12,7 @@ import * as path from 'path';
 import * as bcrypt from 'bcrypt';
 import { RecruiterDto } from './dto/recruiter.dto';
 import { Recruiter } from './schema/recruiter.schema';
+import { Log } from 'src/utils/Log.schema';
 
 @Injectable()
 export class CompanyService {
@@ -21,6 +22,7 @@ export class CompanyService {
     @InjectModel(UserJobs.name) private readonly UserJobsModel: Model<UserJobs>,
     @InjectModel(User.name) private readonly UserModel: Model<User>,
     @InjectModel(Recruiter.name) private readonly recruiterModel: Model<Recruiter>,
+    @InjectModel(Log.name) private readonly logModel: Model<Log>,
     private jwtService: JwtService
   ) { }
 
@@ -41,6 +43,8 @@ export class CompanyService {
       throw new HttpException({ message: "The given user does not exist" }, HttpStatus.NOT_FOUND);
     } else {
       await this.companyProfileModel.findOneAndUpdate({ user_id }, companyProfileDto);
+
+
 
       if (isUser.name !== companyProfileDto.name) { // checking if the user name is changed or not
 
@@ -73,6 +77,9 @@ export class CompanyService {
           }
         }
       }
+
+      await this.createLogs(isUser, companyProfileDto)
+
       return { message: "Update Success" }
     }
   }
@@ -239,6 +246,68 @@ export class CompanyService {
   async getCompanyRecruiters(companyId: string | Types.ObjectId) {
     companyId = new Types.ObjectId(companyId)
     return await this.recruiterModel.find({ companyId }, { password: 0 })
+  }
+
+  async getLogs(id: string, role: string, limit: number, skip: number) {
+
+    let query: any = {}
+
+    if (role === "employer") query.companyId = id
+
+    if (role === "recruiter") {
+      const _id = new Types.ObjectId(id)
+      const user = await this.recruiterModel.findOne({ _id })
+      query.companyId = user.companyId
+    }
+
+    if (role === 'admin' || role === "superadmin") {
+      query = {}
+    }
+
+    const response = await this.logModel.aggregate([
+      {
+        $facet: {
+          logs: [
+            {
+              $match: query
+            },
+            { $skip: skip },
+            { $limit: limit }
+          ],
+          count: [{ $match: query }, { $count: "total" }]
+        }
+      }
+    ])
+
+    return {
+      logs: response[0].logs,
+      total: response[0].count[0]?.total || 0,
+      status: 200
+    }
+  }
+
+
+  async createLogs(previousProfile: CompanyProfile, updatedProfile: CompanyProfileDto) {
+
+    const changes: Log[] = []
+
+    for (const key in updatedProfile) {
+      if (updatedProfile[key] !== previousProfile[key]) {
+        const change: Log = {
+          companyId: previousProfile.user_id.toString(),
+          companyName: updatedProfile.name,
+          description: "Updated " + key,
+          email: updatedProfile.email,
+          username: updatedProfile.name,
+          fieldName: key,
+          changedFrom: previousProfile[key],
+          changedTo: updatedProfile[key]
+        }
+        changes.push(change)
+      }
+    }
+
+    await this.logModel.insertMany(changes, { ordered: false })
   }
 
 

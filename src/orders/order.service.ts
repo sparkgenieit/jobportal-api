@@ -43,11 +43,11 @@ export class OrderService {
           $or: [
             { invoiceNumberString: { $regex: query } },
             { amountString: { $regex: query } },
-            { createdDateString: { $regex: query } }
+            { createdDateString: { $regex: query } },
+            { description: { $regex: query } }
           ]
         }
       },
-      { $sort: { created_date: -1 } },
       {
         $facet: {
           data: [

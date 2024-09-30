@@ -5,8 +5,6 @@ import { CompanyProfile } from './schema/companyProfile.schema';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { Roles } from 'src/auth/roles.decorator';
 import { RecruiterDto } from './dto/recruiter.dto';
-import { Request } from 'express';
-
 
 @UseGuards(AuthGuard)
 @Controller('companies')
@@ -56,6 +54,14 @@ export class CompaniesController {
     @Get('postedJobs/:companyId')
     async getPostedJobs(@Param() data, @Query() { limit, skip, name }) {
         return await this.companyService.getPostedJobs(data.companyId, +limit, +skip, name);
+    }
+
+    @Roles(["employer", "recruiter", "admin", "superadmin"])
+    @Get('logs')
+    async getLogs(@Req() req) {
+        const { id, role } = req.user
+        const { limit, skip } = req.query
+        return await this.companyService.getLogs(id, role, +limit, +skip);
     }
 
     @Roles(["employer", "recruiter"])

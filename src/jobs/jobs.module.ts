@@ -9,6 +9,7 @@ import { User, UserSchema } from 'src/users/schema/user.schema';
 import { UserJobs, UserJobsSchema } from 'src/users/schema/userJobs.schema';
 import { CompanyProfile, CompanyProfileSchema } from 'src/company/schema/companyProfile.schema';
 import { Order, OrderSchema } from 'src/orders/schema/order.schema';
+import { Log, LogSchema } from 'src/utils/Log.schema';
 
 @Module({
   imports: [
@@ -18,7 +19,8 @@ import { Order, OrderSchema } from 'src/orders/schema/order.schema';
       { name: UserJobs.name, schema: UserJobsSchema },
       { name: CompanyProfile.name, schema: CompanyProfileSchema },
       { name: Order.name, schema: OrderSchema },
-    ])
+      { name: Log.name, schema: LogSchema },
+    ]),
   ],
   providers: [Jobs, JobsService, User, UserJobs, JwtService, CompanyProfile],
   controllers: [jobsController]

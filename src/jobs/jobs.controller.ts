@@ -148,9 +148,8 @@ export class jobsController {
     @UseGuards(AuthGuard)
     @Roles(["employer", "recruiter"])
     @Put('update/:id')
-    async jobsDto(@Param() data, @Body() jobsDto: JobsDto): Promise<Jobs[]> {
-        console.log("update jobs id", data.id)
-        return await this.jobsService.updateJob(data.id, jobsDto);
+    async jobsDto(@Param() data, @Body() jobsDto: JobsDto, @Req() req): Promise<Jobs[]> {
+        return await this.jobsService.updateJob(data.id, jobsDto, req.user);
     }
 
     @Get('/job-count')

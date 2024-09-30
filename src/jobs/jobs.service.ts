@@ -10,12 +10,14 @@ import { Cron } from '@nestjs/schedule';
 import { MailerService } from '@nestjs-modules/mailer';
 import { Order } from 'src/orders/schema/order.schema';
 import { OrderDto } from 'src/orders/dto/order.dto';
+import { Log } from 'src/utils/Log.schema';
 
 @Injectable()
 export class JobsService implements OnModuleInit {
   constructor(
     private emailService: MailerService,
     @InjectModel(Jobs.name) private readonly jobsModel: Model<Jobs>,
+    @InjectModel(Log.name) private readonly logModel: Model<Log>,
     @InjectModel(CompanyProfile.name) private readonly companyProfileModel: Model<CompanyProfile>,
     @InjectModel(UserJobs.name) private readonly UserJobsModel: Model<UserJobs>,
     @InjectModel(User.name) private userModel: Model<User>,
@@ -63,7 +65,7 @@ export class JobsService implements OnModuleInit {
     }
   }
 
-  async updateJob(jobId, jobsDto: JobsDto): Promise<any> {
+  async updateJob(jobId, jobsDto: JobsDto, user: any): Promise<any> {
     const isJob = await this.jobsModel.findOne({ _id: jobId });
 
     if (!isJob) {
@@ -72,11 +74,40 @@ export class JobsService implements OnModuleInit {
       if (isJob.status === "expired" || isJob.status === "closed") {
         return await this.repostExpiredJob(isJob, jobsDto)
       }
+
       jobsDto.status = 'queue';
       jobsDto.adminId = null;
       jobsDto.adminName = "";
-      return await this.jobsModel.findOneAndUpdate({ _id: jobId }, jobsDto);
+      await this.jobsModel.findOneAndUpdate({ _id: jobId }, jobsDto);
+      await this.createLogs(user, isJob, jobsDto)
+      return { message: "Updated Success" }
     }
+  }
+
+  async createLogs(user: any, previousJob: any, updatedJob: JobsDto) {
+    const { status, adminId, adminName, creationdate, benifits, employerquestions, ...fieldsTobeChecked } = updatedJob
+
+    let changes: Log[] = []
+
+    for (const key in fieldsTobeChecked) {
+      if (updatedJob[key] !== previousJob[key]) {
+        let change: Log = {
+          companyId: updatedJob.companyId,
+          companyName: updatedJob.company,
+          jobId: previousJob._id,
+          employerReference: updatedJob.employjobreference,
+          jobTitle: updatedJob.jobTitle,
+          fieldName: key,
+          username: user.username,
+          email: user.email,
+          description: "Changed " + key,
+          changedFrom: previousJob[key],
+          changedTo: updatedJob[key]
+        }
+        changes.push(change)
+      }
+    }
+    await this.logModel.insertMany(changes, { ordered: false })
   }
 
   async assignJob({ adminId, jobId, jobsDto }): Promise<any> {
@@ -296,7 +327,7 @@ export class JobsService implements OnModuleInit {
     ])
     return {
       jobs: response[0].jobs,
-      total: response[0].count[0].total,
+      total: response[0].count[0]?.total || 0,
       status: 200,
     }
   }
