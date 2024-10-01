@@ -248,33 +248,32 @@ export class CompanyService {
     return await this.recruiterModel.find({ companyId }, { password: 0 })
   }
 
-  async getLogs(id: string, role: string, limit: number, skip: number) {
+  async getLogs(id: string, role: string, limit: number, skip: number, searchTerm: string) {
 
     let query: any = {}
 
-    if (role === "employer") query.companyId = id
-
-    if (role === "recruiter") {
-      const _id = new Types.ObjectId(id)
-      const user = await this.recruiterModel.findOne({ _id })
-      query.companyId = user.companyId
-    }
-
     if (role === 'admin' || role === "superadmin") {
       query = {}
+    } else {
+      query.companyId = id
+    }
+
+    if (searchTerm && searchTerm.trim() !== "") {
+      query.$text = { $search: searchTerm }
     }
 
     const response = await this.logModel.aggregate([
       {
+        $match: query
+      },
+      {
         $facet: {
           logs: [
-            {
-              $match: query
-            },
+            { $sort: { date: -1 } },
             { $skip: skip },
             { $limit: limit }
           ],
-          count: [{ $match: query }, { $count: "total" }]
+          count: [{ $count: "total" }]
         }
       }
     ])

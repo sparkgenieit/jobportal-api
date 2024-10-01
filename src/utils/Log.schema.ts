@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import mongoose, { HydratedDocument } from "mongoose";
-import { User } from "src/users/schema/user.schema";
+import { HydratedDocument } from "mongoose";
+
 
 export type LogDocument = HydratedDocument<Log>;
 
@@ -45,4 +45,8 @@ export class Log {
 
 }
 
-export const LogSchema = SchemaFactory.createForClass(Log);
+const LogSchema = SchemaFactory.createForClass(Log);
+
+LogSchema.index({ "$**": "text" })
+
+export { LogSchema }

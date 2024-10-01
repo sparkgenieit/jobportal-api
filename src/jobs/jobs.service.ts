@@ -67,14 +67,12 @@ export class JobsService implements OnModuleInit {
 
   async updateJob(jobId, jobsDto: JobsDto, user: any): Promise<any> {
     const isJob = await this.jobsModel.findOne({ _id: jobId });
-
     if (!isJob) {
       throw new HttpException({ message: "The given Job does not exist" }, HttpStatus.BAD_REQUEST);
     } else {
       if (isJob.status === "expired" || isJob.status === "closed") {
         return await this.repostExpiredJob(isJob, jobsDto)
       }
-
       jobsDto.status = 'queue';
       jobsDto.adminId = null;
       jobsDto.adminName = "";
@@ -502,31 +500,6 @@ export class JobsService implements OnModuleInit {
     return jobs[0]
   }
 
-  async PostedJobsCount() {
-
-    const JobsCount = await this.jobsModel.aggregate([
-      {
-        $match: { status: "approved" }
-      },
-      {
-        $group: {
-          _id: '$companyId',
-          count: { $sum: 1 }
-        }
-      },
-      {
-        $match: { count: { $gt: 1 } }
-      }]
-    )
-
-    return {
-      JobsCount,
-      status: 200
-    }
-  }
-
-
-
   async reportJob({ userId, jobId, reportReason }) {
     jobId = new mongoose.Types.ObjectId(jobId);
     userId = new mongoose.Types.ObjectId(userId);
@@ -542,22 +515,52 @@ export class JobsService implements OnModuleInit {
     }
   }
 
-  async deleteJob(jobId) {
+  async deleteJob({ username, email }: any, jobId: string) {
     const isJob = await this.jobsModel.findOne({ _id: jobId });
-    console.log(isJob);
     if (!isJob) {
       throw new HttpException({ message: "The given Job does not exist" }, HttpStatus.NOT_FOUND);
     } else {
-      return await this.jobsModel.findByIdAndDelete({ _id: jobId });
+
+      await this.jobsModel.findByIdAndDelete({ _id: jobId });
+
+      const log: Log = {
+        companyId: isJob.companyId.toString(),
+        companyName: isJob.company,
+        employerReference: isJob.employjobreference,
+        jobId: jobId,
+        jobTitle: isJob.jobTitle,
+        username,
+        email,
+        fieldName: "Actions",
+        changedTo: 'Deleted',
+        description: "Deleted Job"
+      }
+      await this.logModel.create(log)
+
+      return { message: "Job deleted" }
     }
   }
 
-  async closeJob(jobId: Types.ObjectId, userId: string) {
+  async closeJob(jobId: Types.ObjectId, userId: string, { username, email }) {
     const isJob = await this.jobsModel.findOne({ _id: jobId, companyId: userId })
     if (!isJob) throw new HttpException({ message: "No job found" }, HttpStatus.NOT_FOUND);
     isJob.status = "closed"
     isJob.closedate = new Date().toISOString()
     await this.jobsModel.findOneAndUpdate({ _id: isJob._id }, isJob)
+
+    const log: Log = {
+      companyId: isJob.companyId.toString(),
+      companyName: isJob.company,
+      employerReference: isJob.employjobreference,
+      jobId: jobId.toString(),
+      jobTitle: isJob.jobTitle,
+      username,
+      email,
+      fieldName: "Actions",
+      changedTo: 'Closed',
+      description: "Closed Job"
+    }
+    await this.logModel.create(log)
     return { message: "success" }
   }
 
@@ -571,6 +574,8 @@ export class JobsService implements OnModuleInit {
     for (let field of valueToBeCheckedForEquality) {
       jobUserSent[field] !== jobInDB[field] ? isEqual = false : null
     }
+
+    console.log(jobUserSent);
 
     const jobId = new mongoose.Types.ObjectId(jobInDB.companyId)
     const company = await this.userModel.findOne({ _id: jobId })

@@ -59,9 +59,12 @@ export class CompaniesController {
     @Roles(["employer", "recruiter", "admin", "superadmin"])
     @Get('logs')
     async getLogs(@Req() req) {
-        const { id, role } = req.user
-        const { limit, skip } = req.query
-        return await this.companyService.getLogs(id, role, +limit, +skip);
+        let { id, role, companyId } = req.user
+
+        if (role === "recruiter") id = companyId
+
+        const { limit, skip, s } = req.query
+        return await this.companyService.getLogs(id, role, +limit, +skip, s);
     }
 
     @Roles(["employer", "recruiter"])

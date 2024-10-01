@@ -57,7 +57,7 @@ export class UsersService {
   }
 
   async recruiterLogin({ email, password }: LoginUserDto, res: Response): Promise<any> {
-    const recruiter = await this.recruiterModel.findOne({ email }).populate("companyId", { password: 0, activated: 0, token: 0, role: 0 })
+    const recruiter: any = await this.recruiterModel.findOne({ email }).populate("companyId", { password: 0, activated: 0, token: 0, role: 0 })
 
     if (!recruiter) {
       throw new HttpException({ message: 'Recruiter does not exist' }, HttpStatus.NOT_FOUND);
@@ -69,7 +69,7 @@ export class UsersService {
       throw new HttpException({ message: 'Invalid password' }, HttpStatus.BAD_REQUEST);
     }
 
-    const payload = { username: recruiter.name, id: recruiter._id, role: "recruiter", email: recruiter.email };
+    const payload = { username: recruiter.name, id: recruiter._id, role: "recruiter", email: recruiter.email, companyId: recruiter.companyId._id };
     const token = await this.jwtService.signAsync(payload, { secret: "JWT_SECRET_KEY" });
 
     const { password: pass, ...results } = recruiter.toObject()

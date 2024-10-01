@@ -107,8 +107,8 @@ export class jobsController {
     @UseGuards(AuthGuard)
     @Roles(["employer", "recruiter"])
     @Patch('close')
-    async closeJob(@Body() { userId, jobId }): Promise<any> {
-        return await this.jobsService.closeJob(jobId, userId);
+    async closeJob(@Body() { userId, jobId }, @Req() req): Promise<any> {
+        return await this.jobsService.closeJob(jobId, userId, req.user);
     }
 
     @UseGuards(AuthGuard)
@@ -152,11 +152,6 @@ export class jobsController {
         return await this.jobsService.updateJob(data.id, jobsDto, req.user);
     }
 
-    @Get('/job-count')
-    async getJobsCount() {
-        return await this.jobsService.PostedJobsCount()
-    }
-
     @Get(':id')
     async getJob(@Param() data): Promise<Jobs[]> {
         return await this.jobsService.getJob(data.id);
@@ -165,8 +160,9 @@ export class jobsController {
     @UseGuards(AuthGuard)
     @Roles(["employer", "recruiter"])
     @Delete('delete/:id')
-    async deleteJob(@Param() data) {
-        return await this.jobsService.deleteJob(data.id);
+    async deleteJob(@Req() req) {
+        const { id } = req.params
+        return await this.jobsService.deleteJob(req.user, id);
     }
 
 
