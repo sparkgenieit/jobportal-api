@@ -113,9 +113,9 @@ export class jobsController {
 
     @UseGuards(AuthGuard)
     @Roles(["admin"])
-    @Get('assignedJobs/:adminId')
+    @Get('assignedJobs')
     async getAssignedJobs(@Query() { limit, skip }, @Req() req) {
-        const { id } = req.user.id
+        const { id } = req.user
         return await this.jobsService.getAssignedJobs(id, +limit, +skip);
     }
 

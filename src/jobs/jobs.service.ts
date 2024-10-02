@@ -575,7 +575,6 @@ export class JobsService implements OnModuleInit {
       jobUserSent[field] !== jobInDB[field] ? isEqual = false : null
     }
 
-    console.log(jobUserSent);
 
     const jobId = new mongoose.Types.ObjectId(jobInDB.companyId)
     const company = await this.userModel.findOne({ _id: jobId })
