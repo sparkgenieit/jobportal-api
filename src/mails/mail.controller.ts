@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Patch, Post, Put, Query, Request, UseGuards, ValidationPipe } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query, Request, UseGuards, ValidationPipe } from "@nestjs/common";
 import { AuthGuard } from "src/auth/auth.guard";
 import { Roles } from "src/auth/roles.decorator";
 import { Chat, EmployerMailDto, MailDto } from "./mail.dto";
@@ -103,9 +103,16 @@ export class MailController {
 
     @UseGuards(AuthGuard)
     @Roles(["admin"])
-    @Get('/unassigned-mails')
-    async getUnAssignedMails(@Query() { s: searchedTerm, limit, skip }) {
-        return await this.mailService.getUnAssignedQueries(searchedTerm, +limit, +skip)
+    @Get('/unassigned-mails/:type')
+    async getUnAssignedMails(@Param('type') type, @Query() { s: searchedTerm, limit, skip }) {
+        return await this.mailService.getUnAssignedQueries(searchedTerm, +limit, +skip, type)
+    }
+
+    @UseGuards(AuthGuard)
+    @Roles(["admin"])
+    @Delete('/delete/:id')
+    async deleteMail(@Param('id') id) {
+        return await this.mailService.deleteMail(id)
     }
 
     @UseGuards(AuthGuard)

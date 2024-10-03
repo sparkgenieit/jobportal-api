@@ -211,7 +211,8 @@ export class MailService {
         }
     }
 
-    async getUnAssignedQueries(search: string, limit: number, skip: number) {
+
+    async getUnAssignedQueries(search: string, limit: number, skip: number, type: string = "general") {
         let query: any = {
             $and: [
                 {
@@ -220,6 +221,7 @@ export class MailService {
                         { assignedTo: { $regex: /^$/ } } // Matches empty strings
                     ]
                 },
+                { participants: type === "general" ? { $in: ["Visitor"] } : { $nin: ["Visitor"] } }
             ]
         }
 
@@ -303,6 +305,11 @@ export class MailService {
         })
 
         await this.employerMailModel.insertMany(sendingMessages, { ordered: false })
+    }
+
+    async deleteMail(id: string) {
+        await this.employerMailModel.deleteOne({ _id: id })
+        return { message: "Mail deleted" }
     }
 
 
