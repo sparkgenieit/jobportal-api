@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Headers, Param, Post, RawBodyRequest, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, RawBodyRequest, Req, UseGuards } from '@nestjs/common';
 import { PaymentService } from './payment.service';
 import { Request } from 'express';
 import { AuthGuard } from 'src/auth/auth.guard';
@@ -8,7 +8,7 @@ import { Roles } from 'src/auth/roles.decorator';
 export class PaymentController {
     constructor(private readonly paymentService: PaymentService,) { }
     @UseGuards(AuthGuard)
-    @Roles(["employer"])
+    @Roles(["employer", "recruiter"])
     @Post('make-payment')
     async CreatePaymentIntent(@Body() { plan, credits, price, user_id }) {
         return await this.paymentService.makePayment(plan, credits, price, user_id);
@@ -22,9 +22,9 @@ export class PaymentController {
     }
 
     @UseGuards(AuthGuard)
-    @Roles(["employer"])
+    @Roles(["employer", "recruiter"])
     @Get('session-complete/:id')
-    async etPaymentIntent(@Param() { id }) {
+    async GetPaymentIntent(@Param() { id }) {
         return await this.paymentService.getSessionDetails(id)
     }
 }

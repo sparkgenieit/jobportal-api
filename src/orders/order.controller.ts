@@ -19,13 +19,13 @@ export class OrderController {
     }
 
 
-    @Roles(["employer"])
+    @Roles(["employer", "recruiter"])
     @Get("/get/:companyId")
     async getOrders(@Param() { companyId }, @Query() { skip, searchTerm, limit, sort }) {
         return await this.orderService.getOrders(companyId, searchTerm, sort, +skip, +limit)
     }
 
-    @Roles(["employer"])
+    @Roles(["employer", "recruiter"])
     @Get("/download-transactions/:companyId")
     async getAllCompanyOrders(@Param() { companyId }, @Query() { from, to }) {
         return await this.orderService.getAllCompanyOrders(companyId, from, to)
