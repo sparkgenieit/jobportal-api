@@ -40,6 +40,11 @@ export class CategoryService {
     }
   }
 
+  async createBulkCategories(Categories: CategoryDto[]) {
+    await this.catagoriesModel.insertMany(Categories, { ordered: false })
+    return { message: "Success" }
+  }
+
   async getCategories(): Promise<Category[]> {
     return await this.catagoriesModel.find().exec()
   }

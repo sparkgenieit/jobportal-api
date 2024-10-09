@@ -19,6 +19,13 @@ export class CategoryController {
         return await this.categoryService.createCategory(CategoryDto);
     }
 
+    @UseGuards(AuthGuard)
+    @Roles(["superadmin"])
+    @Post('bulk-create')
+    async bulkCreate(@Body() CategoryDto: CategoryDto[]) {
+        return await this.categoryService.createBulkCategories(CategoryDto);
+    }
+
     @Get("all")
     async getCategories(): Promise<Category[]> {
         return await this.categoryService.getCategories()

@@ -5,16 +5,16 @@ export type CategoryDocument = HydratedDocument<Category>;
 
 @Schema()
 export class Category {
-    @Prop({ type: Date })
+    @Prop({ type: Date, default: new Date() })
     created_date?: Date
     @Prop()
     name: string
     @Prop()
-    description: string
+    description?: string
     @Prop()
     parent_id: string
     @Prop()
-    photo: string
+    photo?: string
     @Prop()
     status?: string
 }
