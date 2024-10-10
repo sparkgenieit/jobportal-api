@@ -248,7 +248,7 @@ export class CompanyService {
     return await this.recruiterModel.find({ companyId }, { password: 0 })
   }
 
-  async getLogs(id: string, role: string, limit: number, skip: number, searchTerm: string) {
+  async getLogs(id: string, role: string, limit: number, skip: number, filters: any) {
 
     let query: any = {}
 
@@ -258,8 +258,20 @@ export class CompanyService {
       query.companyId = id
     }
 
-    if (searchTerm && searchTerm.trim() !== "") {
-      query.$text = { $search: searchTerm }
+    filters.jobTitle.trim() ? query.jobTitle = new RegExp(filters.jobTitle, "i") : null
+
+    filters.employerReference.trim() ? query.employerReference = new RegExp(filters.employerReference, "i") : null
+
+    filters.jobId.trim() ? query.jobId = new RegExp(filters.jobId, "i") : null
+
+    if (filters.fromDate) {
+      const from = new Date(filters.fromDate)
+      from.setHours(0, 0, 0, 0)
+
+      const to = filters.toDate ? new Date(filters.toDate) : new Date()
+      to.setHours(23, 59, 59, 999)
+
+      query.date = { $gte: from, $lte: to }
     }
 
     const response = await this.logModel.aggregate([
@@ -277,6 +289,7 @@ export class CompanyService {
         }
       }
     ])
+
 
     return {
       logs: response[0].logs,
