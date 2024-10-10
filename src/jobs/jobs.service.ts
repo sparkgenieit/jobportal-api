@@ -279,10 +279,12 @@ export class JobsService implements OnModuleInit {
       query.duration = new RegExp(data.duration, 'i')
     }
     if (data.rateperhour && data.rateperhour.trim() !== "") {
-      query.rateperhour = { $lt: data.rateperhour }
+
+      const rateperhour = data.salaryType === "annum" ? Math.round(Number(data.rateperhour) / 2080) : +data.rateperhour
+      query.rateperhour = { $lte: rateperhour }
     }
     if (data.weeklyperhour && data.weeklyperhour.trim() !== "") {
-      query.weeklyperhour = { $lt: data.weeklyperhour }
+      query.weeklyperhour = { $lte: +data.weeklyperhour }
     }
     if (data.jobtype && data.jobtype.trim() !== "") {
       query.jobtype = new RegExp(data.jobtype, 'i');

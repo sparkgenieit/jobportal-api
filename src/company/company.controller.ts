@@ -47,7 +47,9 @@ export class CompaniesController {
     @Roles(["employer", "recruiter"])
     @Get('profile/:id')
     async getCompany(@Param() data): Promise<CompanyProfile> {
-        return await this.companyService.getCompany(data.id);
+        if (data.id) {
+            return await this.companyService.getCompany(data.id);
+        }
     }
 
     @Roles(["employer", "recruiter"])
