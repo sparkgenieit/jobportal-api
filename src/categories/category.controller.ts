@@ -26,6 +26,13 @@ export class CategoryController {
         return await this.categoryService.createBulkCategories(CategoryDto);
     }
 
+    @UseGuards(AuthGuard)
+    @Roles(["superadmin"])
+    @Delete('bulk-delete')
+    async deleteAll() {
+        return await this.categoryService.deleteAll();
+    }
+
     @Get("all")
     async getCategories(): Promise<Category[]> {
         return await this.categoryService.getCategories()

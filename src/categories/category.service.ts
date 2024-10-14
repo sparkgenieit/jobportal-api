@@ -63,7 +63,6 @@ export class CategoryService {
 
 
   async deleteCategory(categoryId): Promise<any> {
-    console.log(categoryId);
     categoryId = new mongoose.Types.ObjectId(categoryId);
     //userProfileDto.user_id = user_id;
     const isCategory = await this.catagoriesModel.findOne({ _id: categoryId });
@@ -73,5 +72,10 @@ export class CategoryService {
 
       return await this.catagoriesModel.deleteOne({ _id: categoryId })
     }
+  }
+
+  async deleteAll() {
+    await this.catagoriesModel.deleteMany({})
+    return { message: "All Categories deleted " }
   }
 }
