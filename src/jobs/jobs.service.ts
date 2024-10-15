@@ -260,6 +260,7 @@ export class JobsService implements OnModuleInit {
     let query: any = {
       status: "approved",
     };
+
     if (data.jobTitle && data.jobTitle.trim() !== "") {
       query.jobTitle = new RegExp(data.jobTitle, 'i');
     }
@@ -278,11 +279,32 @@ export class JobsService implements OnModuleInit {
     if (data.duration && data.duration.trim() !== "") {
       query.duration = new RegExp(data.duration, 'i')
     }
-    if (data.rateperhour && data.rateperhour.trim() !== "") {
 
-      const rateperhour = data.salaryType === "annum" ? Math.round(Number(data.rateperhour) / 2080) : +data.rateperhour
-      query.rateperhour = { $lte: rateperhour }
+    if (data.rateperhour && data.rateperhour.trim() !== "") {
+      if (data.salaryType === "per annum") {
+        const salary = Math.round((data.rateperhour.replace(/[K+]/gi, '') * 1000) / 2080)  // Converting the per annum to per hour as we are saving in per hour in db
+        query.$and = [
+          { rateperhour: { $gte: salary } },
+          {
+            $or: [
+              { salary_type: 'per annum' },
+              { salary_type: 'negotiable' }
+            ]
+          },
+        ]
+      } else {
+        query.$and = [
+          { rateperhour: { $gte: +data.rateperhour.replace("+", "") } },
+          {
+            $or: [
+              { salary_type: 'per hour' },
+              { salary_type: 'negotiable' }
+            ]
+          },
+        ]
+      }
     }
+
     if (data.weeklyperhour && data.weeklyperhour.trim() !== "") {
       query.weeklyperhour = { $lte: +data.weeklyperhour }
     }

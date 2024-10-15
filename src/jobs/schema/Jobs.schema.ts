@@ -28,7 +28,7 @@ export class Jobs {
     @Prop()
     jobTitle: string
     @Prop()
-    rateperhour: string
+    rateperhour: number
     @Prop()
     salary_type: string
     @Prop()
