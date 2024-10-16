@@ -83,7 +83,7 @@ export class JobsService implements OnModuleInit {
   }
 
   async createLogs(user: any, previousJob: any, updatedJob: JobsDto) {
-    const { status, adminId, adminName, creationdate, benifits, employerquestions, ...fieldsTobeChecked } = updatedJob
+    const { status, adminId, adminName, creationdate, employerquestions, ...fieldsTobeChecked } = updatedJob
 
     let changes: Log[] = []
 

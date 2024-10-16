@@ -42,6 +42,8 @@ export class Jobs {
     @Prop()
     benifits: string
     @Prop()
+    other_benefits: string
+    @Prop()
     training: string
     @Prop()
     description: string
