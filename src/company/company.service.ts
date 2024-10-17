@@ -255,7 +255,7 @@ export class CompanyService {
     if (role === 'admin' || role === "superadmin") {
       query = {}
     } else {
-      query.companyId = id
+      query.user_id = id
     }
 
     filters.jobTitle.trim() ? query.jobTitle = new RegExp(filters.jobTitle, "i") : null
@@ -306,8 +306,8 @@ export class CompanyService {
     for (const key in updatedProfile) {
       if (updatedProfile[key] !== previousProfile[key]) {
         const change: Log = {
-          companyId: previousProfile.user_id.toString(),
-          companyName: updatedProfile.name,
+          user_id: previousProfile.user_id.toString(),
+          name: updatedProfile.name,
           description: "Updated " + key,
           email: updatedProfile.email,
           username: updatedProfile.name,

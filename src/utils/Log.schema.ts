@@ -11,10 +11,10 @@ export class Log {
     date?: Date
 
     @Prop()
-    companyId: string
+    user_id: string
 
     @Prop()
-    companyName: string
+    name: string
 
     @Prop()
     jobId?: string

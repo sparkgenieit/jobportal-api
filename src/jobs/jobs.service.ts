@@ -28,7 +28,7 @@ export class JobsService implements OnModuleInit {
     this.checkExpiredJobs()
   }
 
-  async postJob(jobsDto: JobsDto): Promise<any> {
+  async postJob(jobsDto: JobsDto, { username, email }): Promise<any> {
     let user = await this.userModel.findOne({ _id: jobsDto.companyId })
     if (user.usedFreeCredit === false) {
       jobsDto.status = 'queue';
@@ -47,7 +47,21 @@ export class JobsService implements OnModuleInit {
       jobsDto.status = 'queue';
       let credits = user.credits - 1;
       await this.userModel.findOneAndUpdate({ _id: jobsDto.companyId }, { credits: credits });
-      await this.jobsModel.create(jobsDto);
+      const job = await this.jobsModel.create(jobsDto);
+
+      const log: Log = {
+        user_id: jobsDto.companyId,
+        name: jobsDto.company,
+        employerReference: jobsDto.employjobreference,
+        jobId: job._id.toString(),
+        jobTitle: jobsDto.jobTitle,
+        username,
+        email,
+        fieldName: "Actions",
+        changedTo: 'Posted',
+        description: "Posted Job"
+      }
+      await this.logModel.create(log)
 
       const details = {
         description: `Job Ad Posted - ${jobsDto.jobTitle}`,
@@ -90,8 +104,8 @@ export class JobsService implements OnModuleInit {
     for (const key in fieldsTobeChecked) {
       if (updatedJob[key] !== previousJob[key]) {
         let change: Log = {
-          companyId: updatedJob.companyId,
-          companyName: updatedJob.company,
+          user_id: updatedJob.companyId,
+          name: updatedJob.company,
           jobId: previousJob._id,
           employerReference: updatedJob.employjobreference,
           jobTitle: updatedJob.jobTitle,
@@ -120,7 +134,22 @@ export class JobsService implements OnModuleInit {
       jobsDto.adminId = adminId;
       jobsDto.status = 'review';
       jobsDto.adminName = isUser.first_name + " " + isUser.last_name;
-      return await this.jobsModel.findOneAndUpdate({ _id: jobId }, jobsDto);
+
+      await this.jobsModel.findOneAndUpdate({ _id: jobId }, jobsDto);
+
+      const log: Log = {
+        user_id: adminId,
+        name: jobsDto.adminName,
+        jobId: jobsDto._id.toString(),
+        jobTitle: jobsDto.jobTitle,
+        username: jobsDto.adminName,
+        email: isUser.email,
+        fieldName: "Actions",
+        changedTo: 'Assigned',
+        description: "Job Assigned to Admin"
+      }
+      await this.logModel.create(log)
+      return { message: "Assigned Successfully" }
     }
   }
 
@@ -137,7 +166,23 @@ export class JobsService implements OnModuleInit {
       jobsDto.adminId = "";
       jobsDto.adminName = "";
       jobsDto.status = 'queue';
-      return await this.jobsModel.findOneAndUpdate({ _id: jobId }, jobsDto);
+
+      await this.jobsModel.findOneAndUpdate({ _id: jobId }, jobsDto);
+      const log: Log = {
+        user_id: adminId,
+        name: jobsDto.adminName,
+        jobId: jobsDto._id.toString(),
+        jobTitle: jobsDto.jobTitle,
+        username: jobsDto.adminName,
+        email: isUser.email,
+        fieldName: "Actions",
+        changedTo: 'Released',
+        description: "Job Released by Admin"
+      }
+
+      await this.logModel.create(log)
+
+      return { message: "Released Successfully" }
     }
   }
 
@@ -215,7 +260,34 @@ export class JobsService implements OnModuleInit {
         jobsDto.reportedBy = null;
         jobsDto.reportReason = null;
       }
-      return await this.jobsModel.findOneAndUpdate({ _id: jobId }, jobsDto);
+      await this.jobsModel.findOneAndUpdate({ _id: jobId }, jobsDto);
+
+      const logs: Log[] = [{
+        user_id: adminId,
+        name: jobsDto.adminName,
+        jobId: jobsDto._id.toString(),
+        jobTitle: jobsDto.jobTitle,
+        username: jobsDto.adminName,
+        email: isUser.email,
+        fieldName: "Actions",
+        changedTo: 'Live',
+        description: "Job Approved by Admin"
+      },
+      {
+        user_id: jobsDto.companyId,
+        name: jobsDto.company,
+        jobId: jobsDto._id.toString(),
+        jobTitle: jobsDto.jobTitle,
+        username: jobsDto.adminName,
+        email: isUser.email,
+        fieldName: "Actions",
+        changedTo: 'Live',
+        description: "Job is now live"
+      }]
+
+      await this.logModel.insertMany(logs, { ordered: false })
+
+      return { message: "Job Approved" }
     }
   }
 
@@ -238,7 +310,37 @@ export class JobsService implements OnModuleInit {
         jobsDto.reportedBy = null;
         jobsDto.reportReason = null;
       }
-      return await this.jobsModel.findOneAndUpdate({ _id: jobId }, jobsDto);
+
+      await this.jobsModel.findOneAndUpdate({ _id: jobId }, jobsDto)
+
+      const logs: Log[] = [
+        {
+          user_id: adminId,
+          name: jobsDto.adminName,
+          jobId: jobsDto._id.toString(),
+          jobTitle: jobsDto.jobTitle,
+          username: jobsDto.adminName,
+          email: isUser.email,
+          fieldName: "Actions",
+          changedTo: 'Rejected',
+          description: "Job Rejected by Admin"
+        },
+        {
+          user_id: jobsDto.companyId,
+          name: jobsDto.company,
+          jobId: jobsDto._id.toString(),
+          jobTitle: jobsDto.jobTitle,
+          username: jobsDto.adminName,
+          email: isUser.email,
+          fieldName: "Actions",
+          changedTo: 'Rejected',
+          description: "Job is rejected"
+        }
+      ]
+
+      await this.logModel.insertMany(logs, { ordered: false })
+
+      return { message: "Job Rejected" }
     }
   }
 
@@ -548,8 +650,8 @@ export class JobsService implements OnModuleInit {
       await this.jobsModel.findByIdAndDelete({ _id: jobId });
 
       const log: Log = {
-        companyId: isJob.companyId.toString(),
-        companyName: isJob.company,
+        user_id: isJob.companyId.toString(),
+        name: isJob.company,
         employerReference: isJob.employjobreference,
         jobId: jobId,
         jobTitle: isJob.jobTitle,
@@ -573,8 +675,8 @@ export class JobsService implements OnModuleInit {
     await this.jobsModel.findOneAndUpdate({ _id: isJob._id }, isJob)
 
     const log: Log = {
-      companyId: isJob.companyId.toString(),
-      companyName: isJob.company,
+      user_id: isJob.companyId.toString(),
+      name: isJob.company,
       employerReference: isJob.employjobreference,
       jobId: jobId.toString(),
       jobTitle: isJob.jobTitle,
@@ -683,8 +785,21 @@ export class JobsService implements OnModuleInit {
   @Cron('0 0 * * *') // Every day at midnight
   async checkExpiredJobs() {
     const closeDate = new Date().toISOString()
-    // const jobs = await this.jobsModel.find({ closedate: { $lte: closeDate }, status: "approved" })
+    const jobs = await this.jobsModel.find({ closedate: { $lte: closeDate }, status: "approved" })
+
+    const logs: Log[] = jobs.map(job => (
+      {
+        user_id: job.companyId.toString(),
+        name: job.company,
+        jobId: job._id.toString(),
+        jobTitle: job.jobTitle,
+        fieldName: "Actions",
+        changedTo: 'Expired',
+        description: "Job Expired"
+      }
+    ))
 
     await this.jobsModel.updateMany({ closedate: { $lte: closeDate }, status: "approved" }, { status: "expired" });
+    await this.logModel.insertMany(logs, { ordered: false })
   }
 }

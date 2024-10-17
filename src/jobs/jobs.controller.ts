@@ -15,8 +15,8 @@ export class jobsController {
     @UseGuards(AuthGuard)
     @Roles(["employer", "recruiter"])
     @Post('create')
-    async postJob(@Body() jobsDto: JobsDto): Promise<Jobs> {
-        return await this.jobsService.postJob(jobsDto);
+    async postJob(@Body() jobsDto: JobsDto, @Req() req): Promise<Jobs> {
+        return await this.jobsService.postJob(jobsDto, req.user);
     }
 
     @UseGuards(AuthGuard)
