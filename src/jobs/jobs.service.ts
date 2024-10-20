@@ -11,13 +11,15 @@ import { MailerService } from '@nestjs-modules/mailer';
 import { Order } from 'src/orders/schema/order.schema';
 import { OrderDto } from 'src/orders/dto/order.dto';
 import { Log } from 'src/utils/Log.schema';
+import { LogService } from 'src/utils/logs.service';
+import { AdminLog } from 'src/utils/AdminLog.Schema';
 
 @Injectable()
 export class JobsService implements OnModuleInit {
   constructor(
     private emailService: MailerService,
+    private logSerivce: LogService,
     @InjectModel(Jobs.name) private readonly jobsModel: Model<Jobs>,
-    @InjectModel(Log.name) private readonly logModel: Model<Log>,
     @InjectModel(CompanyProfile.name) private readonly companyProfileModel: Model<CompanyProfile>,
     @InjectModel(UserJobs.name) private readonly UserJobsModel: Model<UserJobs>,
     @InjectModel(User.name) private userModel: Model<User>,
@@ -61,7 +63,8 @@ export class JobsService implements OnModuleInit {
         changedTo: 'Posted',
         description: "Posted Job"
       }
-      await this.logModel.create(log)
+
+      await this.logSerivce.createLog(log)
 
       const details = {
         description: `Job Ad Posted - ${jobsDto.jobTitle}`,
@@ -119,7 +122,7 @@ export class JobsService implements OnModuleInit {
         changes.push(change)
       }
     }
-    await this.logModel.insertMany(changes, { ordered: false })
+    await this.logSerivce.InsertManyLogs(changes)
   }
 
   async assignJob({ adminId, jobId, jobsDto }): Promise<any> {
@@ -137,18 +140,18 @@ export class JobsService implements OnModuleInit {
 
       await this.jobsModel.findOneAndUpdate({ _id: jobId }, jobsDto);
 
-      const log: Log = {
-        user_id: adminId,
+      const log: AdminLog = {
+        admin_id: adminId,
         name: jobsDto.adminName,
         jobId: jobsDto._id.toString(),
+        employerReference: jobsDto.employjobreference,
         jobTitle: jobsDto.jobTitle,
-        username: jobsDto.adminName,
         email: isUser.email,
         fieldName: "Actions",
         changedTo: 'Assigned',
-        description: "Job Assigned to Admin"
+        description: `Job Assigned to ${jobsDto.adminName}`
       }
-      await this.logModel.create(log)
+      await this.logSerivce.createAdminLog(log)
       return { message: "Assigned Successfully" }
     }
   }
@@ -163,24 +166,26 @@ export class JobsService implements OnModuleInit {
     } if (!isJob) {
       throw new HttpException({ message: "The given Job does not exist" }, HttpStatus.BAD_REQUEST);
     } else {
+
+      const log: AdminLog = {
+        admin_id: adminId,
+        name: jobsDto.adminName,
+        jobId: jobsDto._id.toString(),
+        jobTitle: jobsDto.jobTitle,
+        employerReference: jobsDto.employjobreference,
+        email: isUser.email,
+        fieldName: "Actions",
+        changedTo: 'Released',
+        description: `Job Released by ${jobsDto.adminName}`
+      }
+
       jobsDto.adminId = "";
       jobsDto.adminName = "";
       jobsDto.status = 'queue';
 
       await this.jobsModel.findOneAndUpdate({ _id: jobId }, jobsDto);
-      const log: Log = {
-        user_id: adminId,
-        name: jobsDto.adminName,
-        jobId: jobsDto._id.toString(),
-        jobTitle: jobsDto.jobTitle,
-        username: jobsDto.adminName,
-        email: isUser.email,
-        fieldName: "Actions",
-        changedTo: 'Released',
-        description: "Job Released by Admin"
-      }
 
-      await this.logModel.create(log)
+      await this.logSerivce.createAdminLog(log)
 
       return { message: "Released Successfully" }
     }
@@ -262,8 +267,8 @@ export class JobsService implements OnModuleInit {
       }
       await this.jobsModel.findOneAndUpdate({ _id: jobId }, jobsDto);
 
-      const logs: Log[] = [{
-        user_id: adminId,
+      const log: Log = {
+        user_id: jobsDto.companyId,
         name: jobsDto.adminName,
         jobId: jobsDto._id.toString(),
         jobTitle: jobsDto.jobTitle,
@@ -272,20 +277,24 @@ export class JobsService implements OnModuleInit {
         fieldName: "Actions",
         changedTo: 'Live',
         description: "Job Approved by Admin"
-      },
-      {
-        user_id: jobsDto.companyId,
-        name: jobsDto.company,
+      }
+
+      const adminLog: AdminLog = {
+        admin_id: jobsDto.adminId,
+        name: jobsDto.adminName,
         jobId: jobsDto._id.toString(),
         jobTitle: jobsDto.jobTitle,
-        username: jobsDto.adminName,
         email: isUser.email,
         fieldName: "Actions",
         changedTo: 'Live',
-        description: "Job is now live"
-      }]
+        description: `Job Approved by ${jobsDto.adminName}`
+      }
 
-      await this.logModel.insertMany(logs, { ordered: false })
+      await Promise.all([
+        this.logSerivce.createLog(log),
+        this.logSerivce.createAdminLog(adminLog)
+      ])
+
 
       return { message: "Job Approved" }
     }
@@ -313,32 +322,34 @@ export class JobsService implements OnModuleInit {
 
       await this.jobsModel.findOneAndUpdate({ _id: jobId }, jobsDto)
 
-      const logs: Log[] = [
-        {
-          user_id: adminId,
-          name: jobsDto.adminName,
-          jobId: jobsDto._id.toString(),
-          jobTitle: jobsDto.jobTitle,
-          username: jobsDto.adminName,
-          email: isUser.email,
-          fieldName: "Actions",
-          changedTo: 'Rejected',
-          description: "Job Rejected by Admin"
-        },
-        {
-          user_id: jobsDto.companyId,
-          name: jobsDto.company,
-          jobId: jobsDto._id.toString(),
-          jobTitle: jobsDto.jobTitle,
-          username: jobsDto.adminName,
-          email: isUser.email,
-          fieldName: "Actions",
-          changedTo: 'Rejected',
-          description: "Job is rejected"
-        }
-      ]
+      const log: Log = {
+        user_id: jobsDto.companyId,
+        name: jobsDto.adminName,
+        jobId: jobsDto._id.toString(),
+        jobTitle: jobsDto.jobTitle,
+        username: jobsDto.adminName,
+        email: isUser.email,
+        fieldName: "Actions",
+        changedTo: 'Rejected',
+        description: "Job Rejected by Admin"
+      }
 
-      await this.logModel.insertMany(logs, { ordered: false })
+      const adminLog: AdminLog = {
+        admin_id: jobsDto.adminId,
+        name: jobsDto.adminName,
+        jobId: jobsDto._id.toString(),
+        jobTitle: jobsDto.jobTitle,
+        email: isUser.email,
+        fieldName: "Actions",
+        changedTo: 'Rejected',
+        description: `Job Rejected by ${jobsDto.adminName}`
+      }
+
+      await Promise.all([
+        this.logSerivce.createLog(log),
+        this.logSerivce.createAdminLog(adminLog)
+      ])
+
 
       return { message: "Job Rejected" }
     }
@@ -383,28 +394,16 @@ export class JobsService implements OnModuleInit {
     }
 
     if (data.rateperhour && data.rateperhour.trim() !== "") {
+      let salary: number;
       if (data.salaryType === "per annum") {
-        const salary = Math.round((data.rateperhour.replace(/[K+]/gi, '') * 1000) / 2080)  // Converting the per annum to per hour as we are saving in per hour in db
-        query.$and = [
-          { rateperhour: { $gte: salary } },
-          {
-            $or: [
-              { salary_type: 'per annum' },
-              { salary_type: 'negotiable' }
-            ]
-          },
-        ]
+        salary = Math.round((data.rateperhour.replace(/[K+]/gi, '') * 1000) / 2080)  // Converting the per annum to per hour as we are saving in per hour in db    
       } else {
-        query.$and = [
-          { rateperhour: { $gte: +data.rateperhour.replace("+", "") } },
-          {
-            $or: [
-              { salary_type: 'per hour' },
-              { salary_type: 'negotiable' }
-            ]
-          },
-        ]
+        salary = +data.rateperhour.replace("+", "")
       }
+      query.$or = [
+        { rateperhour: { $gte: salary } },
+        { salary_type: 'negotiable' },
+      ]
     }
 
     if (data.weeklyperhour && data.weeklyperhour.trim() !== "") {
@@ -661,7 +660,7 @@ export class JobsService implements OnModuleInit {
         changedTo: 'Deleted',
         description: "Deleted Job"
       }
-      await this.logModel.create(log)
+      await this.logSerivce.createLog(log)
 
       return { message: "Job deleted" }
     }
@@ -686,7 +685,7 @@ export class JobsService implements OnModuleInit {
       changedTo: 'Closed',
       description: "Closed Job"
     }
-    await this.logModel.create(log)
+    await this.logSerivce.createLog(log)
     return { message: "success" }
   }
 
@@ -800,6 +799,6 @@ export class JobsService implements OnModuleInit {
     ))
 
     await this.jobsModel.updateMany({ closedate: { $lte: closeDate }, status: "approved" }, { status: "expired" });
-    await this.logModel.insertMany(logs, { ordered: false })
+    await this.logSerivce.InsertManyLogs(logs)
   }
 }

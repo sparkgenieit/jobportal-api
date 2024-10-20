@@ -11,6 +11,9 @@ import { CompanyProfile, CompanyProfileSchema } from 'src/company/schema/company
 import { UploadController } from 'src/upload/upload.controller';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { Recruiter, RecruiterSchema } from 'src/company/schema/recruiter.schema';
+import { AdminLog, AdminLogSchema } from 'src/utils/AdminLog.Schema';
+import { Log, LogSchema } from 'src/utils/Log.schema';
+import { LogService } from 'src/utils/logs.service';
 
 @Module({
   imports: [
@@ -19,10 +22,12 @@ import { Recruiter, RecruiterSchema } from 'src/company/schema/recruiter.schema'
       { name: UserProfile.name, schema: UserProfileSchema },
       { name: UserJobs.name, schema: UserJobsSchema },
       { name: CompanyProfile.name, schema: CompanyProfileSchema },
-      { name: Recruiter.name, schema: RecruiterSchema }
+      { name: Recruiter.name, schema: RecruiterSchema },
+      { name: Log.name, schema: LogSchema },
+      { name: AdminLog.name, schema: AdminLogSchema },
     ]),
   ],
-  providers: [User, UploadController, UserProfile, UserJobs, UsersService, JwtService],
+  providers: [UploadController, LogService, UsersService, JwtService],
   controllers: [UsersController]
 })
 export class UsersModule { }

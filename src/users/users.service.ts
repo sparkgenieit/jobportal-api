@@ -15,15 +15,17 @@ import * as bcrypt from 'bcrypt';
 import { MailerService } from '@nestjs-modules/mailer';
 import { randomUUID } from 'crypto';
 import { Recruiter } from 'src/company/schema/recruiter.schema';
-import { RecruiterDto } from 'src/company/dto/recruiter.dto';
 import { updateUserDto } from './dto/updateUser.dto';
 import { Response } from 'express';
+import { Log } from 'src/utils/Log.schema';
+import { LogService } from 'src/utils/logs.service';
 
 @Injectable()
 export class UsersService {
   constructor(
     private readonly uploadController: UploadController,
     private emailService: MailerService,
+    private logService: LogService,
     @InjectModel(User.name) private readonly userModel: Model<User>,
     @InjectModel(UserProfile.name) private readonly userProfileModel: Model<UserProfile>,
     @InjectModel(Recruiter.name) private readonly recruiterModel: Model<Recruiter>,
@@ -52,8 +54,18 @@ export class UsersService {
 
     const { password: pass, ...results } = userObject  // Should not send password string to the client
 
+    const log: Log = {
+      user_id: user._id.toString(),
+      name: payload.username,
+      username: payload.username,
+      email: user.email,
+      description: `${user.role} Login`
+    }
+
+    await this.logService.createLog(log)
+
     res.cookie('Token', token, { httpOnly: true, sameSite: 'strict', maxAge: 3 * 24 * 60 * 60 * 1000 }) // Cookie will expire after 3 days
-    res.send(results)
+    res.json(results)
   }
 
   async recruiterLogin({ email, password }: LoginUserDto, res: Response): Promise<any> {
@@ -75,6 +87,16 @@ export class UsersService {
     const { password: pass, ...results } = recruiter.toObject()
 
     const user = { ...results, role: "recruiter" }
+
+    const log: Log = {
+      user_id: user._id.toString(),
+      name: recruiter.companyId.first_name + " " + recruiter.companyId.last_name,
+      username: payload.username,
+      email: user.email,
+      description: `Recruiter Login`
+    }
+
+    await this.logService.createLog(log)
 
     res.cookie('Token', token, { httpOnly: true, sameSite: 'strict', maxAge: 3 * 24 * 60 * 60 * 1000 })
     res.send(user)

@@ -10,6 +10,8 @@ import { UserJobs, UserJobsSchema } from 'src/users/schema/userJobs.schema';
 import { CompanyProfile, CompanyProfileSchema } from 'src/company/schema/companyProfile.schema';
 import { Order, OrderSchema } from 'src/orders/schema/order.schema';
 import { Log, LogSchema } from 'src/utils/Log.schema';
+import { LogService } from 'src/utils/logs.service';
+import { AdminLog, AdminLogSchema } from 'src/utils/AdminLog.Schema';
 
 @Module({
   imports: [
@@ -20,9 +22,10 @@ import { Log, LogSchema } from 'src/utils/Log.schema';
       { name: CompanyProfile.name, schema: CompanyProfileSchema },
       { name: Order.name, schema: OrderSchema },
       { name: Log.name, schema: LogSchema },
+      { name: AdminLog.name, schema: AdminLogSchema },
     ]),
   ],
-  providers: [Jobs, JobsService, User, UserJobs, JwtService, CompanyProfile],
+  providers: [JobsService, JwtService, LogService],
   controllers: [jobsController]
 })
 export class JobsModule { }
