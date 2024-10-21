@@ -9,7 +9,7 @@ import { UserJobs, UserJobsSchema } from 'src/users/schema/userJobs.schema';
 import { User, UserSchema } from 'src/users/schema/user.schema';
 import { Jobs, JobsSchema } from 'src/jobs/schema/Jobs.schema';
 import { Recruiter, RecruiterSchema } from './schema/recruiter.schema';
-import { Log, LogSchema } from 'src/utils/Log.schema';
+import { Log, LogSchema } from 'src/audit/Log.schema';
 
 @Module({
   imports: [

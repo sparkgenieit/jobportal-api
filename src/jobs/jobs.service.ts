@@ -10,9 +10,9 @@ import { Cron } from '@nestjs/schedule';
 import { MailerService } from '@nestjs-modules/mailer';
 import { Order } from 'src/orders/schema/order.schema';
 import { OrderDto } from 'src/orders/dto/order.dto';
-import { Log } from 'src/utils/Log.schema';
-import { LogService } from 'src/utils/logs.service';
-import { AdminLog } from 'src/utils/AdminLog.Schema';
+import { Log } from 'src/audit/Log.schema';
+import { AdminLog } from 'src/audit/AdminLog.Schema';
+import { LogService } from 'src/audit/logs.service';
 
 @Injectable()
 export class JobsService implements OnModuleInit {
@@ -60,7 +60,7 @@ export class JobsService implements OnModuleInit {
         username,
         email,
         fieldName: "Actions",
-        changedTo: 'Posted',
+        changedTo: 'Queue',
         description: "Posted Job"
       }
 
@@ -148,7 +148,8 @@ export class JobsService implements OnModuleInit {
         jobTitle: jobsDto.jobTitle,
         email: isUser.email,
         fieldName: "Actions",
-        changedTo: 'Assigned',
+        changedFrom: 'Queue',
+        changedTo: "In Review",
         description: `Job Assigned to ${jobsDto.adminName}`
       }
       await this.logSerivce.createAdminLog(log)
@@ -175,7 +176,8 @@ export class JobsService implements OnModuleInit {
         employerReference: jobsDto.employjobreference,
         email: isUser.email,
         fieldName: "Actions",
-        changedTo: 'Released',
+        changedTo: 'Queue',
+        changedFrom: 'In Review',
         description: `Job Released by ${jobsDto.adminName}`
       }
 
@@ -275,6 +277,7 @@ export class JobsService implements OnModuleInit {
         username: jobsDto.adminName,
         email: isUser.email,
         fieldName: "Actions",
+        changedFrom: "In Review",
         changedTo: 'Live',
         description: "Job Approved by Admin"
       }
@@ -286,6 +289,7 @@ export class JobsService implements OnModuleInit {
         jobTitle: jobsDto.jobTitle,
         email: isUser.email,
         fieldName: "Actions",
+        changedFrom: "In Review",
         changedTo: 'Live',
         description: `Job Approved by ${jobsDto.adminName}`
       }

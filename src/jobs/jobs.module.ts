@@ -9,9 +9,9 @@ import { User, UserSchema } from 'src/users/schema/user.schema';
 import { UserJobs, UserJobsSchema } from 'src/users/schema/userJobs.schema';
 import { CompanyProfile, CompanyProfileSchema } from 'src/company/schema/companyProfile.schema';
 import { Order, OrderSchema } from 'src/orders/schema/order.schema';
-import { Log, LogSchema } from 'src/utils/Log.schema';
-import { LogService } from 'src/utils/logs.service';
-import { AdminLog, AdminLogSchema } from 'src/utils/AdminLog.Schema';
+import { Log, LogSchema } from 'src/audit/Log.schema';
+import { AdminLog, AdminLogSchema } from 'src/audit/AdminLog.Schema';
+import { LogService } from 'src/audit/logs.service';
 
 @Module({
   imports: [

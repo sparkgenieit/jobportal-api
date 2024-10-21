@@ -12,7 +12,7 @@ import * as path from 'path';
 import * as bcrypt from 'bcrypt';
 import { RecruiterDto } from './dto/recruiter.dto';
 import { Recruiter } from './schema/recruiter.schema';
-import { Log } from 'src/utils/Log.schema';
+import { Log } from 'src/audit/Log.schema';
 
 @Injectable()
 export class CompanyService {
@@ -247,57 +247,6 @@ export class CompanyService {
     companyId = new Types.ObjectId(companyId)
     return await this.recruiterModel.find({ companyId }, { password: 0 })
   }
-
-  async getLogs(id: string, role: string, limit: number, skip: number, filters: any) {
-
-    let query: any = {}
-
-    if (role === 'admin' || role === "superadmin") {
-      query = {}
-    } else {
-      query.user_id = id
-    }
-
-    filters.jobTitle.trim() ? query.jobTitle = new RegExp(filters.jobTitle, "i") : null
-
-    filters.employerReference.trim() ? query.employerReference = new RegExp(filters.employerReference, "i") : null
-
-    filters.jobId.trim() ? query.jobId = new RegExp(filters.jobId, "i") : null
-
-    if (filters.fromDate) {
-      const from = new Date(filters.fromDate)
-      from.setHours(0, 0, 0, 0)
-
-      const to = filters.toDate ? new Date(filters.toDate) : new Date()
-      to.setHours(23, 59, 59, 999)
-
-      query.date = { $gte: from, $lte: to }
-    }
-
-    const response = await this.logModel.aggregate([
-      {
-        $match: query
-      },
-      {
-        $facet: {
-          logs: [
-            { $sort: { date: -1 } },
-            { $skip: skip },
-            { $limit: limit }
-          ],
-          count: [{ $count: "total" }]
-        }
-      }
-    ])
-
-
-    return {
-      logs: response[0].logs,
-      total: response[0].count[0]?.total || 0,
-      status: 200
-    }
-  }
-
 
   async createLogs(previousProfile: CompanyProfile, updatedProfile: CompanyProfileDto) {
 

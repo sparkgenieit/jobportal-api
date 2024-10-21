@@ -17,8 +17,9 @@ import { randomUUID } from 'crypto';
 import { Recruiter } from 'src/company/schema/recruiter.schema';
 import { updateUserDto } from './dto/updateUser.dto';
 import { Response } from 'express';
-import { Log } from 'src/utils/Log.schema';
-import { LogService } from 'src/utils/logs.service';
+import { Log } from 'src/audit/Log.schema';
+import { AdminLog } from 'src/audit/AdminLog.Schema';
+import { LogService } from 'src/audit/logs.service';
 
 @Injectable()
 export class UsersService {
@@ -54,15 +55,29 @@ export class UsersService {
 
     const { password: pass, ...results } = userObject  // Should not send password string to the client
 
-    const log: Log = {
-      user_id: user._id.toString(),
-      name: payload.username,
-      username: payload.username,
-      email: user.email,
-      description: `${user.role} Login`
-    }
+    if (user.role === "employer" || user.role === "user") {  // Log to create in normal logs when user or an employer is logged in 
+      const log: Log = {
+        user_id: user._id.toString(),
+        name: payload.username,
+        username: payload.username,
+        email: user.email,
+        description: `${user.role} Login`,
+        fieldName: "Login"
+      }
 
-    await this.logService.createLog(log)
+      await this.logService.createLog(log)
+    }
+    else { // create the log in admin logs if admin or superadmin is logged in
+      const log: AdminLog = {
+        admin_id: user._id.toString(),
+        name: payload.username,
+        email: user.email,
+        description: `${user.role} Login`,
+        fieldName: "Login"
+
+      }
+      await this.logService.createAdminLog(log)
+    }
 
     res.cookie('Token', token, { httpOnly: true, sameSite: 'strict', maxAge: 3 * 24 * 60 * 60 * 1000 }) // Cookie will expire after 3 days
     res.json(results)
@@ -93,7 +108,8 @@ export class UsersService {
       name: recruiter.companyId.first_name + " " + recruiter.companyId.last_name,
       username: payload.username,
       email: user.email,
-      description: `Recruiter Login`
+      description: `Recruiter Login`,
+      fieldName: "Login"
     }
 
     await this.logService.createLog(log)

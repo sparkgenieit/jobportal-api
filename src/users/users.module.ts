@@ -9,11 +9,10 @@ import { UserJobs, UserJobsSchema } from './schema/userJobs.schema';
 import { JwtService } from '@nestjs/jwt';
 import { CompanyProfile, CompanyProfileSchema } from 'src/company/schema/companyProfile.schema';
 import { UploadController } from 'src/upload/upload.controller';
-import { AuthGuard } from 'src/auth/auth.guard';
 import { Recruiter, RecruiterSchema } from 'src/company/schema/recruiter.schema';
-import { AdminLog, AdminLogSchema } from 'src/utils/AdminLog.Schema';
-import { Log, LogSchema } from 'src/utils/Log.schema';
-import { LogService } from 'src/utils/logs.service';
+import { AdminLog, AdminLogSchema } from 'src/audit/AdminLog.Schema';
+import { Log, LogSchema } from 'src/audit/Log.schema';
+import { LogService } from 'src/audit/logs.service';
 
 @Module({
   imports: [

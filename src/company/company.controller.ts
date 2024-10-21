@@ -58,16 +58,6 @@ export class CompaniesController {
         return await this.companyService.getPostedJobs(data.companyId, +limit, +skip, name);
     }
 
-    @Roles(["employer", "recruiter", "admin", "superadmin"])
-    @Post('logs')
-    async getLogs(@Req() req) {
-        let { id, role, companyId } = req.user
-
-        if (role === "recruiter") id = companyId
-        const data = req.body
-        const { limit, skip } = req.query
-        return await this.companyService.getLogs(id, role, +limit, +skip, data);
-    }
 
     @Roles(["employer", "recruiter"])
     @Get('/applied-users/:id')
