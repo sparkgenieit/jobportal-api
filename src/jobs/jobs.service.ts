@@ -404,10 +404,7 @@ export class JobsService implements OnModuleInit {
       } else {
         salary = +data.rateperhour.replace("+", "")
       }
-      query.$or = [
-        { rateperhour: { $gte: salary } },
-        { salary_type: 'negotiable' },
-      ]
+      query.$or = { rateperhour: { $gte: salary } }
     }
 
     if (data.weeklyperhour && data.weeklyperhour.trim() !== "") {
