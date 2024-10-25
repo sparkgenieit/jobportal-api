@@ -378,48 +378,47 @@ export class JobsService implements OnModuleInit {
       status: "approved",
     };
 
-    if (data.jobTitle && data.jobTitle.trim() !== "") {
-      query.jobTitle = new RegExp(data.jobTitle, 'i');
+    if (data?.jobTitle?.trim()) {
+      query.jobTitle = new RegExp(data?.jobTitle, 'i');
     }
-    if (data.location && data.location.trim() !== "") {
-      query.location = new RegExp(data.location, 'i');
+    if (data?.location?.trim()) {
+      query.location = new RegExp(data?.location, 'i');
     }
-    if (data.company && data.company.trim() !== "") {
-      query.company = new RegExp(data.company, 'i');
+    if (data?.company?.trim()) {
+      query.company = new RegExp(data?.company, 'i');
     }
-    if (data.jobCategory && data.jobCategory.trim() !== "") {
-      query.jobCategory = new RegExp(data.jobCategory, 'i');
+    if (data?.jobCategory?.trim()) {
+      query.jobCategory = new RegExp(data?.jobCategory, 'i');
     }
-    if (data.subCategory && data.subCategory.trim() !== "") {
-      query.subCategory = new RegExp(data.subCategory, 'i');
+    if (data?.subCategory?.trim()) {
+      query.subCategory = new RegExp(data?.subCategory, 'i');
     }
-    if (data.duration && data.duration.trim() !== "") {
-      query.duration = new RegExp(data.duration, 'i')
+    if (data?.duration?.trim()) {
+      query.duration = new RegExp(data?.duration, 'i')
     }
 
-    if (data.rateperhour && data.rateperhour.trim() !== "") {
+    if (data?.rateperhour?.trim()) {
       let salary: number;
-      if (data.salaryType === "per annum") {
-        salary = Math.round((data.rateperhour.replace(/[K+]/gi, '') * 1000) / 2080)  // Converting the per annum to per hour as we are saving in per hour in db    
+      if (data?.salaryType === "per annum") {
+        salary = Math.round((data?.rateperhour?.replace(/[K+]/gi, '') * 1000) / 2080)  // Converting the per annum to per hour as we are saving in per hour in db    
       } else {
-        salary = +data.rateperhour.replace("+", "")
+        salary = +data?.rateperhour?.replace("+", "")
       }
-      query.$or = { rateperhour: { $gte: salary } }
+      query.rateperhour = { $gte: salary }
     }
 
-    if (data.weeklyperhour && data.weeklyperhour.trim() !== "") {
-      query.weeklyperhour = { $lte: +data.weeklyperhour }
+    if (data?.weeklyperhour?.trim()) {
+      query.weeklyperhour = { $lte: +data?.weeklyperhour }
     }
-    if (data.jobtype && data.jobtype.trim() !== "") {
-      query.jobtype = new RegExp(data.jobtype, 'i');
+    if (data?.jobtype?.trim()) {
+      query.jobtype = new RegExp(data?.jobtype, 'i');
     }
-    if (data.date) {
+    if (data?.date) {
       const today = new Date(); // Get the current date
-      today.setDate(today.getDate() - data.date); // Subtracts the specified number of days
+      today.setDate(today.getDate() - data?.date); // Subtracts the specified number of days
       query.creationdate = { $gte: today }
     }
-    let sorting: any = { [data.sort]: -1 }
-
+    let sorting: any = { [data?.sort]: -1 }
 
     const response = await this.jobsModel.aggregate([
       {
