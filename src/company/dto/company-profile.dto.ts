@@ -16,5 +16,13 @@ export class CompanyProfileDto {
     youtubeUrl?: string
     banner?: string
     info?: string
+    status?: string
+}
+
+
+export enum CompanyProfileStatus {
+    PENDING = "pending",
+    APPROVED = "approved",
+    REJECTED = "rejected"
 }
 

@@ -8,7 +8,7 @@ import { UserProfileDto } from './dto/user-profile.dto';
 import { UserProfile } from './schema/userProfile.schema';
 import { UserJobs } from './schema/userJobs.schema';
 import { JwtService } from '@nestjs/jwt';
-import { CompanyProfileDto } from 'src/company/dto/company-profile.dto';
+import { CompanyProfileDto, CompanyProfileStatus } from 'src/company/dto/company-profile.dto';
 import { CompanyProfile } from 'src/company/schema/companyProfile.schema';
 import { UploadController } from 'src/upload/upload.controller';
 import * as bcrypt from 'bcrypt';
@@ -234,6 +234,7 @@ export class UsersService {
             contact: '',
             website: '',
             logo: '',
+            status: CompanyProfileStatus.APPROVED
           };
           this.companyProfileModel.create(companyProfileDto);
         }

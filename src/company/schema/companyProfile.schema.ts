@@ -38,6 +38,10 @@ export class CompanyProfile {
     banner?: string
     @Prop()
     info?: string
+    @Prop()
+    status: string
+    @Prop()
+    reject_message?: string
 }
 
 export const CompanyProfileSchema = SchemaFactory.createForClass(CompanyProfile);

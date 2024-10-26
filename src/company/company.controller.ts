@@ -58,6 +58,37 @@ export class CompaniesController {
         return await this.companyService.getPostedJobs(data.companyId, +limit, +skip, name);
     }
 
+    @Roles(["employer"])
+    @Put('revert-changes')
+    async revertChanges(@Req() req) {
+        const { id } = req.user
+        return await this.companyService.revertChanges(id)
+    }
+
+    @Roles(["admin"])
+    @Get('profiles/queue')
+    async getProfilesQueue() {
+        return await this.companyService.getProfilesQueue()
+    }
+
+    @Roles(["admin"])
+    @Put('profiles/assign/:id')
+    async assignProfile(@Req() req, @Param("id") id) {
+        return await this.companyService.assignProfileToAdmin(id, req.user.id)
+    }
+
+    @Roles(["admin"])
+    @Get('profiles/assigned')
+    async assignedProfiles(@Req() req) {
+        return await this.companyService.assignedProfiles(req.user.id)
+    }
+
+    @Roles(["admin"])
+    @Get('profiles/profile/:id')
+    async getProfileChanges(@Param("id") id) {
+        return await this.companyService.getProfile(id)
+    }
+
 
     @Roles(["employer", "recruiter"])
     @Get('/applied-users/:id')
