@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory, raw } from "@nestjs/mongoose";
 import { HydratedDocument, Types } from "mongoose";
+import { CompanyProfileDto } from "../dto/company-profile.dto";
 import { CompanyProfile } from "./companyProfile.schema";
 
 
@@ -16,7 +17,7 @@ export class ProfileChanges {
     old_profile: CompanyProfile
 
     @Prop()
-    new_profile: CompanyProfile
+    new_profile: CompanyProfileDto
 
     @Prop()
     assignedTo?: string

@@ -46,7 +46,7 @@ export class CompaniesController {
 
     @Roles(["employer", "recruiter"])
     @Get('profile/:id')
-    async getCompany(@Param() data): Promise<CompanyProfile> {
+    async getCompany(@Param() data) {
         if (data.id) {
             return await this.companyService.getCompany(data.id);
         }
@@ -84,9 +84,20 @@ export class CompaniesController {
     }
 
     @Roles(["admin"])
-    @Get('profiles/profile/:id')
+    @Get('profiles/changed-profile/:id')
     async getProfileChanges(@Param("id") id) {
         return await this.companyService.getProfile(id)
+    }
+
+    @Roles(["admin"])
+    @Put('profiles/approve/:id')
+    async approveProfileChanges(@Param("id") id) {
+        return await this.companyService.approveProfileChanges(id)
+    }
+    @Roles(["admin"])
+    @Put('profiles/reject/:id')
+    async rejectProfileChanges(@Param("id") id) {
+        return await this.companyService.rejectProfileChanges(id)
     }
 
 

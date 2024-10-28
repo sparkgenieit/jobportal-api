@@ -91,7 +91,7 @@ export class CompanyService {
 
   }
 
-  async getCompany(user_id: string | Types.ObjectId): Promise<CompanyProfile> {
+  async getCompany(user_id: string | Types.ObjectId) {
     user_id = new Types.ObjectId(user_id);
     const isUser = await this.companyProfileModel.findOne({ user_id });
     if (!isUser) {
@@ -101,9 +101,11 @@ export class CompanyService {
     if (isUser.status === CompanyProfileStatus.PENDING) {
       const profileWithChanges = await this.profileChangesModel.findOne({ company_id: user_id })
 
-      const { new_profile } = profileWithChanges.toObject()
+      if (profileWithChanges) {
+        const { new_profile } = profileWithChanges.toObject()
+        return { ...isUser.toObject(), ...new_profile }
+      }
 
-      return { ...isUser.toObject(), ...new_profile }
     }
     return isUser
   }
@@ -297,6 +299,9 @@ export class CompanyService {
 
   async assignProfileToAdmin(id: string, user_id: string) {
     const res = await this.profileChangesModel.findOneAndUpdate({ _id: id }, { assignedTo: user_id })
+
+    if (!res) throw new HttpException({ message: "The company does not exist" }, HttpStatus.NOT_FOUND);
+
     return { message: "Assigned Successfully" }
   }
 
@@ -307,14 +312,81 @@ export class CompanyService {
 
   async getProfile(id: string) {
     const res = await this.profileChangesModel.findOne({ _id: id })
+    if (!res) throw new HttpException({ message: "The company does not exist" }, HttpStatus.NOT_FOUND);
     return res
   }
 
-  async revertChanges(company_id: string) {
+  async approveProfileChanges(company_id: string) {
+
+    const company = await this.companyProfileModel.findOne({ user_id: company_id })
+
+    if (!company) throw new HttpException({ message: "The company does not exist" }, HttpStatus.NOT_FOUND);
+
+    const changes = await this.profileChangesModel.findOne({ company_id })
+
+    if (!changes) throw new HttpException({ message: "Can't find the company profile" }, HttpStatus.NOT_FOUND);
+
+    const new_profile = changes.toObject().new_profile
+
+    new_profile.status = CompanyProfileStatus.APPROVED
+
     await Promise.all([
-      this.companyProfileModel.findOneAndUpdate({ user_id: company_id }, { status: CompanyProfileStatus.APPROVED }),
-      this.profileChangesModel.deleteOne({ company_id })
+      this.companyProfileModel.findOneAndUpdate({ user_id: company_id }, new_profile),
+      this.profileChangesModel.findOneAndDelete({ company_id })
     ])
+
+    if (company.name !== new_profile.name) { // checking if the user name is changed or not
+
+      const name = new_profile.name.split(" ")  // Updating the name in Users Collection
+
+      let [first_name, ...lastName] = name;
+      let last_name = lastName.join(" ");
+
+      this.UserModel.findOneAndUpdate({ _id: company.user_id }, { first_name, last_name });
+    }
+
+    if (new_profile.logo) { // checking if logo is changed or not 
+      if (company.logo !== "") { // deleting the previous logo if the user is updating the existing logo
+        const filePath = path.join(__dirname, '..', '..', "public", "uploads", "logos", company.logo);
+        const photoExists = await this.checkPreviousPhotoExistence(filePath)
+        if (photoExists) {
+          fs.promises.unlink(filePath);
+        }
+      }
+      // Updating the logo in all the jobs posted by the company
+      this.jobsModel.updateMany({ companyId: company_id }, { companyLogo: new_profile.logo });
+    }
+
+    if (new_profile.banner) { // checking if Banner is changed or not 
+      if (company.banner !== "") { // deleting the previous Banner if the user is updating the existing Banner
+        const filePath = path.join(__dirname, '..', '..', "public", "uploads", "banners", company.banner);
+        const photoExists = await this.checkPreviousPhotoExistence(filePath)
+        if (photoExists) {
+          fs.promises.unlink(filePath);
+        }
+      }
+    }
+
+    this.createLogs(company, changes?.toObject().new_profile)
+
+    return { message: "Company profile updated" }
+  }
+
+  async rejectProfileChanges(company_id: string) {
+    const company = await this.companyProfileModel.findOne({ user_id: company_id })
+
+    if (!company) throw new HttpException({ message: "The company does not exist" }, HttpStatus.NOT_FOUND);
+
+    await this.companyProfileModel.findOneAndUpdate({ user_id: company_id }, { status: CompanyProfileStatus.REJECTED })
+
+    await this.profileChangesModel.findOneAndDelete({ company_id })
+
+    return { message: "Company profile Changes Rejected" }
+  }
+
+  async revertChanges(company_id: string) {
+
+    await this.companyProfileModel.findOneAndUpdate({ user_id: company_id }, { status: CompanyProfileStatus.APPROVED })
       .catch(e => { throw new HttpException({ message: `Something went wrong! Please try again` }, HttpStatus.INTERNAL_SERVER_ERROR) })
 
     return { message: "Changes Reverted" }
