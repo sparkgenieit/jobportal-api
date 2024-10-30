@@ -1,12 +1,11 @@
-import { Types } from "mongoose";
 
 export class NotificationDto {
-    userId: Types.ObjectId
-    jobId: Types.ObjectId
-    jobTitle: string
+    userId: string
+    jobId?: string
+    jobTitle?: string
     message: string
-    isRead: boolean
-    status: string
-    createdAt: Date
+    isRead?: boolean
+    status?: string
+    createdAt?: Date
 }
 

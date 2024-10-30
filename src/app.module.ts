@@ -19,13 +19,17 @@ import { NotificationModule } from './notifications/notifications.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { MailModule } from './mails/mail.module';
 import { LogModule } from './audit/logs.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 
 @Module({
-  imports: [ConfigModule.forRoot({ isGlobal: true, }), ServeStaticModule.forRoot({
-    rootPath: join(__dirname, '..', 'public'),
-  }),
-  ScheduleModule.forRoot(),
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true, }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'public'),
+    }),
+    EventEmitterModule.forRoot(),
+    ScheduleModule.forRoot(),
     GlobalModule,
     DatabaseModule,
     UsersModule,

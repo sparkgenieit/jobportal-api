@@ -6,9 +6,9 @@ export type NotificationDocument = HydratedDocument<Notification>;
 @Schema()
 export class Notification {
     @Prop()
-    userId: Types.ObjectId
+    userId: string
     @Prop()
-    jobId: Types.ObjectId
+    jobId: string
     @Prop({ default: Date.now() })
     createdAt: Date
     @Prop()

@@ -14,6 +14,8 @@ import { RecruiterDto } from './dto/recruiter.dto';
 import { Recruiter } from './schema/recruiter.schema';
 import { Log } from 'src/audit/Log.schema';
 import { ProfileChanges } from './schema/profileChanges.schema';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { NotificationDto } from 'src/notifications/dto/notifications.dto';
 
 @Injectable()
 export class CompanyService {
@@ -25,6 +27,7 @@ export class CompanyService {
     @InjectModel(Recruiter.name) private readonly recruiterModel: Model<Recruiter>,
     @InjectModel(Log.name) private readonly logModel: Model<Log>,
     @InjectModel(ProfileChanges.name) private readonly profileChangesModel: Model<ProfileChanges>,
+    private eventEmitter: EventEmitter2,
     private jwtService: JwtService
   ) { }
 
@@ -372,6 +375,14 @@ export class CompanyService {
       }
     }
 
+    const notification: NotificationDto = {
+      userId: company_id,
+      message: "Your profile changes is approved",
+      status: "approved"
+    }
+
+    this.eventEmitter.emit('notification.create', notification)
+
     this.createLogs(company, changes?.toObject().new_profile)
 
     return { message: "Company profile updated" }
@@ -385,6 +396,14 @@ export class CompanyService {
     await this.companyProfileModel.findOneAndUpdate({ user_id: company_id }, { status: CompanyProfileStatus.REJECTED })
 
     await this.profileChangesModel.findOneAndDelete({ company_id })
+
+    const notification: NotificationDto = {
+      userId: company_id,
+      message: "Your profile changes is rejected",
+      status: "rejected"
+    }
+
+    this.eventEmitter.emit('notification.create', notification)
 
     return { message: "Company profile Changes Rejected" }
   }
