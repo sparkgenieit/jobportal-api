@@ -94,6 +94,7 @@ export class CompanyService {
   async getCompany(user_id: string | Types.ObjectId) {
     user_id = new Types.ObjectId(user_id);
     const isUser = await this.companyProfileModel.findOne({ user_id });
+
     if (!isUser) {
       throw new HttpException({ message: "The given user does not exist" }, HttpStatus.BAD_REQUEST);
     }
@@ -106,6 +107,9 @@ export class CompanyService {
         return { ...isUser.toObject(), ...new_profile }
       }
 
+    }
+    if (isUser.status === CompanyProfileStatus.REJECTED || isUser.status === CompanyProfileStatus.APPROVED) {
+      await this.companyProfileModel.findOneAndUpdate({ user_id }, { status: CompanyProfileStatus.ACTIVE })
     }
     return isUser
   }
@@ -342,7 +346,8 @@ export class CompanyService {
       let [first_name, ...lastName] = name;
       let last_name = lastName.join(" ");
 
-      this.UserModel.findOneAndUpdate({ _id: company.user_id }, { first_name, last_name });
+      await this.UserModel.findOneAndUpdate({ _id: company.user_id }, { first_name, last_name });
+
     }
 
     if (new_profile.logo) { // checking if logo is changed or not 
@@ -354,7 +359,7 @@ export class CompanyService {
         }
       }
       // Updating the logo in all the jobs posted by the company
-      this.jobsModel.updateMany({ companyId: company_id }, { companyLogo: new_profile.logo });
+      await this.jobsModel.updateMany({ companyId: company_id }, { companyLogo: new_profile.logo });
     }
 
     if (new_profile.banner) { // checking if Banner is changed or not 
@@ -386,8 +391,10 @@ export class CompanyService {
 
   async revertChanges(company_id: string) {
 
-    await this.companyProfileModel.findOneAndUpdate({ user_id: company_id }, { status: CompanyProfileStatus.APPROVED })
-      .catch(e => { throw new HttpException({ message: `Something went wrong! Please try again` }, HttpStatus.INTERNAL_SERVER_ERROR) })
+    await Promise.all([
+      this.companyProfileModel.findOneAndUpdate({ user_id: company_id }, { status: CompanyProfileStatus.APPROVED }),
+      this.profileChangesModel.findOneAndDelete({ company_id })
+    ])
 
     return { message: "Changes Reverted" }
   }

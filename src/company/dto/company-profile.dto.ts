@@ -23,6 +23,7 @@ export class CompanyProfileDto {
 export enum CompanyProfileStatus {
     PENDING = "pending",
     APPROVED = "approved",
-    REJECTED = "rejected"
+    REJECTED = "rejected",
+    ACTIVE = "active"
 }
 
