@@ -116,7 +116,7 @@ export class UsersController {
     }
 
     @UseGuards(AuthGuard)
-    @Roles(["user", "employer", "recruiter"])
+    @Roles(["user", "employer", "recruiter", "superadmin"])
     @Get('profile/:id')
     async getUserProfile(@Param() data): Promise<UserProfile> {
         return await this.userService.getUserProfile(data.id);

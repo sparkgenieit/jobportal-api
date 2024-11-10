@@ -44,7 +44,7 @@ export class CompaniesController {
         return await this.companyService.updateProfile(data.id, companyProfileDto);
     }
 
-    @Roles(["employer", "recruiter"])
+    @Roles(["employer", "recruiter", "superadmin"])
     @Get('profile/:id')
     async getCompany(@Param() data) {
         if (data.id) {
