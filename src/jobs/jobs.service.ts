@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable, OnModuleInit, Search, Type } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, OnModuleInit } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model, Types } from 'mongoose';
 import { Jobs } from './schema/Jobs.schema';
@@ -8,22 +8,22 @@ import { UserJobs } from 'src/users/schema/userJobs.schema';
 import { CompanyProfile } from 'src/company/schema/companyProfile.schema';
 import { Cron } from '@nestjs/schedule';
 import { MailerService } from '@nestjs-modules/mailer';
-import { Order } from 'src/orders/schema/order.schema';
 import { OrderDto } from 'src/orders/dto/order.dto';
 import { Log } from 'src/audit/Log.schema';
 import { AdminLog } from 'src/audit/AdminLog.Schema';
 import { LogService } from 'src/audit/logs.service';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class JobsService implements OnModuleInit {
   constructor(
     private emailService: MailerService,
     private logSerivce: LogService,
+    private eventEmitter: EventEmitter2,
     @InjectModel(Jobs.name) private readonly jobsModel: Model<Jobs>,
     @InjectModel(CompanyProfile.name) private readonly companyProfileModel: Model<CompanyProfile>,
     @InjectModel(UserJobs.name) private readonly UserJobsModel: Model<UserJobs>,
     @InjectModel(User.name) private userModel: Model<User>,
-    @InjectModel(Order.name) private ordersModel: Model<Order>,
   ) { }
 
   async onModuleInit() {
@@ -42,7 +42,8 @@ export class JobsService implements OnModuleInit {
         creditsUsed: 0,
         companyId: user._id
       }
-      await this.CreateOrder(details)
+
+      this.CreateOrder(details)
       return ({ message: "Job Posted" })
     }
     if (user.credits > 0) {
@@ -73,7 +74,7 @@ export class JobsService implements OnModuleInit {
         companyId: user._id
       }
 
-      await this.CreateOrder(details)
+      this.CreateOrder(details)
 
       return ({ message: "Job Posted", credits: credits })
     }
@@ -717,7 +718,7 @@ export class JobsService implements OnModuleInit {
         creditsUsed: 1,
       }
 
-      await this.CreateOrder(details);
+      this.CreateOrder(details);
 
       return { message: "Update Success" }
 
@@ -726,8 +727,8 @@ export class JobsService implements OnModuleInit {
     }
   }
 
-  async CreateOrder(details: OrderDto) {
-    await this.ordersModel.create(details)
+  CreateOrder(details: OrderDto) {
+    this.eventEmitter.emit("order.create", details)
   }
 
   async refundCredits() {
@@ -772,7 +773,7 @@ export class JobsService implements OnModuleInit {
       credits: company.credits
     }))
 
-    await this.ordersModel.insertMany(creatingOrders, { ordered: false })
+    this.eventEmitter.emit("order.create-many", creatingOrders)
   }
 
   async increaseViewCount(id: string) {
@@ -786,19 +787,22 @@ export class JobsService implements OnModuleInit {
     const closeDate = new Date().toISOString()
     const jobs = await this.jobsModel.find({ closedate: { $lte: closeDate }, status: "approved" })
 
-    const logs: Log[] = jobs.map(job => (
-      {
-        user_id: job.companyId.toString(),
-        name: job.company,
-        jobId: job._id.toString(),
-        jobTitle: job.jobTitle,
-        fieldName: "Actions",
-        changedTo: 'Expired',
-        description: "Job Expired"
-      }
-    ))
+    if (jobs.length > 0) {
 
-    await this.jobsModel.updateMany({ closedate: { $lte: closeDate }, status: "approved" }, { status: "expired" });
-    await this.logSerivce.InsertManyLogs(logs)
+      const logs: Log[] = jobs.map(job => (
+        {
+          user_id: job.companyId.toString(),
+          name: job.company,
+          jobId: job._id.toString(),
+          jobTitle: job.jobTitle,
+          fieldName: "Actions",
+          changedTo: 'Expired',
+          description: "Job Expired"
+        }
+      ))
+
+      await this.jobsModel.updateMany({ closedate: { $lte: closeDate }, status: "approved" }, { status: "expired" });
+      await this.logSerivce.InsertManyLogs(logs)
+    }
   }
 }

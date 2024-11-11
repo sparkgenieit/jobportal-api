@@ -28,7 +28,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'public'),
     }),
-    EventEmitterModule.forRoot(),
+    EventEmitterModule.forRoot({ delimiter: "." }),
     ScheduleModule.forRoot(),
     GlobalModule,
     DatabaseModule,

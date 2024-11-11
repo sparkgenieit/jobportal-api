@@ -28,7 +28,6 @@ export class CompanyService {
     @InjectModel(Log.name) private readonly logModel: Model<Log>,
     @InjectModel(ProfileChanges.name) private readonly profileChangesModel: Model<ProfileChanges>,
     private eventEmitter: EventEmitter2,
-    private jwtService: JwtService
   ) { }
 
   async checkPreviousPhotoExistence(photoPath) {
@@ -39,7 +38,6 @@ export class CompanyService {
       return false; // File not found or other error
     }
   }
-
 
   async updateProfile(user_id: string | Types.ObjectId, companyProfileDto: CompanyProfileDto) {
     user_id = new Types.ObjectId(user_id);
@@ -56,42 +54,7 @@ export class CompanyService {
 
     await this.profileChangesModel.findOneAndUpdate({ company_id: user_id }, { new_profile: companyProfileDto, old_profile: isUser }, { upsert: true })
 
-    // if (isUser.name !== companyProfileDto.name) { // checking if the user name is changed or not
-
-    //   const name = companyProfileDto.name.split(" ")  // Updating the name in Users Collection
-
-    //   let [first_name, ...lastName] = name;
-    //   let last_name = lastName.join(" ");
-
-    //   await this.UserModel.findOneAndUpdate({ _id: user_id }, { first_name, last_name });
-    // }
-
-    // if (companyProfileDto.logo) { // checking if logo is changed or not 
-    //   if (isUser.logo !== "") { // deleting the previous logo if the user is updating the existing logo
-    //     const filePath = path.join(__dirname, '..', '..', "public", "uploads", "logos", isUser.logo);
-    //     const photoExists = await this.checkPreviousPhotoExistence(filePath)
-    //     if (photoExists) {
-    //       await fs.promises.unlink(filePath);
-    //     }
-    //   }
-    //   // Updating the logo in all the jobs posted by the company
-    //   await this.jobsModel.updateMany({ companyId: user_id.toString() }, { companyLogo: companyProfileDto.logo });
-    // }
-
-    // if (companyProfileDto.banner) { // checking if Banner is changed or not 
-    //   if (isUser.banner !== "") { // deleting the previous Banner if the user is updating the existing Banner
-    //     const filePath = path.join(__dirname, '..', '..', "public", "uploads", "banners", isUser.banner);
-    //     const photoExists = await this.checkPreviousPhotoExistence(filePath)
-    //     if (photoExists) {
-    //       await fs.promises.unlink(filePath);
-    //     }
-    //   }
-    // }
-
-    // await this.createLogs(isUser, companyProfileDto)
-
     return { message: "Update Success" }
-
   }
 
   async getCompany(user_id: string | Types.ObjectId) {
@@ -281,7 +244,7 @@ export class CompanyService {
           user_id: previousProfile.user_id.toString(),
           name: updatedProfile.name,
           description: "Updated " + key,
-          email: updatedProfile.email,
+          email: previousProfile.email,
           username: updatedProfile.name,
           fieldName: key,
           changedFrom: previousProfile[key],

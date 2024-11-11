@@ -1,22 +1,26 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Order } from './schema/order.schema';
 import { OrderDto } from './dto/order.dto';
-import { User } from 'src/users/schema/user.schema';
-import { UserJobs } from 'src/users/schema/userJobs.schema';
+import { OnEvent } from '@nestjs/event-emitter';
+
 
 @Injectable()
 export class OrderService {
   constructor(
     @InjectModel(Order.name) private readonly ordersModel: Model<Order>,
-    @InjectModel(UserJobs.name) private readonly UserJobsModel: Model<UserJobs>,
-    @InjectModel(User.name) private userModel: Model<User>
   ) { }
 
+  @OnEvent("order.create")
   async createOrder(data: OrderDto) {
     data.companyId = new Types.ObjectId(data.companyId)
     return await this.ordersModel.create(data)
+  }
+
+  @OnEvent("order.create-many")
+  async createManyOrders(creatingOrders: OrderDto[]) {
+    await this.ordersModel.insertMany(creatingOrders, { ordered: false })
   }
 
   async getOrders(companyId: string | Types.ObjectId, searchTerm: string, sort: string, skip: number, limit: number) {
