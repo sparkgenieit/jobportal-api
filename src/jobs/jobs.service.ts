@@ -557,7 +557,11 @@ export class JobsService implements OnModuleInit {
   }
 
   async getAppliedJobs(userId, limit: number, skip: number): Promise<any> {
-    userId = new mongoose.Types.ObjectId(userId);
+    try {
+      userId = new mongoose.Types.ObjectId(userId);
+    } catch (error) {
+      throw new HttpException({ message: "The given user does not exist" }, HttpStatus.BAD_REQUEST);
+    }
     const count = await this.UserJobsModel.countDocuments({ userId, applied: true });
     const jobs = await this.UserJobsModel.find({ userId, applied: true }).sort({ applied_date: -1 }).limit(limit).skip(skip).populate("jobId");
     return {
@@ -574,13 +578,13 @@ export class JobsService implements OnModuleInit {
     let userSaved = false;
     let shortlisted = false;
     const job = await this.UserJobsModel.findOne({ userId, jobId });
-    if (job && job.saved == true) {
+    if (job && job.saved) {
       userSaved = true;
     }
-    if (job && job.applied == true) {
+    if (job && job.applied) {
       userApplied = true;
     }
-    if (job && job.shortlisted == true) {
+    if (job && job.shortlisted) {
       shortlisted = true;
     }
     return {
@@ -592,7 +596,11 @@ export class JobsService implements OnModuleInit {
   }
 
   async getSavedJobs(userId: string | Types.ObjectId, limit: number, skip: number): Promise<any> {
-    userId = new mongoose.Types.ObjectId(userId);
+    try {
+      userId = new mongoose.Types.ObjectId(userId);
+    } catch (error) {
+      throw new HttpException({ message: "The given user does not exist" }, HttpStatus.BAD_REQUEST);
+    }
     const count = await this.UserJobsModel.countDocuments({ userId, saved: true });
     const jobs = await this.UserJobsModel.find({ userId, saved: true }).sort({ saved_date: -1 }).limit(limit).skip(skip).populate("jobId");
     return {
