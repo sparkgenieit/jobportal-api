@@ -1,14 +1,12 @@
-import { Injectable, OnModuleInit } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Log } from "./Log.schema";
 import { Model } from "mongoose";
 import { AdminLog } from "./AdminLog.Schema";
-import { EventEmitter2, OnEvent } from "@nestjs/event-emitter";
 
 @Injectable()
 export class LogService {
     constructor(
-        private readonly eventEmitter: EventEmitter2,
         @InjectModel(Log.name) private readonly logModel: Model<Log>,
         @InjectModel(AdminLog.name) private readonly adminLogModel: Model<AdminLog>,
     ) { }
