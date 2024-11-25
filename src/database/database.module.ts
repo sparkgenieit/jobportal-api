@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
+import { ENV } from 'src/utils/functions';
 
 @Module({
     imports: [
-        MongooseModule.forRoot("mongodb://127.0.0.1:27017/jobportal?authSource=admin")
+        MongooseModule.forRoot(ENV.DATABASE_URL)
     ]
 })
-export class DatabaseModule {}
+export class DatabaseModule { }

@@ -7,7 +7,7 @@ import { CompanyProfile } from 'src/company/schema/companyProfile.schema';
 import { OrderDto } from 'src/orders/dto/order.dto';
 import { Order } from 'src/orders/schema/order.schema';
 import { User } from 'src/users/schema/user.schema';
-import { invoicePdfCreation } from 'src/utils/functions';
+import { ENV, invoicePdfCreation } from 'src/utils/functions';
 import { Counter } from 'src/utils/Counter.schema';
 import Stripe from 'stripe';
 
@@ -21,7 +21,7 @@ export class PaymentService {
         @InjectModel(CompanyProfile.name) private readonly companyProfileModel: Model<CompanyProfile>,
         @InjectModel('Counter') private readonly counterModel: Model<Counter>,
     ) {
-        this.stripe = new Stripe('sk_test_51PKHdMSIkLQ1QpWMKj1xClSWqcOgyIQsd28qfTkD7scrtjZ5Nf2dAijNlyHXlq5a5CCHzEzqwuqJnV9XydBGYz4z00rBFUPxZc');
+        this.stripe = new Stripe(ENV.STRIPE_SERVER_KEY);
     }
     async makePayment(plan: string, credits: number, price: number, user_id: any) {
         let priceInCents = price * 100

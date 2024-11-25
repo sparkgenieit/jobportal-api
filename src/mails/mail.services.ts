@@ -7,6 +7,7 @@ import { EmployerMail } from "./schema/employerMail.schema";
 import { CompanyProfile } from "src/company/schema/companyProfile.schema";
 import { CompanyProfileDto } from "src/company/dto/company-profile.dto";
 import { MailerService } from "@nestjs-modules/mailer";
+import { ENV } from "src/utils/functions";
 
 @Injectable()
 export class MailService {
@@ -16,6 +17,24 @@ export class MailService {
         @InjectModel("CompanyProfile") private companyProfileModel: Model<CompanyProfile>,
         private emailService: MailerService
     ) { }
+
+    async contactUsMail(mail: EmployerMailDto, token: string) {
+        const secretKey = ENV.CAPTCHA_SECRET_KEY
+        const response = await fetch(`https://www.google.com/recaptcha/api/siteverify?secret=${secretKey}&response=${token}`, { method: "POST" })
+
+        const result = await response.json()
+
+        if (!result.success) {
+            throw new HttpException({ message: "Please re-verify the captcha" }, HttpStatus.UNPROCESSABLE_ENTITY)
+        }
+
+        try {
+            await this.employerMailModel.create(mail)
+            return { message: "Mail Sent" }
+        } catch (error) {
+            throw new HttpException({ message: 'Something went wrong! Please try again' }, HttpStatus.INTERNAL_SERVER_ERROR)
+        }
+    }
 
     //Admin - Admin Methods
 

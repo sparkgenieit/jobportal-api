@@ -10,8 +10,8 @@ export class MailController {
 
 
     @Post('/contact-us')
-    async ContactUsMail(@Body(ValidationPipe) mailDto: EmployerMailDto) {
-        return await this.mailService.createEmployerMail(mailDto)
+    async ContactUsMail(@Body(ValidationPipe) mailDto: EmployerMailDto, @Query("recaptcha_token") token: string) {
+        return await this.mailService.contactUsMail(mailDto, token)
     }
 
     // Admin to Admin Mail Routes

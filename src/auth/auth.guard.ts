@@ -2,6 +2,7 @@ import { CanActivate, ExecutionContext, Injectable, HttpException, HttpStatus, }
 import { JwtService } from '@nestjs/jwt';
 import { Reflector } from '@nestjs/core';
 import { Roles } from './roles.decorator';
+import { ENV } from 'src/utils/functions';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -19,7 +20,7 @@ export class AuthGuard implements CanActivate {
             data = await this.jwtService.verifyAsync(
                 token,
                 {
-                    secret: "JWT_SECRET_KEY"
+                    secret: ENV.JWT_SECRET_KEY
                 }
             );
         } catch (error) {

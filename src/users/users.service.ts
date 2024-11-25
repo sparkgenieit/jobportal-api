@@ -20,6 +20,7 @@ import { Response } from 'express';
 import { Log } from 'src/audit/Log.schema';
 import { AdminLog } from 'src/audit/AdminLog.Schema';
 import { LogService } from 'src/audit/logs.service';
+import { ENV } from 'src/utils/functions';
 
 @Injectable()
 export class UsersService {
@@ -49,7 +50,7 @@ export class UsersService {
       throw new HttpException({ message: 'Invalid password' }, HttpStatus.BAD_REQUEST);
     }
     const payload = { username: user.first_name + " " + user.last_name, id: user._id, role: user.role, email: user.email };
-    const token = await this.jwtService.signAsync(payload, { secret: "JWT_SECRET_KEY" });
+    const token = await this.jwtService.signAsync(payload, { secret: ENV.JWT_SECRET_KEY });
 
     let userObject = user.toObject()
 
@@ -97,7 +98,7 @@ export class UsersService {
     }
 
     const payload = { username: recruiter.name, id: recruiter._id, role: "recruiter", email: recruiter.email, companyId: recruiter.companyId._id };
-    const token = await this.jwtService.signAsync(payload, { secret: "JWT_SECRET_KEY" });
+    const token = await this.jwtService.signAsync(payload, { secret: ENV.JWT_SECRET_KEY });
 
     const { password: pass, ...results } = recruiter.toObject()
 
