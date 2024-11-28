@@ -23,9 +23,17 @@ export class AdService {
     // }
 
     //CreateUserDto.token = '';
-    adsDto.status = 'active';
     return await this.adsModel.create(adsDto);
 
+  }
+
+  async showAd(type: string) {
+    const ads = await this.adsModel.aggregate([
+      { $match: { ad_type: type } },
+      { $sample: { size: 1 } }
+    ])
+
+    return ads[0]
   }
 
   async updateAd(adId, adsDto: AdDto): Promise<any> {

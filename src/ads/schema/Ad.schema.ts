@@ -5,24 +5,16 @@ export type AdDocument = HydratedDocument<Ad>;
 
 @Schema()
 export class Ad {
-    @Prop({ type: Date })
+    @Prop({ type: Date, default: new Date() })
     created_date?: Date
     @Prop()
     title: string
     @Prop()
     description: string
     @Prop()
-    pages: string
+    ad_image_url: string
     @Prop()
-    position: string
-    @Prop()
-    size: string
-    @Prop()
-    price: string
-    @Prop()
-    noOfClicks: string
-    @Prop()
-    status?: string
+    ad_type: string
 }
 
 export const AdSchema = SchemaFactory.createForClass(Ad);

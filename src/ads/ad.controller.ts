@@ -1,8 +1,9 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards, ValidationPipe } from '@nestjs/common';
 import { AdDto } from './dto/ad.dto';
 import { Ad } from './schema/Ad.schema';
 import { AdService } from './ad.service';
 import { AuthGuard } from 'src/auth/auth.guard';
+import { Roles } from 'src/auth/roles.decorator';
 
 
 @Controller('ads')
@@ -12,9 +13,15 @@ export class AdController {
     ) { }
 
     @UseGuards(AuthGuard)
+    @Roles(["superadmin"])
     @Post('create')
-    async createAdDto(@Body() AdDto: AdDto): Promise<Ad> {
+    async createAdDto(@Body(ValidationPipe) AdDto: AdDto): Promise<Ad> {
         return await this.adService.createAd(AdDto);
+    }
+
+    @Get("show-ad")
+    async showAd(@Query("type") type): Promise<Ad> {
+        return await this.adService.showAd(type)
     }
 
     @Get("all")
