@@ -10,6 +10,10 @@ export class AdDto {
     description: string
 
     @IsString()
+    @IsNotEmpty({ message: "Redirect URL should not be empty" })
+    redirect_url: string
+
+    @IsString()
     @IsNotEmpty({ message: "Ad type should be provided" })
     ad_type: string
 

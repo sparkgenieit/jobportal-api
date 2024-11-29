@@ -15,6 +15,8 @@ export class Ad {
     ad_image_url: string
     @Prop()
     ad_type: string
+    @Prop()
+    redirect_url: string
 }
 
 export const AdSchema = SchemaFactory.createForClass(Ad);

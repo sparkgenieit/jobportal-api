@@ -36,9 +36,9 @@ export class AdService {
     return ads[0]
   }
 
-  async updateAd(adId, adsDto: AdDto): Promise<any> {
-    const isJob = await this.adsModel.findOne({ _id: adId });
-    if (!isJob) {
+  async updateAd(adId: string, adsDto: AdDto): Promise<any> {
+    const isAd = await this.adsModel.findOne({ _id: adId });
+    if (!isAd) {
       throw new HttpException({ message: "The given Ad does not exsit" }, HttpStatus.BAD_REQUEST);
     } else {
       return await this.adsModel.findOneAndUpdate({ _id: adId }, adsDto);
