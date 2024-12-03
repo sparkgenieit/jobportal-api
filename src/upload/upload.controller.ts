@@ -18,13 +18,11 @@ import Path = require('path');
 
 import * as fs from 'fs';
 import { FileInterceptor } from '@nestjs/platform-express';
-import path = require('path');
 import { AuthGuard } from 'src/auth/auth.guard';
 
 const storage = {
   storage: diskStorage({
     destination: (req, file, callback) => {
-      console.log(req.query);
       const userPath = req.query.path;
       let path = `public/uploads/${userPath}`;
       console.log(fs.existsSync(path));
@@ -35,11 +33,8 @@ const storage = {
     },
 
     filename: (req, file, cb) => {
-      console.log(req);
-      console.log(file);
-      const filename: string = 'myfile-' + randomUUID();
-      const extension: string = Path.parse(file.originalname).ext;
-      cb(null, `${filename}${extension}`);
+      const filename: string = 'myfile-' + randomUUID() + "_ON_" + file.originalname;
+      cb(null, filename);
     },
   }),
 };

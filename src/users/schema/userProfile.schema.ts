@@ -1,37 +1,37 @@
 import { Prop, Schema, SchemaFactory, raw } from "@nestjs/mongoose";
 import { HydratedDocument, Types } from "mongoose";
 
-class WorkHistory{
-    jobTitle:string;
-    employer:string;
-    location:string;
+class WorkHistory {
+    jobTitle: string;
+    employer: string;
+    location: string;
     fromDate: Date;
     toDate: Date;
     description: string;
 }
 
-class Education{
-    provider:string;
-    qualification:string;
-    completedYear:string;
+class Education {
+    provider: string;
+    qualification: string;
+    completedYear: string;
     validInNz: string;
     description: string;
 }
 
-class Licence{
-    name:string;
-    issuingAuthority:string;
-    issueDate:Date;
-    expiryDate:Date;
+class Licence {
+    name: string;
+    issuingAuthority: string;
+    issueDate: Date;
+    expiryDate: Date;
     validInNz: string;
     description: string;
 }
 
-class Certificate{
-    name:string;
-    issuingAuthority:string;
-    issueDate:Date;
-    expiryDate:Date;
+class Certificate {
+    name: string;
+    issuingAuthority: string;
+    issueDate: Date;
+    expiryDate: Date;
     validInNz: string;
     description: string;
 }
@@ -39,8 +39,8 @@ class Certificate{
 export type UserDocument = HydratedDocument<UserProfile>;
 
 @Schema()
-export class UserProfile{
-    @Prop({type: Date})
+export class UserProfile {
+    @Prop({ type: Date })
     created_date?: Date
     @Prop()
     user_id: Types.ObjectId
@@ -67,7 +67,7 @@ export class UserProfile{
     @Prop()
     availability?: string
     @Prop()
-    noticePeriod?:number
+    noticePeriod?: string
     @Prop()
     preferredJobTypes?: Array<string>
     @Prop()
