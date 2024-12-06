@@ -21,7 +21,6 @@ import { MailModule } from './mails/mail.module';
 import { LogModule } from './audit/logs.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 
-
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true, }),
@@ -43,7 +42,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     PaymentModule,
     NotificationModule,
     MailModule,
-    LogModule
+    LogModule,
   ],
   controllers: [AppController],
   providers: [AppService],

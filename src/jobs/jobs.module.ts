@@ -11,6 +11,8 @@ import { CompanyProfile, CompanyProfileSchema } from 'src/company/schema/company
 import { Log, LogSchema } from 'src/audit/Log.schema';
 import { AdminLog, AdminLogSchema } from 'src/audit/AdminLog.Schema';
 import { LogService } from 'src/audit/logs.service';
+import { ChartsController } from 'src/charts/charts.controller';
+import { ChartsService } from 'src/charts/charts.service';
 
 @Module({
   imports: [
@@ -23,7 +25,7 @@ import { LogService } from 'src/audit/logs.service';
       { name: AdminLog.name, schema: AdminLogSchema },
     ]),
   ],
-  providers: [JobsService, JwtService, LogService],
-  controllers: [jobsController]
+  providers: [JobsService, JwtService, LogService, ChartsService],
+  controllers: [jobsController, ChartsController]
 })
 export class JobsModule { }
