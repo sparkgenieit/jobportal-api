@@ -17,47 +17,127 @@ export class ChartsService {
 
     const startDate = new Date(lastYear, 0, 1)
 
-    const posted_jobs =
-      [
-        {
-          $match: {
-            companyId: company_id,
-            creationdate: {
-              $gte: startDate,
-              $lte: endDate
-            }
-          }
-        },
-        {
-          $group: {
-            _id: {
-              year: { $year: "$creationdate" },
-              month: { $month: "$creationdate" }
-            },
-            count: { $sum: 1 }
-          }
-        },
-        {
-          $project: {
-            _id: 0,
-            year: '$_id.year',
-            month: '$_id.month',
-            count: 1
+    const postedJobsByYear = [
+      {
+        $match: {
+          creationdate: {
+            $gte: new Date(endDate.getFullYear(), 0, 1),
+            $lte: endDate
           }
         }
-      ]
+      },
+      {
+        $count: "count"
+      }
+    ]
+
+    const postedJobsByMonth = [
+      {
+        $match: {
+          creationdate: {
+            $gte: new Date(endDate.getFullYear(), endDate.getMonth(), 1),
+            $lte: endDate
+          }
+        }
+      },
+      {
+        $count: "count"
+      }
+    ]
+
+    const posted_jobs = [
+      {
+        $match: {
+          creationdate: {
+            $gte: startDate,
+            $lte: endDate
+          }
+        }
+      },
+      {
+        $group: {
+          _id: {
+            year: { $year: "$creationdate" },
+            month: { $month: "$creationdate" }
+          },
+          count: { $sum: 1 }
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          year: '$_id.year',
+          month: '$_id.month',
+          count: 1
+        }
+      }
+    ]
+
+    const avgViews = [
+      {
+        $match: {
+          creationdate: {
+            $gte: startDate,
+            $lte: endDate
+          }
+        }
+      },
+      {
+        $group: {
+          _id: {
+            year: { $year: "$creationdate" },
+            month: { $month: "$creationdate" }
+          },
+          count: { $avg: "$views" }
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          year: '$_id.year',
+          month: '$_id.month',
+          count: 1
+        }
+      }
+    ]
+
+    const activeJobs = [
+      {
+        $match: {
+          status: "approved"
+        }
+      },
+      {
+        $count: "count"
+      }
+    ]
 
 
     const data = await this.jobsModel.aggregate([
       {
+        $match: {
+          companyId: company_id
+        }
+      },
+      {
         $facet: {
-          posted_jobs
+          posted_jobs,
+          avgViews,
+          activeJobs,
+          postedJobsByYear,
+          postedJobsByMonth
         }
       }
     ])
 
+    console.log(data[0]?.postedJobsByYear);
+
     return {
-      posted_jobs: data[0]?.posted_jobs
+      posted_jobs: data[0]?.posted_jobs,
+      avgViews: data[0]?.avgViews,
+      activeJobs: data[0]?.activeJobs[0]?.count,
+      postedJobsByYear: data[0]?.postedJobsByYear[0]?.count,
+      postedJobsByMonth: data[0]?.postedJobsByMonth[0]?.count
     }
   }
 }
