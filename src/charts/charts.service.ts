@@ -112,6 +112,54 @@ export class ChartsService {
       }
     ]
 
+    const avgJobsByYear = [
+      {
+        $match: {
+          creationdate: {
+            $gte: startDate,
+            $lte: endDate
+          }
+        }
+      },
+      {
+        $lookup: {
+          from: 'userjobs',
+          localField: '_id',
+          foreignField: 'jobId',
+          as: 'applications'
+        }
+      },
+      {
+        $match: {
+          'applications.applied': true
+        }
+      },
+      {
+        $addFields: {
+          applicationCount: { $size: '$applications' }
+        }
+      },
+      {
+        $group: {
+          _id: {
+            year: { $year: "$creationdate" },
+            month: { $month: "$creationdate" }
+          },
+          count: { $sum: 1 },
+          totalApplications: { $sum: '$applicationCount' }
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          year: '$_id.year',
+          month: '$_id.month',
+          count: 1,
+          totalApplications: 1
+        }
+      }
+    ];
+
 
     const data = await this.jobsModel.aggregate([
       {
@@ -125,19 +173,22 @@ export class ChartsService {
           avgViews,
           activeJobs,
           postedJobsByYear,
-          postedJobsByMonth
+          postedJobsByMonth,
+          avgJobsByYear,
         }
       }
     ])
 
-    console.log(data[0]?.postedJobsByYear);
+
+    console.log(data[0]?.avgJobsByYear);
 
     return {
       posted_jobs: data[0]?.posted_jobs,
       avgViews: data[0]?.avgViews,
       activeJobs: data[0]?.activeJobs[0]?.count,
       postedJobsByYear: data[0]?.postedJobsByYear[0]?.count,
-      postedJobsByMonth: data[0]?.postedJobsByMonth[0]?.count
+      postedJobsByMonth: data[0]?.postedJobsByMonth[0]?.count,
+      avgJobsByYear: data[0]?.avgJobsByYear,
     }
   }
 }
