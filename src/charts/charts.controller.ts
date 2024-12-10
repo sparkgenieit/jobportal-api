@@ -1,4 +1,4 @@
-import { Controller, Get, Req, UseGuards } from "@nestjs/common";
+import { Controller, Post, Req, UseGuards } from "@nestjs/common";
 import { ChartsService } from "./charts.service";
 import { AuthGuard } from "src/auth/auth.guard";
 import { Roles } from "src/auth/roles.decorator";
@@ -11,9 +11,9 @@ export class ChartsController {
 
     @UseGuards(AuthGuard)
     @Roles(["employer", "recruiter"])
-    @Get('company')
+    @Post('company')
     async getCompanyCharts(@Req() req) {
-        return this.chartsService.getCompanyChartsData(req.user.id)
+        const { year, month } = req.body
+        return this.chartsService.getCompanyChartsData(req.user.id, +year, +month)
     }
-
 }

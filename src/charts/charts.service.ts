@@ -9,7 +9,13 @@ export class ChartsService {
     @InjectModel(Jobs.name) private readonly jobsModel: Model<Jobs>,
   ) { }
 
-  async getCompanyChartsData(company_id: string) {
+  async getCompanyChartsData(company_id: string, year: number, month: number) {
+
+    const todayDate = new Date()
+
+    const queryYear = year ? year : todayDate.getFullYear()
+
+    const queryMonth = month ? month : todayDate.getMonth()
 
     const endDate = new Date()
 
@@ -21,8 +27,8 @@ export class ChartsService {
       {
         $match: {
           creationdate: {
-            $gte: new Date(endDate.getFullYear(), 0, 1),
-            $lte: endDate
+            $gte: new Date(queryYear, 0, 2),
+            $lte: new Date(queryYear, 11, 31)
           }
         }
       },
@@ -35,8 +41,8 @@ export class ChartsService {
       {
         $match: {
           creationdate: {
-            $gte: new Date(endDate.getFullYear(), endDate.getMonth(), 1),
-            $lte: endDate
+            $gte: new Date(queryYear, queryMonth, 1),
+            $lte: new Date(queryYear, queryMonth, 31),
           }
         }
       },
@@ -49,8 +55,8 @@ export class ChartsService {
       {
         $match: {
           creationdate: {
-            $gte: startDate,
-            $lte: endDate
+            $gte: new Date(queryYear - 1, 0, 1),
+            $lte: new Date(queryYear, 11, 31),
           }
         }
       },
@@ -77,8 +83,8 @@ export class ChartsService {
       {
         $match: {
           creationdate: {
-            $gte: startDate,
-            $lte: endDate
+            $gte: new Date(queryYear - 1, 0, 1),
+            $lte: new Date(queryYear, 11, 31),
           }
         }
       },
@@ -116,8 +122,8 @@ export class ChartsService {
       {
         $match: {
           creationdate: {
-            $gte: startDate,
-            $lte: endDate
+            $gte: new Date(queryYear - 1, 0, 1),
+            $lte: new Date(queryYear, 11, 31),
           }
         }
       },
@@ -178,9 +184,6 @@ export class ChartsService {
         }
       }
     ])
-
-
-    console.log(data[0]?.avgJobsByYear);
 
     return {
       posted_jobs: data[0]?.posted_jobs,
