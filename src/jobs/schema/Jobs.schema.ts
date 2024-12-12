@@ -5,38 +5,51 @@ export type JobsDocument = HydratedDocument<Jobs>;
 
 @Schema({ autoIndex: true, timestamps: true })
 export class Jobs {
-    @Prop()
-    jobId: Types.ObjectId
-    @Prop()
+    @Prop({ required: true })
     companyId: Types.ObjectId
-    @Prop()
+
+    @Prop({ required: true })
     company: string
-    @Prop()
+
+    @Prop({ required: true })
     companyLogo: string
-    @Prop()
+
+    @Prop({ required: true })
     closedate: string
-    @Prop()
+
+    @Prop({ required: true })
     creationdate: Date
-    @Prop()
+
+    @Prop({ required: true })
     jobtype: string
-    @Prop()
+
+    @Prop({ required: true })
     location: string
+
     @Prop()
     employjobreference: string
+
     @Prop()
     numberofvacancies: number
-    @Prop()
+
+    @Prop({ required: true })
     jobTitle: string
+
     @Prop()
     rateperhour: number
+
     @Prop()
     salary_type: string
+
     @Prop()
     duration: string
-    @Prop()
+
+    @Prop({ required: true })
     jobCategory: string
-    @Prop()
+
+    @Prop({ required: true })
     subCategory: string
+
     @Prop()
     weeklyperhour: number
     @Prop()
@@ -49,8 +62,13 @@ export class Jobs {
     description: string
     @Prop()
     employerquestions: string
-    @Prop()
+
+    @Prop({ required: true })
     employer: string
+
+    @Prop({ required: true })
+    posted_by: string
+
     @Prop()
     adminId: Types.ObjectId
     @Prop()

@@ -13,7 +13,7 @@ export class ChartsController {
     @Roles(["employer", "recruiter"])
     @Post('company')
     async getCompanyCharts(@Req() req) {
-        const { year, month } = req.body
-        return this.chartsService.getCompanyChartsData(req.user.id, +year, +month)
+        const { year, month, recruiterId } = req.body
+        return this.chartsService.getCompanyChartsData(req.user.id, +year, +month, recruiterId)
     }
 }

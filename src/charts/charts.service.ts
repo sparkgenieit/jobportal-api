@@ -9,19 +9,17 @@ export class ChartsService {
     @InjectModel(Jobs.name) private readonly jobsModel: Model<Jobs>,
   ) { }
 
-  async getCompanyChartsData(company_id: string, year: number, month: number) {
+  async getCompanyChartsData(company_id: string, year: number, month: number, recruiterId: string | null) {
+
+    const query: any = { companyId: company_id }
+
+    if (recruiterId) query.posted_by = recruiterId
 
     const todayDate = new Date()
 
     const queryYear = year ? year : todayDate.getFullYear()
 
     const queryMonth = month ? month : todayDate.getMonth()
-
-    const endDate = new Date()
-
-    const lastYear = endDate.getFullYear() - 1
-
-    const startDate = new Date(lastYear, 0, 1)
 
     const postedJobsByYear = [
       {
@@ -169,9 +167,7 @@ export class ChartsService {
 
     const data = await this.jobsModel.aggregate([
       {
-        $match: {
-          companyId: company_id
-        }
+        $match: query
       },
       {
         $facet: {
