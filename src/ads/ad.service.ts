@@ -1,30 +1,19 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import mongoose, { Model } from 'mongoose';
-import { JwtService } from '@nestjs/jwt';
+import mongoose, { Model, Types } from 'mongoose';
 import { Ad } from './schema/Ad.schema';
 import { AdDto } from './dto/ad.dto';
-import { User } from 'src/users/schema/user.schema';
-import { UserJobs } from 'src/users/schema/userJobs.schema';
-import { UserJobsDto } from 'src/users/dto/user-jobs.dto';
+
 
 @Injectable()
 export class AdService {
   constructor(
     @InjectModel(Ad.name) private readonly adsModel: Model<Ad>,
-    @InjectModel(UserJobs.name) private readonly UserJobsModel: Model<UserJobs>,
-    @InjectModel(User.name) private userModel: Model<User>
+
   ) { }
 
-  async createAd(adsDto: AdDto): Promise<any> {
-    // const isJob = await this.userModel.findOne({email});
-    // if (isUser) {
-    //   throw new HttpException({message: "The given email "+email+" already exsit"}, HttpStatus.BAD_REQUEST);
-    // }
-
-    //CreateUserDto.token = '';
+  async createAd(adsDto: AdDto) {
     return await this.adsModel.create(adsDto);
-
   }
 
   async showAd(type: string) {
@@ -39,7 +28,7 @@ export class AdService {
   async updateAd(adId: string, adsDto: AdDto): Promise<any> {
     const isAd = await this.adsModel.findOne({ _id: adId });
     if (!isAd) {
-      throw new HttpException({ message: "The given Ad does not exsit" }, HttpStatus.BAD_REQUEST);
+      throw new HttpException({ message: "The given Ad does not exist" }, HttpStatus.BAD_REQUEST);
     } else {
       return await this.adsModel.findOneAndUpdate({ _id: adId }, adsDto);
     }
@@ -49,28 +38,31 @@ export class AdService {
     return await this.adsModel.find().exec()
   }
 
-  async getAd(adId): Promise<any> {
+  async getCompanyAds(id: string): Promise<Ad[]> {
+    return await this.adsModel.find({ posted_by: id }).exec()
+  }
+
+  async getAd(adId: string | Types.ObjectId) {
     adId = new mongoose.Types.ObjectId(adId);
 
     const isAd = await this.adsModel.findOne({ _id: adId });
-    console.log(isAd);
+
     if (!isAd) {
-      throw new HttpException({ message: "The given Ad does not exsit" }, HttpStatus.BAD_REQUEST);
+      throw new HttpException({ message: "The given Ad does not exist" }, HttpStatus.BAD_REQUEST);
     } else {
       return await this.adsModel.findOne({ _id: adId });
     }
   }
 
 
-  async deleteAd(adId): Promise<any> {
-    console.log(adId);
+  async deleteAd(adId: string | Types.ObjectId): Promise<any> {
+
     adId = new mongoose.Types.ObjectId(adId);
-    //userProfileDto.user_id = user_id;
+
     const isAd = await this.adsModel.findOne({ _id: adId });
     if (!isAd) {
-      throw new HttpException({ message: "The given Ad does not exsit" }, HttpStatus.BAD_REQUEST);
+      throw new NotFoundException("The given Ad does not exist");
     } else {
-
       return await this.adsModel.deleteOne({ _id: adId })
     }
   }

@@ -13,6 +13,9 @@ export class AdDto {
     @IsNotEmpty({ message: "Redirect URL should not be empty" })
     redirect_url: string
 
+    @IsNotEmpty()
+    posted_by: string
+
     @IsString()
     @IsNotEmpty({ message: "Ad type should be provided" })
     ad_type: string

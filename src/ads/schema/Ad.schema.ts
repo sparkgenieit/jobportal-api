@@ -7,16 +7,18 @@ export type AdDocument = HydratedDocument<Ad>;
 export class Ad {
     @Prop({ type: Date, default: new Date() })
     created_date?: Date
-    @Prop()
+    @Prop({ required: true })
     title: string
-    @Prop()
+    @Prop({ required: true })
     description: string
-    @Prop()
+    @Prop({ required: true })
     ad_image_url: string
-    @Prop()
+    @Prop({ required: true })
     ad_type: string
-    @Prop()
+    @Prop({ required: true })
     redirect_url: string
+    @Prop({ required: true })
+    posted_by: string
 }
 
 export const AdSchema = SchemaFactory.createForClass(Ad);
