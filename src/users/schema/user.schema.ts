@@ -19,6 +19,8 @@ export class User {
     role: string
     @Prop()
     activated: boolean
+    @Prop({ default: false })
+    blocked: boolean
     @Prop()
     token?: string
     @Prop()

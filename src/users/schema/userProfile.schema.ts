@@ -61,7 +61,7 @@ export class UserProfile {
     @Prop()
     licences?: Array<Licence>
     @Prop()
-    certification?: Array<Licence>
+    certification?: Array<Certificate>
     @Prop()
     skills?: Array<string>
     @Prop()

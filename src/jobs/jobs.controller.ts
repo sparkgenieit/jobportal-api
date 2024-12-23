@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query, Req, UseGuards, ValidationPipe } from '@nestjs/common';
 import { JobsDto } from './dto/jobs.dto';
 import { Jobs } from './schema/Jobs.schema';
 import { JobsService } from './jobs.service';
@@ -46,8 +46,8 @@ export class jobsController {
     @UseGuards(AuthGuard)
     @Roles(["user"])
     @Post('apply')
-    async applyJob(@Body() data: { userId: string, jobId: string, applied: boolean, applied_date: string }): Promise<any> {
-        return await this.jobsService.applyJob(data);
+    async applyJob(@Body() data): Promise<any> {
+        return await this.jobsService.applyJob(data.userId, data.jobId, data);
     }
 
     @UseGuards(AuthGuard)

@@ -33,7 +33,7 @@ const storage = {
     },
 
     filename: (req, file, cb) => {
-      const filename: string = 'myfile-' + randomUUID() + "_ON_" + file.originalname;
+      const filename: string = 'file-' + randomUUID() + "_ON_" + file.originalname;
       cb(null, filename);
     },
   }),

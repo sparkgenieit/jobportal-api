@@ -194,7 +194,7 @@ export class JobsService implements OnModuleInit {
     }
   }
 
-  async applyJob({ userId, jobId, applied, applied_date }): Promise<any> {
+  async applyJob(userId, jobId, data): Promise<any> {
     userId = new mongoose.Types.ObjectId(userId);
     jobId = new mongoose.Types.ObjectId(jobId);
 
@@ -205,12 +205,8 @@ export class JobsService implements OnModuleInit {
     } if (!isJob) {
       throw new HttpException({ message: "The given Job does not exist" }, HttpStatus.BAD_REQUEST);
     } else {
-      const isAppliedJob = await this.UserJobsModel.findOne({ userId, jobId });
-      if (isAppliedJob) {
-        return await this.UserJobsModel.findOneAndUpdate({ _id: isAppliedJob }, { userId, jobId, applied, applied_date });
-      } else {
-        return await this.UserJobsModel.create({ userId, jobId, applied, applied_date });
-      }
+      await this.UserJobsModel.findOneAndUpdate({ userId, jobId }, data, { upsert: true });
+      return { message: "Applied Successfully" }
     }
   }
 

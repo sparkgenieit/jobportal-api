@@ -44,6 +44,11 @@ export class UsersService {
     if (!user.activated) {
       throw new HttpException({ message: 'User Not Activated' }, HttpStatus.BAD_REQUEST);
     }
+
+    if (user.blocked) {
+      throw new HttpException({ message: 'You are blocked from using our services' }, HttpStatus.FORBIDDEN);
+    }
+
     const isMatch: boolean = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {

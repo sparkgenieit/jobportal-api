@@ -15,6 +15,10 @@ export class UserJobs {
     @Prop()
     applied: Boolean
     @Prop()
+    cv: String
+    @Prop()
+    coverLetter: String
+    @Prop()
     saved: Boolean
     @Prop()
     saved_date: String
