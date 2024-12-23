@@ -1,7 +1,9 @@
 import * as fs from "fs";
 import { join } from "path";
 import * as PDFDocumet from 'pdfkit';
-import { randomBytes } from "crypto";
+import * as fspromises from 'fs/promises';
+import * as pdfParser from 'pdf-parse';
+import { isProfane } from 'no-profanity';
 
 export function invoicePdfCreation(details: any) {
     try {
@@ -86,12 +88,13 @@ export const ENV = {
     DATABASE_URL: "mongodb://127.0.0.1:27017/jobportal?authSource=admin"
 }
 
+export const isBad = async (filePath: string) => {
 
-export function generateRandomUniqueNumber() {
-    const timestamp = Date.now();
-    const random = randomBytes(4) // Generate 4 random bytes
-    const randomNum = parseInt(random.toString("hex"), 16)
-    const combinedNumber = (timestamp * 10000) + randomNum;
-    const formattedNumber = combinedNumber.toString().slice(-8)
-    return formattedNumber;
+    const fileBuffer = await fspromises.readFile(filePath);
+
+    const pdfData = await pdfParser(fileBuffer);
+
+    const isValid = isProfane(pdfData.text);
+
+    return isValid;
 }

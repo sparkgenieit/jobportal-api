@@ -21,6 +21,7 @@ import { Log } from 'src/audit/Log.schema';
 import { AdminLog } from 'src/audit/AdminLog.Schema';
 import { LogService } from 'src/audit/logs.service';
 import { ENV } from 'src/utils/functions';
+import { OnEvent } from '@nestjs/event-emitter';
 
 @Injectable()
 export class UsersService {
@@ -292,13 +293,6 @@ export class UsersService {
     return { message: "Update Success" }
   }
 
-  async uploadCv(cv) {
-    if (cv) {
-      const cvFileName = this.uploadController.uploadFile(cv);
-      console.log(cvFileName);
-      return cvFileName;
-    }
-  }
 
   async getAllUsers(role: string, limit: number, skip: number): Promise<any> {
     const users = await this.userModel.aggregate([
@@ -376,6 +370,18 @@ export class UsersService {
     } else {
       currentUser = await this.userModel.findOne({ _id }, { password: 0 })
       return currentUser
+    }
+  }
+
+  @OnEvent('user.block')
+  async blockUser(user_id: string | Types.ObjectId) {
+    console.log("User Blocked")
+    user_id = new mongoose.Types.ObjectId(user_id);
+    const isUser = await this.userModel.findOne({ _id: user_id });
+    if (!isUser) {
+      throw new HttpException({ message: "The given user does not exist" }, HttpStatus.NOT_FOUND);
+    } else {
+      return await this.userModel.findOneAndUpdate({ _id: user_id }, { blocked: true })
     }
   }
 }

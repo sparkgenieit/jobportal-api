@@ -6,26 +6,28 @@ import {
   UploadedFile,
   Query,
   StreamableFile,
-  Header,
   UseGuards,
   UseInterceptors,
+  Req,
 } from '@nestjs/common';
 import { createReadStream } from 'fs';
 
 import { diskStorage } from 'multer';
 import { randomUUID } from 'crypto';
-import Path = require('path');
-
-import * as fs from 'fs';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AuthGuard } from 'src/auth/auth.guard';
+import * as fs from 'fs';
+import * as Path from 'path';
+import { isBad } from 'src/utils/functions';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+
+
 
 const storage = {
   storage: diskStorage({
     destination: (req, file, callback) => {
       const userPath = req.query.path;
       let path = `public/uploads/${userPath}`;
-      console.log(fs.existsSync(path));
       if (!fs.existsSync(path)) {
         fs.mkdirSync(path, { recursive: true });
       }
@@ -39,10 +41,10 @@ const storage = {
   }),
 };
 
-UseGuards(AuthGuard)
 @Controller('upload')
 export class UploadController {
   constructor(
+    private eventEmitter: EventEmitter2,
   ) { }
 
   @Get("allfiles")
@@ -59,9 +61,22 @@ export class UploadController {
 
 
   // @UseGuards(JwtAuthGuard) your methode of guard
+
+  @UseGuards(AuthGuard)
   @Post('cvs')
   @UseInterceptors(FileInterceptor('file', storage))
-  uploadFile(@UploadedFile() file: any) {
+  async uploadFile(@UploadedFile() file: any, @Req() req) {
+
+    const filePath = Path.join(__dirname, '..', '..', file.path);
+
+    const isAbusive = await isBad(filePath);
+
+
+    if (isAbusive) {
+      fs.unlinkSync(filePath);
+      this.eventEmitter.emit('user.block', req?.user?.id);
+    }
+
     return file;
   }
 
