@@ -42,6 +42,7 @@ const storage = {
 };
 
 @Controller('upload')
+@UseGuards(AuthGuard)
 export class UploadController {
   constructor(
     private eventEmitter: EventEmitter2,
@@ -61,16 +62,12 @@ export class UploadController {
 
 
   // @UseGuards(JwtAuthGuard) your methode of guard
-
-  @UseGuards(AuthGuard)
   @Post('cvs')
   @UseInterceptors(FileInterceptor('file', storage))
   async uploadFile(@UploadedFile() file: any, @Req() req) {
 
     const filePath = Path.join(__dirname, '..', '..', file.path);
-
     const isAbusive = await isBad(filePath);
-
 
     if (isAbusive) {
       fs.unlinkSync(filePath);
