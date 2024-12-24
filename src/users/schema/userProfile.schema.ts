@@ -36,6 +36,12 @@ class Certificate {
     description: string;
 }
 
+export class UploadDoc {
+    filename: string;
+    originalname: string;
+    uploaddate: Date;
+}
+
 export type UserDocument = HydratedDocument<UserProfile>;
 
 @Schema()
@@ -81,11 +87,11 @@ export class UserProfile {
     @Prop()
     visaExpiryDate?: Date
     @Prop()
-    cv?: string
+    cv?: UploadDoc
     @Prop()
     showProfile?: string
     @Prop()
-    coverLetter?: string
+    coverLetter?: UploadDoc
 }
 
 export const UserProfileSchema = SchemaFactory.createForClass(UserProfile);

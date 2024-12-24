@@ -36,7 +36,7 @@ const storage = {
     },
 
     filename: (req, file, cb) => {
-      const filename: string = 'file-' + randomUUID() + "_ON_" + file.originalname;
+      const filename: string = 'file-' + randomUUID() + Path.extname(file.originalname);
       cb(null, filename);
     },
   }),
@@ -78,13 +78,13 @@ export class UploadController {
       throw new HttpException('Abusive content detected', 400);
     }
     return file;
-
   }
 
   // @UseGuards(JwtAuthGuard) your methode of guard
   @Post('coverLetters')
   @UseInterceptors(FileInterceptor('file', storage))
   async uploadCoverLetter(@UploadedFile() file: any, @Req() req, @Res({ passthrough: true }) res) {
+
     const filePath = Path.join(__dirname, '..', '..', file.path);
     const isAbusive = await isBad(filePath);
 

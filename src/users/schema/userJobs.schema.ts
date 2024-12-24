@@ -2,6 +2,7 @@ import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import mongoose, { Types } from "mongoose";
 import { User } from "./user.schema";
 import { Jobs } from "src/jobs/schema/Jobs.schema";
+import { UploadDoc } from "./userProfile.schema";
 
 
 @Schema()
@@ -15,9 +16,9 @@ export class UserJobs {
     @Prop()
     applied: Boolean
     @Prop()
-    cv: String
+    cv: UploadDoc
     @Prop()
-    coverLetter: String
+    coverLetter: UploadDoc
     @Prop()
     saved: Boolean
     @Prop()

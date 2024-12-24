@@ -570,25 +570,7 @@ export class JobsService implements OnModuleInit {
   async getUserJobStatus(userId, jobId) {
     userId = new mongoose.Types.ObjectId(userId);
     jobId = new mongoose.Types.ObjectId(jobId);
-    let userApplied = false;
-    let userSaved = false;
-    let shortlisted = false;
-    const job = await this.UserJobsModel.findOne({ userId, jobId });
-    if (job && job.saved) {
-      userSaved = true;
-    }
-    if (job && job.applied) {
-      userApplied = true;
-    }
-    if (job && job.shortlisted) {
-      shortlisted = true;
-    }
-    return {
-      saved: userSaved,
-      applied: userApplied,
-      shortlisted: shortlisted,
-      status: 200
-    }
+    return await this.UserJobsModel.findOne({ userId, jobId });
   }
 
   async getSavedJobs(userId: string | Types.ObjectId, limit: number, skip: number): Promise<any> {
