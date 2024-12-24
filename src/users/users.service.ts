@@ -375,7 +375,6 @@ export class UsersService {
 
   @OnEvent('user.block')
   async blockUser(user_id: string | Types.ObjectId) {
-    console.log("User Blocked")
     user_id = new mongoose.Types.ObjectId(user_id);
     const isUser = await this.userModel.findOne({ _id: user_id });
     if (!isUser) {

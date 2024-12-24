@@ -9,6 +9,7 @@ import {
   UseGuards,
   UseInterceptors,
   Req,
+  HttpException,
 } from '@nestjs/common';
 import { createReadStream } from 'fs';
 
@@ -64,23 +65,36 @@ export class UploadController {
   // @UseGuards(JwtAuthGuard) your methode of guard
   @Post('cvs')
   @UseInterceptors(FileInterceptor('file', storage))
-  async uploadFile(@UploadedFile() file: any, @Req() req) {
+  async uploadFile(@UploadedFile() file: any, @Req() req, @Res({ passthrough: true }) res) {
 
+    const filePath = Path.join(__dirname, '..', '..', file.path);
+    const isAbusive = await isBad(filePath);
+
+
+    if (isAbusive) {
+      fs.unlinkSync(filePath);
+      this.eventEmitter.emit('user.block', req?.user?.id);
+      res.clearCookie('Token');
+      throw new HttpException('Abusive content detected', 400);
+    }
+    return file;
+
+  }
+
+  // @UseGuards(JwtAuthGuard) your methode of guard
+  @Post('coverLetters')
+  @UseInterceptors(FileInterceptor('file', storage))
+  async uploadCoverLetter(@UploadedFile() file: any, @Req() req, @Res({ passthrough: true }) res) {
     const filePath = Path.join(__dirname, '..', '..', file.path);
     const isAbusive = await isBad(filePath);
 
     if (isAbusive) {
       fs.unlinkSync(filePath);
       this.eventEmitter.emit('user.block', req?.user?.id);
+      res.clearCookie('Token');
+      throw new HttpException('Abusive content detected', 400);
     }
 
-    return file;
-  }
-
-  // @UseGuards(JwtAuthGuard) your methode of guard
-  @Post('coverLetters')
-  @UseInterceptors(FileInterceptor('file', storage))
-  uploadCoverLetter(@UploadedFile() file: any) {
     return file;
   }
 
