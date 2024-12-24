@@ -21,11 +21,11 @@ export class User {
     activated: boolean
     @Prop({ default: false })
     blocked: boolean
-    @Prop()
+    @Prop({ required: false })
     token?: string
-    @Prop()
+    @Prop({ required: false })
     credits?: number
-    @Prop()
+    @Prop({ required: false })
     usedFreeCredit?: boolean
 }
 
