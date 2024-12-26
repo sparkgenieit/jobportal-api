@@ -16,6 +16,10 @@ export class AdService {
     return await this.adsModel.create(adsDto);
   }
 
+  async createCompanyAd(adsDto: AdDto) {
+    return await this.adsModel.create(adsDto);
+  }
+
   async showAd(type: string) {
     const ads = await this.adsModel.aggregate([
       { $match: { ad_type: type } },

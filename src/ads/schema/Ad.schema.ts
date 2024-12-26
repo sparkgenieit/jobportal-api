@@ -19,6 +19,8 @@ export class Ad {
     redirect_url: string
     @Prop({ required: true })
     posted_by: string
+    @Prop()
+    company_id: string
 }
 
 export const AdSchema = SchemaFactory.createForClass(Ad);

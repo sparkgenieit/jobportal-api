@@ -16,6 +16,9 @@ export class AdDto {
     @IsNotEmpty()
     posted_by: string
 
+    @IsNotEmpty()
+    company_id: string
+
     @IsString()
     @IsNotEmpty({ message: "Ad type should be provided" })
     ad_type: string

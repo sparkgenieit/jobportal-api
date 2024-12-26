@@ -4,6 +4,7 @@ import { Ad } from './schema/Ad.schema';
 import { AdService } from './ad.service';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { Roles } from 'src/auth/roles.decorator';
+import { roles } from 'src/utils/Roles';
 
 
 @Controller('ads')
@@ -13,10 +14,26 @@ export class AdController {
     ) { }
 
     @UseGuards(AuthGuard)
-    @Roles(["superadmin", "employer", "recruiter"])
+    @Roles(["superadmin"])
     @Post('create')
     async createAdDto(@Body(ValidationPipe) adDto: AdDto): Promise<Ad> {
         return await this.adService.createAd(adDto);
+    }
+
+
+    @UseGuards(AuthGuard)
+    @Roles([roles.Company, roles.Recruiter])
+    @Post('company')
+    async createCompanyAd(@Body(ValidationPipe) adDto: AdDto): Promise<Ad> {
+        return await this.adService.createCompanyAd(adDto);
+    }
+
+    @UseGuards(AuthGuard)
+    @Roles([roles.Company, roles.Recruiter])
+    @Get("company")
+    async getCompanyAds(@Req() req) {
+        const { id } = req.user
+        return await this.adService.getCompanyAds(id)
     }
 
     @Get("show-ad")
@@ -31,13 +48,6 @@ export class AdController {
         return await this.adService.getAds()
     }
 
-    @UseGuards(AuthGuard)
-    @Roles(["employer", "recruiter"])
-    @Get("company")
-    async getCompanyAds(@Req() req) {
-        const { id } = req.user
-        return await this.adService.getCompanyAds(id)
-    }
 
     @UseGuards(AuthGuard)
     @Put('update/:id')
