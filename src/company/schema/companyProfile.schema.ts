@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory, raw } from "@nestjs/mongoose";
 import mongoose, { HydratedDocument, Types } from "mongoose";
 import { User } from "src/users/schema/user.schema";
+import { CompanyProfileStatus } from "../dto/company-profile.dto";
 
 export type CompanyProfileDocument = HydratedDocument<CompanyProfile>;
 
@@ -39,7 +40,7 @@ export class CompanyProfile {
     @Prop()
     info?: string
     @Prop()
-    status: string
+    status: CompanyProfileStatus
 }
 
 export const CompanyProfileSchema = SchemaFactory.createForClass(CompanyProfile);

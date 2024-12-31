@@ -1,5 +1,12 @@
 import { IsNotEmpty, IsString } from "class-validator";
 
+
+export enum AdTypes {
+    HOMEBANNER = "home_banner",
+    LONG = "long",
+    SHORT = "short",
+}
+
 export class AdDto {
     @IsString()
     @IsNotEmpty({ message: "Title should not be empty" })
@@ -29,4 +36,6 @@ export class AdDto {
 
     created_date?: Date
 }
+
+
 

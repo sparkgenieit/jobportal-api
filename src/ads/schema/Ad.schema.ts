@@ -1,5 +1,6 @@
-import { Prop, Schema, SchemaFactory, raw } from "@nestjs/mongoose";
+import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { HydratedDocument, Types } from "mongoose";
+import { AdTypes } from "../dto/ad.dto";
 
 export type AdDocument = HydratedDocument<Ad>;
 
@@ -14,7 +15,7 @@ export class Ad {
     @Prop({ required: true })
     ad_image_url: string
     @Prop({ required: true })
-    ad_type: string
+    ad_type: AdTypes
     @Prop({ required: true })
     redirect_url: string
     @Prop({ required: true })
