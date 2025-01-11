@@ -41,6 +41,11 @@ export class AdController {
         return await this.adService.showAd(type)
     }
 
+    @Get("specific-ad")
+    async specificPageAds(@Query("page") page): Promise<Ad[]> {
+        return await this.adService.getSpecificPageAds(page)
+    }
+
     @UseGuards(AuthGuard)
     @Roles(["superadmin"])
     @Get("all")

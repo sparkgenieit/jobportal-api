@@ -17,7 +17,16 @@ export class AdService {
   }
 
   async createCompanyAd(adsDto: AdDto) {
+
+    adsDto.status = "Review"
+
     return await this.adsModel.create(adsDto);
+  }
+
+  async getSpecificPageAds(page: string) {
+    const regex = new RegExp(page, 'i') // Eliminating any possibility of any case sensitive issues
+
+    return await this.adsModel.find({ specific_page_ad: regex });
   }
 
   async showAd(type: string) {

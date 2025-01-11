@@ -1,10 +1,11 @@
-import { IsNotEmpty, IsString } from "class-validator";
+import { IsNotEmpty, IsOptional, IsString } from "class-validator";
 
 
 export enum AdTypes {
     HOMEBANNER = "home_banner",
     LONG = "long",
     SHORT = "short",
+    SPECIFIC_PAGE = "specific_page"
 }
 
 export class AdDto {
@@ -22,6 +23,14 @@ export class AdDto {
 
     @IsNotEmpty()
     posted_by: string
+
+    @IsOptional()
+    @IsString()
+    specific_page_ad: string
+
+    @IsOptional()
+    @IsNotEmpty()
+    status: string
 
     @IsNotEmpty()
     company_id: string
