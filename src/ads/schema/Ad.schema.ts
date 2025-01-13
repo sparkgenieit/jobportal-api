@@ -21,6 +21,9 @@ export class Ad {
     @Prop({ required: true })
     ad_type: AdTypes
 
+    @Prop({ required: true })
+    location: String
+
     @Prop()
     specific_page_ad: string
 

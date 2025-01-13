@@ -28,9 +28,9 @@ export class AdDto {
     @IsString()
     specific_page_ad: string
 
-    @IsOptional()
-    @IsNotEmpty()
     status: string
+
+    location: string
 
     @IsNotEmpty()
     company_id: string
