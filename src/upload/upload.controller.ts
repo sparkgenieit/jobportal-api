@@ -112,6 +112,12 @@ export class UploadController {
     return file;
   }
 
+  @Post('ad-photo')
+  @UseInterceptors(FileInterceptor('file', storage))
+  uploadAdPhoto(@UploadedFile() file: any) {
+    return file;
+  }
+
   // @UseGuards(JwtAuthGuard) your methode of guard
   @Post('categoryPhoto')
   @UseInterceptors(FileInterceptor('file', storage))
