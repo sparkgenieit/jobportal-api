@@ -1,43 +1,51 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import { HydratedDocument, Types } from "mongoose";
-import { AdTypes } from "../dto/ad.dto";
+import mongoose, { HydratedDocument, Types } from "mongoose";
+import { AdStatus, AdTypes } from "../dto/ad.dto";
+import { User } from "src/users/schema/user.schema";
 
 export type AdDocument = HydratedDocument<Ad>;
 
 @Schema()
 export class Ad {
-    @Prop({ type: Date, default: new Date() })
-    created_date?: Date
+
+    @Prop({ default: new Date() })
+    date: Date;
 
     @Prop({ required: true })
-    title: string
+    title: string;
 
     @Prop({ required: true })
-    description: string
+    description: string;
 
     @Prop({ required: true })
-    ad_image_url: string
+    location: string;
 
     @Prop({ required: true })
-    ad_type: AdTypes
+    end_date: Date
 
     @Prop({ required: true })
-    location: String
-
-    @Prop()
-    specific_page_ad: string
-
-    @Prop()
-    status: "Review" | "Active" | "Rejected"
+    status: AdStatus
 
     @Prop({ required: true })
     redirect_url: string
 
     @Prop({ required: true })
-    posted_by: string
+    image: string
+
+    @Prop({ required: true })
+    type: AdTypes
 
     @Prop()
-    company_id: string
+    show_on_pages: [string]
+
+    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: User.name, required: true })
+    company_id: User
+
+    @Prop({ required: true })
+    created_by: string
+
+    @Prop({ type: mongoose.Schema.Types.ObjectId, ref: User.name })
+    approved_by: User
 }
 
 export const AdSchema = SchemaFactory.createForClass(Ad);

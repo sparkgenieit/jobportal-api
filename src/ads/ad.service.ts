@@ -2,7 +2,7 @@ import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestj
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model, Types } from 'mongoose';
 import { Ad } from './schema/Ad.schema';
-import { AdDto } from './dto/ad.dto';
+import { AdDto, AdStatus } from './dto/ad.dto';
 
 
 @Injectable()
@@ -17,9 +17,7 @@ export class AdService {
   }
 
   async createCompanyAd(adsDto: AdDto) {
-
-    adsDto.status = "Review"
-
+    adsDto.status = AdStatus.REVIEW
     return await this.adsModel.create(adsDto);
   }
 
