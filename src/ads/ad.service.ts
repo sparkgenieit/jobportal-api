@@ -23,8 +23,7 @@ export class AdService {
 
   async getSpecificPageAds(page: string) {
     const regex = new RegExp(page, 'i') // Eliminating any possibility of any case sensitive issues
-
-    return await this.adsModel.find({ specific_page_ad: regex }).sort({ data: 1 });
+    return await this.adsModel.find({ show_on_pages: { $in: [regex] }, status: AdStatus.LIVE }).sort({ data: 1 });
   }
 
   async showAd(type: string) {

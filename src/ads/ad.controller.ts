@@ -1,11 +1,15 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Query, Req, UseGuards, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, Req, UploadedFile, UseGuards, UseInterceptors, ValidationPipe } from '@nestjs/common';
 import { AdDto } from './dto/ad.dto';
 import { Ad } from './schema/Ad.schema';
 import { AdService } from './ad.service';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { Roles } from 'src/auth/roles.decorator';
 import { roles } from 'src/utils/Roles';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { upload } from 'src/utils/multerUpload';
+import * as path from 'path';
 
+const filePath = path.join(__dirname, "..", "..", "public", "uploads", "ads");
 
 @Controller('ads')
 export class AdController {
@@ -20,11 +24,12 @@ export class AdController {
         return await this.adService.createAd(adDto);
     }
 
-
     @UseGuards(AuthGuard)
     @Roles([roles.Company, roles.Recruiter])
     @Post('company')
-    async createCompanyAd(@Body(ValidationPipe) adDto: AdDto): Promise<Ad> {
+    @UseInterceptors(FileInterceptor('image', upload(filePath))) // 'image' is the name of the file input
+    async createCompanyAd(@UploadedFile() file, @Body(ValidationPipe) adDto: AdDto) {
+        adDto.image = file.filename
         return await this.adService.createCompanyAd(adDto);
     }
 

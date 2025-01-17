@@ -30,8 +30,7 @@ export class AdDto {
 
 
     @IsNotEmpty({ message: "End Date should not be empty" })
-    @IsDateString()
-    end_date: Date
+    end_date: Date | string
 
     @IsOptional()
     @IsEnum(AdStatus, { message: "Invalid Status" })
@@ -41,10 +40,7 @@ export class AdDto {
     @IsString({ message: "Invalid Redirect URL" })
     redirect_url: string
 
-    @IsNotEmpty({ message: "Image should not be empty" })
-    @IsString({ message: "Invalid Image URL" })
     image: string
-
 
     @IsNotEmpty({ message: "Type should not be empty" })
     @IsEnum(AdTypes, { message: "Invalid Type" })
