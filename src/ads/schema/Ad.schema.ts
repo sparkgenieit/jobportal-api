@@ -45,7 +45,7 @@ export class Ad {
     created_by: string
 
     @Prop({ type: mongoose.Schema.Types.ObjectId, ref: User.name })
-    approved_by: User
+    assigned_to: User
 }
 
 export const AdSchema = SchemaFactory.createForClass(Ad);

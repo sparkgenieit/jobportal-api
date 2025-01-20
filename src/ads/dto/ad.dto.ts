@@ -58,7 +58,7 @@ export class AdDto {
 
     @IsOptional()
     @IsString({ message: "Invalid Approved By" })
-    approved_by: string
+    assigned_to: string
 }
 
 

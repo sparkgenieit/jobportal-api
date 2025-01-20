@@ -4,6 +4,7 @@ import * as PDFDocumet from 'pdfkit';
 import * as fspromises from 'fs/promises';
 import * as pdfParser from 'pdf-parse';
 import { isProfane } from 'no-profanity';
+import mongoose from "mongoose";
 
 export function invoicePdfCreation(details: any) {
     try {
@@ -87,6 +88,8 @@ export const ENV = {
     ALLOWED_ORIGIN: 'http://localhost:3000',
     DATABASE_URL: "mongodb://127.0.0.1:27017/jobportal?authSource=admin"
 }
+
+export const convertToObjectId = (id: string) => new mongoose.Types.ObjectId(id);
 
 export const isBad = async (filePath: string) => {
 

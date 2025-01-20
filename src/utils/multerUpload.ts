@@ -1,7 +1,6 @@
 import { diskStorage } from "multer";
 import { randomUUID } from 'crypto';
 import * as fs from 'fs';
-import * as Path from 'path';
 
 const upload = (destinationPath: string) => {
     return {
@@ -14,7 +13,7 @@ const upload = (destinationPath: string) => {
             },
 
             filename: (req, file, cb) => {
-                const filename: string = 'file-' + randomUUID() + Path.extname(file.originalname);
+                const filename: string = 'file-' + randomUUID() + "." + file.mimetype.split("/")[1]
                 cb(null, filename);
             },
 

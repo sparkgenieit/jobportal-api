@@ -1,8 +1,9 @@
-import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model, Types } from 'mongoose';
 import { Ad } from './schema/Ad.schema';
 import { AdDto, AdStatus } from './dto/ad.dto';
+import { convertToObjectId } from 'src/utils/functions';
 
 
 @Injectable()
@@ -19,6 +20,29 @@ export class AdService {
   async createCompanyAd(adsDto: AdDto) {
     adsDto.status = AdStatus.REVIEW
     return await this.adsModel.create(adsDto);
+  }
+
+  async setStatus(status: AdStatus, adId: string) {
+    const _id = convertToObjectId(adId)
+
+    // Checking if the Ad exists
+    const isAd = await this.adsModel.findOne({ _id });
+    if (!isAd) throw new BadRequestException("The given Ad does not exist")
+
+    // Updating the ad
+    await this.adsModel.findOneAndUpdate({ _id }, { status });
+    return { message: "Status Updated" }
+  }
+
+  async assignAdToAdmin(adminId: string, adId: string) {
+    const _id = convertToObjectId(adId);
+    const AdminId = convertToObjectId(adminId);
+
+    const isAd = await this.adsModel.findOne({ _id });
+    if (!isAd) throw new BadRequestException("The given Ad does not exist")
+
+    await this.adsModel.findOneAndUpdate({ _id }, { assigned_to: AdminId });
+    return { message: "Ad Assigned to Admin" }
   }
 
   async getSpecificPageAds(page: string) {
@@ -45,15 +69,15 @@ export class AdService {
   }
 
   async getAds(): Promise<Ad[]> {
-    return await this.adsModel.find().exec()
+    return await this.adsModel.find()
   }
 
   async getCompanyAds(id: string): Promise<Ad[]> {
-    return await this.adsModel.find({ posted_by: id }).exec()
+    return await this.adsModel.find({ company_id: id })
   }
 
-  async getAd(adId: string | Types.ObjectId) {
-    adId = new mongoose.Types.ObjectId(adId);
+  async getAd(id: string) {
+    const adId = convertToObjectId(id);
 
     const isAd = await this.adsModel.findOne({ _id: adId });
 
@@ -65,9 +89,9 @@ export class AdService {
   }
 
 
-  async deleteAd(adId: string | Types.ObjectId): Promise<any> {
+  async deleteAd(id: string): Promise<any> {
 
-    adId = new mongoose.Types.ObjectId(adId);
+    const adId = convertToObjectId(id);
 
     const isAd = await this.adsModel.findOne({ _id: adId });
     if (!isAd) {
