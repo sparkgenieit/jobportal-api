@@ -20,6 +20,9 @@ export class AdminLog {
     jobId?: string
 
     @Prop()
+    adId?: string
+
+    @Prop()
     employerReference?: string
 
     @Prop()

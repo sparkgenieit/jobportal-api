@@ -52,11 +52,17 @@ export class AdController {
     }
 
     // to get specific-page ad 
-    @Get("specific-ad")
-    async specificPageAds(@Query("page") page): Promise<Ad[]> {
-        return await this.adService.getSpecificPageAds(page)
+    @Get("specific-ad-live")
+    async specificPageLiveAds(@Query("page") page): Promise<Ad[]> {
+        return await this.adService.getSpecificPageLiveAds(page)
     }
+   // to get specific-page ad 
+   @Get("specific-ad")
+   async specificPageAds(@Query("page") page): Promise<Ad[]> {
+       return await this.adService.getSpecificPageAds(page)
+   }
 
+   /*
     // to approve an ad
     @UseGuards(AuthGuard)
     @Roles([roles.Admin])
@@ -72,7 +78,7 @@ export class AdController {
     async rejectAd(@Param("id") id) {
         return await this.adService.setStatus(AdStatus.REJECTED, id)
     }
-
+*/
     // to assign an ad to admin
     @UseGuards(AuthGuard)
     @Roles([roles.Admin])
@@ -81,7 +87,55 @@ export class AdController {
         const { id } = req.user // Taking the admin id from the request
         return await this.adService.assignAdToAdmin(id, req.params.id)
     }
+    @UseGuards(AuthGuard)
+    @Roles(["admin"])
+    @Get("queue")
+    async getQueuejobs(@Query() { limit, skip }) {
+        return await this.adService.getQueueAds(+limit, +skip)
+    }
 
+
+     @UseGuards(AuthGuard)
+    @Roles([roles.Admin, "superadmin"])
+    @Post('assign')
+    
+    async assignAd(@Body() data: { adminId: string, adId: string, adsDto:AdDto }) : Promise<Ad> {
+        console.log(data);
+        return await this.adService.assignAd(data);
+    }
+
+      @UseGuards(AuthGuard)
+        @Roles(["admin", "superadmin"])
+        @Post('release')
+        async releaseJob(@Body() data: { adminId: string, adId: string, adDto:AdDto }) : Promise<Ad> {
+            return await this.adService.releaseAd(data);
+        }
+
+    @UseGuards(AuthGuard)
+    @Roles(["admin", "superadmin"])
+    @Post('multi_release')
+    async multiReleaseJob(@Body() bodyData: any, response: any): Promise<Ad> {
+        const promises = [];
+        bodyData.forEach(async (data: { adminId: string; adId: string, adDto:AdDto }) => {
+            await this.adService.releaseAd(data);
+        })
+        response = { status: '200' };
+        return response;
+    }
+
+    @UseGuards(AuthGuard)
+    @Roles(["admin", "superadmin"])
+    @Post('approve')
+    async approveAd(@Body() data:  { adminId: string, adId: string, adDto:AdDto }) : Promise<Ad> {
+        return await this.adService.approveAd(data);
+    }
+
+    @UseGuards(AuthGuard)
+    @Roles(["admin", "superadmin"])
+    @Post('reject')
+    async rejectAd(@Body() data: { adminId: string,  adId: string, adDto:AdDto }) : Promise<Ad> {
+        return await this.adService.rejectAd(data);
+    }
 
     @UseGuards(AuthGuard)
     @Roles(["superadmin"])
@@ -103,9 +157,15 @@ export class AdController {
         return await this.adService.deleteAd(id);
     }
 
+        
+
     @UseGuards(AuthGuard)
-    @Get(':id')
-    async getAd(@Param("id") id) {
-        return await this.adService.getAd(id);
+    @Roles(["admin"])
+    @Get('assignedAds')
+    async getAssignedAds(@Query() { limit, skip }, @Req() req) {
+        
+       
+        const { id } = req.user
+        return await this.adService.getAssignedAds(id, +limit, +skip);
     }
 }

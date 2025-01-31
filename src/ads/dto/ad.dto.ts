@@ -1,6 +1,9 @@
 import { IsDate, IsDateString, IsEnum, IsNotEmpty, IsOptional, IsString } from "class-validator";
+import { Types } from "mongoose"
+
 
 export enum AdStatus {
+    QUEUE = "QUEUE",
     REVIEW = "REVIEW",
     LIVE = 'LIVE',
     REJECTED = 'REJECTED'
@@ -12,7 +15,7 @@ export enum AdTypes {
 }
 
 export class AdDto {
-    date: Date;
+    created_date: Date;
 
     @IsNotEmpty({ message: "Title should not be empty" })
     @IsString({ message: "Invalid Title" })
@@ -59,6 +62,13 @@ export class AdDto {
     @IsOptional()
     @IsString({ message: "Invalid Approved By" })
     assigned_to: string
+
+ 
+    adminId: string
+
+
+
+
 }
 
 
