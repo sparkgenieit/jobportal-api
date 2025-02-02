@@ -100,14 +100,13 @@ export class AdController {
     @Post('assign')
     
     async assignAd(@Body() data: { adminId: string, adId: string, adsDto:AdDto }) : Promise<Ad> {
-        console.log(data);
         return await this.adService.assignAd(data);
     }
 
       @UseGuards(AuthGuard)
         @Roles(["admin", "superadmin"])
         @Post('release')
-        async releaseJob(@Body() data: { adminId: string, adId: string, adDto:AdDto }) : Promise<Ad> {
+        async releaseJob(@Body() data: { adminId: string, adId: string, adsDto:AdDto }) : Promise<Ad> {
             return await this.adService.releaseAd(data);
         }
 
@@ -116,7 +115,7 @@ export class AdController {
     @Post('multi_release')
     async multiReleaseJob(@Body() bodyData: any, response: any): Promise<Ad> {
         const promises = [];
-        bodyData.forEach(async (data: { adminId: string; adId: string, adDto:AdDto }) => {
+        bodyData.forEach(async (data: { adminId: string; adId: string, adsDto:AdDto }) => {
             await this.adService.releaseAd(data);
         })
         response = { status: '200' };
@@ -126,14 +125,14 @@ export class AdController {
     @UseGuards(AuthGuard)
     @Roles(["admin", "superadmin"])
     @Post('approve')
-    async approveAd(@Body() data:  { adminId: string, adId: string, adDto:AdDto }) : Promise<Ad> {
+    async approveAd(@Body() data:  { adminId: string, adId: string, adsDto:AdDto }) : Promise<Ad> {
         return await this.adService.approveAd(data);
     }
 
     @UseGuards(AuthGuard)
     @Roles(["admin", "superadmin"])
     @Post('reject')
-    async rejectAd(@Body() data: { adminId: string,  adId: string, adDto:AdDto }) : Promise<Ad> {
+    async rejectAd(@Body() data: { adminId: string,  adId: string, adsDto:AdDto }) : Promise<Ad> {
         return await this.adService.rejectAd(data);
     }
 

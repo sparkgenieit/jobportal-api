@@ -217,24 +217,25 @@ export class AdService {
       }
     
   
-    async releaseAd({ adminId, adId, adDto }): Promise<any> {
+    async releaseAd({ adminId, adId, adsDto }): Promise<any> {
       adminId = new mongoose.Types.ObjectId(adminId);
   
   
         const log: AdminLog = {
           admin_id: adminId,
           name: '',
-          adId: adDto._id.toString(),
+          adId: adsDto._id.toString(),
           fieldName: "Actions",
           changedTo: 'Queue',
           changedFrom: 'AdIn Review',
           description: `Job Released by Admin ${adminId}`
         }
   
-        adDto.adminId = "";
-        adDto.status =  AdStatus.REVIEW;
+      delete  adsDto.adminId;
+        adsDto.status =  AdStatus.QUEUE;
+        adsDto = {...adsDto , $unset: { adminId: 1 } }
   
-        await this.adsModel.findOneAndUpdate({ _id: adId }, adDto);
+        await this.adsModel.findOneAndUpdate({ _id: adId }, adsDto);
   
         await this.logSerivce.createAdminLog(log)
   
@@ -243,11 +244,11 @@ export class AdService {
   }
 
   
-    async approveAd({ adminId, adId, adDto }): Promise<any> {
+    async approveAd({ adminId, adId, adsDto }): Promise<any> {
       adminId = new mongoose.Types.ObjectId(adminId);
 
-      adDto.adminId = adminId;
-      adDto.status = AdStatus.LIVE;
+      adsDto.adminId = adminId;
+      adsDto.status = AdStatus.LIVE;
         /*
         if (isJob.reportReason || isJob.reportedBy) {
           await this.emailUserAboutReportedJob(jobsDto, false);
@@ -255,13 +256,13 @@ export class AdService {
           jobsDto.reportReason = null;
         }
           */
-        await this.adsModel.findOneAndUpdate({ _id: adId }, adDto);
+        await this.adsModel.findOneAndUpdate({ _id: adId }, adsDto);
   
   
         const log: AdminLog = {
           admin_id: adminId,
           name: '',
-          adId: adDto._id.toString(),
+          adId: adsDto._id.toString(),
           fieldName: "Actions",
           changedTo: 'LIVE',
           changedFrom: 'AdIn Review',
@@ -277,11 +278,11 @@ export class AdService {
       
     }
   
-    async rejectAd({ adminId, adId, adDto }): Promise<any> {
+    async rejectAd({ adminId, adId, adsDto }): Promise<any> {
       adminId = new mongoose.Types.ObjectId(adminId);
 
-      adDto.adminId = adminId;
-        adDto.status = AdStatus.LIVE;
+      adsDto.adminId = adminId;
+        adsDto.status = AdStatus.REJECTED;
         /*
         if (isJob.reportReason || isJob.reportedBy) {
           await this.emailUserAboutReportedJob(jobsDto, false);
@@ -289,13 +290,13 @@ export class AdService {
           jobsDto.reportReason = null;
         }
           */
-        await this.adsModel.findOneAndUpdate({ _id: adId }, adDto);
+        await this.adsModel.findOneAndUpdate({ _id: adId }, adsDto);
   
   
         const log: AdminLog = {
           admin_id: adminId,
           name: '',
-          adId: adDto._id.toString(),
+          adId: adsDto._id.toString(),
           fieldName: "Actions",
           changedTo: 'REJECTED',
           changedFrom: 'AdIn Review',
