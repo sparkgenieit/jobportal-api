@@ -11,7 +11,8 @@ export enum AdStatus {
 
 export enum AdTypes {
     HOMEBANNER = "home-banner",
-    SPECIFIC_PAGE = "specific-page"
+    SPECIFIC_PAGE = "specific-page",
+     B2B = "b2b"
 }
 
 export class AdDto {
