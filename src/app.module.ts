@@ -5,7 +5,7 @@ import { DatabaseModule } from './database/database.module';
 import { UsersModule } from './users/users.module';
 import { CompanyModule } from './company/company.module';
 import { JobsModule } from './jobs/jobs.module';
-import { AdModule } from './ads/ad.module';
+import { AdModule } from './ads/ads.module';
 import { SkillModule } from './skills/skill.module';
 import { UploadModule } from './upload/upload.module';
 import { ServeStaticModule } from '@nestjs/serve-static';

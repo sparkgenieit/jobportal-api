@@ -21,6 +21,10 @@ export class OrderDto {
     @IsNotEmpty()
     credits: number
 
+    @IsNumber()
+    @IsNotEmpty()
+    creditType: string
+
 
     @IsOptional()
     @IsNumber()

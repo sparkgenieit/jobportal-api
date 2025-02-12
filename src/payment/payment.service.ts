@@ -23,10 +23,20 @@ export class PaymentService {
     ) {
         this.stripe = new Stripe(ENV.STRIPE_SERVER_KEY);
     }
-    async makePayment(plan: string, credits: number, price: number, user_id: any) {
+    async makePayment(plan: string, credits: number, price: number, user_id: any, creditType:  'job') {
         let priceInCents = price * 100
         let gstAmount = Math.ceil((0.15 * price) * 100)
         let totalAmount = priceInCents + gstAmount;
+        const productName = `${credits} ${creditType === 'job' ? 'Job' : 'Ad'} Credits`; // Dynamic product name
+        const metadata = {
+            plan,
+            credits,
+            creditType,
+            price: priceInCents,
+            gst: gstAmount,
+            total: totalAmount,
+            user_id,
+        };
         const session = await this.stripe.checkout.sessions.create({
             line_items: [
                 {
@@ -40,7 +50,7 @@ export class PaymentService {
                     quantity: 1,
                 },
             ],
-            metadata: { plan, credits, price: priceInCents, gst: gstAmount, total: totalAmount, user_id },
+            metadata, // Attach metadata here
             mode: 'payment',
             success_url: `http://localhost:3000/payment-status?session_id={CHECKOUT_SESSION_ID}&success=true`,
             cancel_url: `http://localhost:3000/payment-status?success=false`,
@@ -92,13 +102,15 @@ export class PaymentService {
         try {
             const session = await this.stripe.checkout.sessions.retrieve(session_id)
             if (session.status === "complete") {
-                const { price, user_id, credits, gst, total } = session.metadata;
+                const { price, user_id, credits,creditType, gst, total } = session.metadata;
                 let userId = new mongoose.Types.ObjectId(user_id);
                 const user = await this.userModel.findOne({ _id: userId })
                 if (user.token === session.id) {
-
+                    const ad_credits = (creditType == 'Ad')?credits:0;
+                    const job_credits = (creditType == 'Job')?credits:0;
+                    
                     let [, profile, response] = await Promise.all([
-                        this.userModel.findOneAndUpdate({ _id: user_id }, { credits: user.credits + +credits, token: null }),
+                        this.userModel.findOneAndUpdate({ _id: user_id }, { job_credits: user.job_credits + +job_credits,ad_credits: user.ad_credits + +ad_credits, token: null }),
                         this.companyProfileModel.findOne({ user_id: userId }),
                         this.counterModel.findOneAndUpdate({ counterName: "invoice" }, { $inc: { counterValue: 1 } }, { new: true })
                     ])
@@ -128,7 +140,8 @@ export class PaymentService {
                         companyId: user._id,
                         description: "Purchased Job Ad Credits",
                         invoiceNumber: details.invoiceNumber,
-                        credits: user.credits + +credits,
+                        credits: Number(credits),                        
+                        creditType,
                         creditsPurchased: +credits,
                         creditsUsed: 0,
                         amount: +total / 100

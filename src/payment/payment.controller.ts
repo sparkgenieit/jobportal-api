@@ -10,8 +10,8 @@ export class PaymentController {
     @UseGuards(AuthGuard)
     @Roles(["employer", "recruiter"])
     @Post('make-payment')
-    async CreatePaymentIntent(@Body() { plan, credits, price, user_id }) {
-        return await this.paymentService.makePayment(plan, credits, price, user_id);
+    async CreatePaymentIntent(@Body() { plan, credits, price, user_id,creditType }) {
+        return await this.paymentService.makePayment(plan, credits, price, user_id,creditType);
     }
 
     @Post("webhook-event")

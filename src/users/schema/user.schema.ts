@@ -24,7 +24,9 @@ export class User {
     @Prop({ required: false })
     token?: string
     @Prop({ required: false })
-    credits?: number
+    job_credits?: number
+    @Prop({ required: false })
+    ad_credits?: number
     @Prop({ required: false })
     usedFreeCredit?: boolean
 }

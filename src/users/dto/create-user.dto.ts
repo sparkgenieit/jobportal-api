@@ -27,6 +27,8 @@ export class CreateUserDto {
 
   activated: boolean
   token?: string
-  credits?: number
+  job_credits?: number
+  ad_credits?: number
+  
   usedFreeCredit?: boolean
 }
