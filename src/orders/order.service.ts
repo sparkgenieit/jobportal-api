@@ -23,10 +23,31 @@ export class OrderService {
     await this.ordersModel.insertMany(creatingOrders, { ordered: false })
   }
 
-  async getOrders(companyId: string | Types.ObjectId, searchTerm: string, sort: string, skip: number, limit: number) {
+  async getOrders(companyId: string | Types.ObjectId, searchTerm: string, sort: string,  skip: number, limit: number, type: string) {
     companyId = new Types.ObjectId(companyId);
+    const creditType =type; console.log('creditType',creditType);
     let query = new RegExp(searchTerm, 'i')
     let sortingOrder: any = sort === "desc" ? { created_date: -1 } : { created_date: 1 }
+    interface MatchCondition {
+      companyId: string | Types.ObjectId;
+      $or: Array<{ [key: string]: any }>;
+      creditType?: string; // Optional field
+    }
+    const matchCondition: MatchCondition = {
+      companyId,
+      $or: [
+        { invoiceNumberString: { $regex: query } },
+        { amountString: { $regex: query } },
+        { createdDateString: { $regex: query } },
+        { description: { $regex: query } }
+      ]
+    };
+    
+    // Add the `credYtType` condition if it's not 'all'
+    if (type !== 'all') {
+      matchCondition.creditType = type;
+    }
+    
 
     const details = await this.ordersModel.aggregate([
       {
@@ -42,15 +63,7 @@ export class OrderService {
         }
       },
       {
-        $match: {
-          companyId,
-          $or: [
-            { invoiceNumberString: { $regex: query } },
-            { amountString: { $regex: query } },
-            { createdDateString: { $regex: query } },
-            { description: { $regex: query } }
-          ]
-        }
+        $match:  matchCondition
       },
       {
         $facet: {

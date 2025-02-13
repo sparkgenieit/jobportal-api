@@ -101,16 +101,17 @@ export class PaymentService {
     async getSessionDetails(session_id: string) {
         try {
             const session = await this.stripe.checkout.sessions.retrieve(session_id)
+            console.log(session);
             if (session.status === "complete") {
                 const { price, user_id, credits,creditType, gst, total } = session.metadata;
                 let userId = new mongoose.Types.ObjectId(user_id);
                 const user = await this.userModel.findOne({ _id: userId })
                 if (user.token === session.id) {
-                    const ad_credits = (creditType == 'Ad')?credits:0;
-                    const job_credits = (creditType == 'Job')?credits:0;
-                    
+                    const ad_credits = (creditType == 'ad')?credits:0;
+                    const job_credits = (creditType == 'job')?credits:0;
+                    console.log('credits',ad_credits,      '-========',job_credits);
                     let [, profile, response] = await Promise.all([
-                        this.userModel.findOneAndUpdate({ _id: user_id }, { job_credits: user.job_credits + +job_credits,ad_credits: user.ad_credits + +ad_credits, token: null }),
+                        this.userModel.findOneAndUpdate({ _id: user_id }, { job_credits: user.job_credits +  Number(job_credits),ad_credits: user.ad_credits + Number(ad_credits), token: null }),
                         this.companyProfileModel.findOne({ user_id: userId }),
                         this.counterModel.findOneAndUpdate({ counterName: "invoice" }, { $inc: { counterValue: 1 } }, { new: true })
                     ])
@@ -138,7 +139,7 @@ export class PaymentService {
 
                     const data: OrderDto = {
                         companyId: user._id,
-                        description: "Purchased Job Ad Credits",
+                        description: `Purchased ${creditType.charAt(0).toUpperCase() + creditType.slice(1)} Credits`,
                         invoiceNumber: details.invoiceNumber,
                         credits: Number(credits),                        
                         creditType,
