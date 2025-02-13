@@ -58,6 +58,11 @@ export class CompaniesController {
         return await this.companyService.getPostedJobs(data.companyId, +limit, +skip, name);
     }
 
+    @Roles(["employer", "recruiter"])
+    @Get('postedAds/:companyId')
+    async getPostedAds(@Param() data, @Query() { limit, skip, name }) {
+        return await this.companyService.getPostedAds(data.companyId, +limit, +skip, name);
+    }
     @Roles(["employer"])
     @Put('revert-changes')
     async revertChanges(@Req() req) {

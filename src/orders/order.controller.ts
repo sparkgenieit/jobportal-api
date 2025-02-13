@@ -21,8 +21,9 @@ export class OrderController {
 
     @Roles(["employer", "recruiter"])
     @Get("/get/:companyId")
-    async getOrders(@Param() { companyId }, @Query() { skip, searchTerm, limit, sort }) {
-        return await this.orderService.getOrders(companyId, searchTerm, sort, +skip, +limit)
+    async getOrders(@Param() { companyId }, @Query() { skip, searchTerm, limit, sort, type }) {
+        console.log('type',type);
+        return await this.orderService.getOrders(companyId, searchTerm, sort,+skip, +limit,type  )
     }
 
     @Roles(["employer", "recruiter"])

@@ -1,7 +1,7 @@
 import { BadRequestException, Body, Controller, Delete, Get, Param, Post, Put, Query, Req, UploadedFile, UseGuards, UseInterceptors, ValidationPipe } from '@nestjs/common';
 import { AdDto, AdStatus } from './dto/ad.dto';
-import { Ad } from './schema/Ad.schema';
-import { AdService } from './ad.service';
+import { Ads } from './schema/Ads.schema';
+import { AdsService } from './ads.service';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { Roles } from 'src/auth/roles.decorator';
 import { roles } from 'src/utils/Roles';
@@ -12,16 +12,16 @@ import * as path from 'path';
 const filePath = path.join(__dirname, "..", "..", "public", "uploads", "ads");
 
 @Controller('ads')
-export class AdController {
+export class AdsController {
     constructor(
-        private readonly adService: AdService
+        private readonly adService: AdsService
     ) { }
 
     // To create an ad by superadmin 
     @UseGuards(AuthGuard)
     @Roles(["superadmin"])
     @Post('create')
-    async createAdDto(@Body(ValidationPipe) adDto: AdDto): Promise<Ad> {
+    async createAdDto(@Body(ValidationPipe) adDto: AdDto): Promise<Ads> {
         return await this.adService.createAd(adDto);
     }
 
@@ -47,18 +47,18 @@ export class AdController {
 
     // showing of ads
     @Get("show-ad")
-    async showAd(@Query("type") type): Promise<Ad> {
+    async showAd(@Query("type") type): Promise<Ads> {
         return await this.adService.showAd(type)
     }
 
     // to get specific-page ad 
     @Get("specific-ad-live")
-    async specificPageLiveAds(@Query("page") page): Promise<Ad[]> {
+    async specificPageLiveAds(@Query("page") page): Promise<Ads[]> {
         return await this.adService.getSpecificPageLiveAds(page)
     }
    // to get specific-page ad 
    @Get("specific-ad")
-   async specificPageAds(@Query("page") page): Promise<Ad[]> {
+   async specificPageAds(@Query("page") page): Promise<Ads[]> {
        return await this.adService.getSpecificPageAds(page)
    }
 
@@ -99,21 +99,21 @@ export class AdController {
     @Roles([roles.Admin, "superadmin"])
     @Post('assign')
     
-    async assignAd(@Body() data: { adminId: string, adId: string, adsDto:AdDto }) : Promise<Ad> {
+    async assignAd(@Body() data: { adminId: string, adId: string, adsDto:AdDto }) : Promise<Ads> {
         return await this.adService.assignAd(data);
     }
 
       @UseGuards(AuthGuard)
         @Roles(["admin", "superadmin"])
         @Post('release')
-        async releaseJob(@Body() data: { adminId: string, adId: string, adsDto:AdDto }) : Promise<Ad> {
+        async releaseJob(@Body() data: { adminId: string, adId: string, adsDto:AdDto }) : Promise<Ads> {
             return await this.adService.releaseAd(data);
         }
 
     @UseGuards(AuthGuard)
     @Roles(["admin", "superadmin"])
     @Post('multi_release')
-    async multiReleaseJob(@Body() bodyData: any, response: any): Promise<Ad> {
+    async multiReleaseJob(@Body() bodyData: any, response: any): Promise<Ads> {
         const promises = [];
         bodyData.forEach(async (data: { adminId: string; adId: string, adsDto:AdDto }) => {
             await this.adService.releaseAd(data);
@@ -125,34 +125,34 @@ export class AdController {
     @UseGuards(AuthGuard)
     @Roles(["admin", "superadmin"])
     @Post('approve')
-    async approveAd(@Body() data:  { adminId: string, adId: string, adsDto:AdDto }) : Promise<Ad> {
+    async approveAd(@Body() data:  { adminId: string, adId: string, adsDto:AdDto }) : Promise<Ads> {
         return await this.adService.approveAd(data);
     }
 
     @UseGuards(AuthGuard)
     @Roles(["admin", "superadmin"])
     @Post('reject')
-    async rejectAd(@Body() data: { adminId: string,  adId: string, adsDto:AdDto }) : Promise<Ad> {
+    async rejectAd(@Body() data: { adminId: string,  adId: string, adsDto:AdDto }) : Promise<Ads> {
         return await this.adService.rejectAd(data);
     }
 
     @UseGuards(AuthGuard)
     @Roles(["superadmin"])
     @Get("all")
-    async getAds(): Promise<Ad[]> {
+    async getAds(): Promise<Ads[]> {
         return await this.adService.getAds()
     }
 
 
     @UseGuards(AuthGuard)
     @Put('update/:id')
-    async updateAdDto(@Param("id") id, @Body(ValidationPipe) adDto: AdDto): Promise<Ad[]> {
+    async updateAdDto(@Param("id") id, @Body(ValidationPipe) adDto: AdDto): Promise<Ads[]> {
         return await this.adService.updateAd(id, adDto);
     }
 
     @UseGuards(AuthGuard)
     @Delete('delete/:id')
-    async deleteAd(@Param("id") id): Promise<Ad[]> {
+    async deleteAd(@Param("id") id): Promise<Ads[]> {
         return await this.adService.deleteAd(id);
     }
 

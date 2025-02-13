@@ -38,7 +38,8 @@ export class JobsService implements OnModuleInit {
       await this.jobsModel.create(jobsDto);
       const details = {
         description: "Free Job Ad",
-        credits: user.credits,
+        credits: user.job_credits,
+        creditType:'Job',
         creditsUsed: 0,
         companyId: user._id
       }
@@ -46,9 +47,9 @@ export class JobsService implements OnModuleInit {
       this.CreateOrder(details)
       return ({ message: "Job Posted" })
     }
-    if (user.credits > 0) {
+    if (user.job_credits > 0) {
       jobsDto.status = 'queue';
-      let credits = user.credits - 1;
+      let credits = user.job_credits - 1;
       await this.userModel.findOneAndUpdate({ _id: jobsDto.companyId }, { credits: credits });
       const job = await this.jobsModel.create(jobsDto);
 
@@ -69,7 +70,8 @@ export class JobsService implements OnModuleInit {
 
       const details = {
         description: `Job Ad Posted - ${jobsDto.jobTitle}`,
-        credits: user.credits - 1,
+        credits: user.job_credits - 1,
+        creditType:'Job',
         creditsUsed: 1,
         companyId: user._id
       }
@@ -78,7 +80,7 @@ export class JobsService implements OnModuleInit {
 
       return ({ message: "Job Posted", credits: credits })
     }
-    if (user.usedFreeCredit === true && user.credits <= 0) {
+    if (user.usedFreeCredit === true && user.job_credits <= 0) {
       throw new HttpException({ message: "Not Enough Credits, Can't Post this Job" }, HttpStatus.BAD_REQUEST);
     }
   }
@@ -691,16 +693,17 @@ export class JobsService implements OnModuleInit {
     const jobId = new mongoose.Types.ObjectId(jobInDB.companyId)
     const company = await this.userModel.findOne({ _id: jobId })
 
-    if (company.credits > 0) {
+    if (company.job_credits > 0) {
       jobUserSent = isEqual ? { ...jobUserSent, status: "approved" } : { ...jobUserSent, status: "queue", adminName: "", adminId: null }
       jobUserSent.creationdate = new Date()
       await this.jobsModel.findOneAndUpdate({ _id: jobInDB._id }, jobUserSent);
-      await this.userModel.findOneAndUpdate({ _id: jobId }, { credits: company.credits - 1 })
+      await this.userModel.findOneAndUpdate({ _id: jobId }, { job_credits: company.job_credits - 1 })
 
       const details = {
         companyId: company._id,
         description: `Job Ad Reposted - ${jobUserSent.jobTitle}`,
-        credits: company.credits - 1,
+        credits: company.job_credits - 1,
+        creditType:'Job',
         creditsUsed: 1,
       }
 
@@ -739,7 +742,7 @@ export class JobsService implements OnModuleInit {
       {
         updateOne: {
           filter: { _id },
-          update: { $inc: { credits: jobCount } }
+          update: { $inc: { job_credits: jobCount } }
         }
       }
     ));
@@ -756,7 +759,8 @@ export class JobsService implements OnModuleInit {
       description: "Credit Refund",
       amount: 0,
       creditsPurchased: companies.filter((c) => c._id.toString() === company._id.toString())[0].jobCount,
-      credits: company.credits
+      credits: company.job_credits,
+      creditType:'Job'
     }))
 
     this.eventEmitter.emit("order.create-many", creatingOrders)

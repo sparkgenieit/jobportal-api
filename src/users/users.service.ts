@@ -205,7 +205,9 @@ export class UsersService {
     const role = createUserDto.role;
     const encryptedPassword = await bcrypt.hash(createUserDto.password, 10);
     createUserDto.password = encryptedPassword;
-    createUserDto.credits = 0;
+    createUserDto.job_credits = 0;
+    createUserDto.ad_credits = 0;
+
     createUserDto.usedFreeCredit = false;
 
 

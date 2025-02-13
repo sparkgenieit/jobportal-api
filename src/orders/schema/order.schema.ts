@@ -22,6 +22,8 @@ export class Order {
 
     @Prop()
     credits: number
+    @Prop()
+    creditType?: string
 
     @Prop()
     creditsPurchased?: number

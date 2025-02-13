@@ -1,7 +1,7 @@
 import { BadRequestException, HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model, Types } from 'mongoose';
-import { Ad } from './schema/Ad.schema';
+import { Ads } from './schema/Ads.schema';
 import { AdDto, AdStatus } from './dto/ad.dto';
 import { convertToObjectId } from 'src/utils/functions';
 import { LogService } from 'src/audit/logs.service';
@@ -9,10 +9,10 @@ import { AdminLog } from 'src/audit/AdminLog.Schema';
 
 
 @Injectable()
-export class AdService {
+export class AdsService {
   constructor(
     private logSerivce: LogService,
-    @InjectModel(Ad.name) private readonly adsModel: Model<Ad>,
+    @InjectModel(Ads.name) private readonly adsModel: Model<Ads>,
 
   ) { }
 
@@ -76,11 +76,11 @@ export class AdService {
     }
   }
 
-  async getAds(): Promise<Ad[]> {
+  async getAds(): Promise<Ads[]> {
     return await this.adsModel.find()
   }
 
-  async getCompanyAds(id: string): Promise<Ad[]> {
+  async getCompanyAds(id: string): Promise<Ads[]> {
     return await this.adsModel.find({ company_id: id })
   }
 

@@ -6,6 +6,8 @@ import { CompanyProfile } from './schema/companyProfile.schema';
 import { CompanyProfileDto, CompanyProfileStatus } from './dto/company-profile.dto';
 import { UserJobs } from 'src/users/schema/userJobs.schema';
 import { Jobs } from 'src/jobs/schema/Jobs.schema';
+import { Ads } from 'src/ads/schema/Ads.schema';
+
 import { User } from 'src/users/schema/user.schema';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -21,6 +23,8 @@ import { NotificationDto } from 'src/notifications/dto/notifications.dto';
 export class CompanyService {
   constructor(
     @InjectModel(Jobs.name) private readonly jobsModel: Model<Jobs>,
+    @InjectModel(Ads.name) private readonly adsModel: Model<Jobs>,
+
     @InjectModel(CompanyProfile.name) private readonly companyProfileModel: Model<CompanyProfile>,
     @InjectModel(UserJobs.name) private readonly UserJobsModel: Model<UserJobs>,
     @InjectModel(User.name) private readonly UserModel: Model<User>,
@@ -163,6 +167,72 @@ export class CompanyService {
       status: 200,
     }
   }
+
+  async getPostedAds(company_id: string, limit: number, skip: number, searchTerm: string) {
+    let query: any = {
+      company_id: new Types.ObjectId(company_id),
+    }
+    if (searchTerm && searchTerm.trim() !== "") {
+      query.$or = [{ jobTitle: { $regex: searchTerm, $options: 'i' } }, { employjobreference: { $regex: searchTerm, $options: 'i' } }]
+    }
+
+    const response = await this.adsModel.aggregate([
+      {
+        $facet: {
+          data: [{
+            $match: query
+          },
+          {
+            $addFields: {
+              sortPriority: {
+                $switch: {
+                  branches: [
+                    {
+                      'case': { $eq: ['$status', 'REJECTED'] },
+                      then: 0
+                    },
+                    {
+                      'case': { $eq: ['$status', 'LIVE'] },
+                      then: 1
+                    },
+                    {
+                      'case': { $eq: ['$status', 'REVIEW'] },
+                      then: 2
+                    },
+                    {
+                      'case': { $eq: ['$status', 'QUEUE'] },
+                      then: 3
+                    },
+                  ],
+                  'default': 4
+                }
+              },           
+            },
+          }, {
+            $sort: {
+              sortPriority: 1,           
+            }
+          },
+          {
+            $skip: skip
+          },
+          {
+            $limit: limit
+          }
+
+          ],
+          count: [{ $match: query }, { $count: 'total' }]
+        }
+      }
+    ])
+
+    return {
+      total: response[0]?.count[0]?.total,
+      ads: response[0]?.data,
+      status: 200,
+    }
+  }
+
 
   async getAppliedUsers(jobId: Types.ObjectId, shortlisted: string, limit: number, skip: number) {
     let query: any = {

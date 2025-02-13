@@ -3,10 +3,10 @@ import mongoose, { HydratedDocument, Types } from "mongoose";
 import { AdStatus, AdTypes } from "../dto/ad.dto";
 import { User } from "src/users/schema/user.schema";
 
-export type AdDocument = HydratedDocument<Ad>;
+export type AdDocument = HydratedDocument<Ads>;
 
 @Schema()
-export class Ad {
+export class Ads {
 
     @Prop({ default: new Date() })
     date: Date;
@@ -48,4 +48,4 @@ export class Ad {
     adminId: User
 }
 
-export const AdSchema = SchemaFactory.createForClass(Ad);
+export const AdsSchema = SchemaFactory.createForClass(Ads);
