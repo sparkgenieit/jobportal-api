@@ -6,6 +6,7 @@ import { AdDto, AdStatus } from './dto/ad.dto';
 import { convertToObjectId } from 'src/utils/functions';
 import { LogService } from 'src/audit/logs.service';
 import { AdminLog } from 'src/audit/AdminLog.Schema';
+import { User } from 'src/users/schema/user.schema';
 
 
 @Injectable()
@@ -13,6 +14,8 @@ export class AdsService {
   constructor(
     private logSerivce: LogService,
     @InjectModel(Ads.name) private readonly adsModel: Model<Ads>,
+    @InjectModel(User.name) private userModel: Model<User>,
+    
 
   ) { }
 
@@ -22,6 +25,8 @@ export class AdsService {
 
   async createCompanyAd(adsDto: AdDto) {
     adsDto.status = AdStatus.QUEUE
+    await this.userModel.findOneAndUpdate({ _id: adsDto.company_id }, { usedFreeAdCredit: true });
+
     return await this.adsModel.create(adsDto);
   }
 

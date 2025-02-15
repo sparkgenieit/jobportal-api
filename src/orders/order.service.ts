@@ -83,7 +83,7 @@ export class OrderService {
     }
   }
 
-  async getAllCompanyOrders(companyId: string | Types.ObjectId, from: string, to: string) {
+  async getAllCompanyOrders(companyId: string | Types.ObjectId, from: string, to: string, type: string) {
     companyId = new Types.ObjectId(companyId);
 
     let query: any = {
@@ -102,6 +102,11 @@ export class OrderService {
         $lte: toDate
       }
     }
+
+    if (type !== 'all' && (type =='ad' || type =='job')) {
+      query.creditType = type;
+    }
+    
     return await this.ordersModel.find(query).sort({ created_date: -1 })
   }
 

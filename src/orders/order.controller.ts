@@ -28,8 +28,8 @@ export class OrderController {
 
     @Roles(["employer", "recruiter"])
     @Get("/download-transactions/:companyId")
-    async getAllCompanyOrders(@Param() { companyId }, @Query() { from, to }) {
-        return await this.orderService.getAllCompanyOrders(companyId, from, to)
+    async getAllCompanyOrders(@Param() { companyId }, @Query() { from, to ,type}) {
+        return await this.orderService.getAllCompanyOrders(companyId, from, to,type)
     }
 
 

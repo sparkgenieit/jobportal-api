@@ -30,5 +30,7 @@ export class CreateUserDto {
   job_credits?: number
   ad_credits?: number
   
-  usedFreeCredit?: boolean
+  usedFreeJobCredit?: boolean
+  usedFreeAdCredit?: boolean
+  
 }
