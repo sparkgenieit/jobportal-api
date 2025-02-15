@@ -32,9 +32,9 @@ export class JobsService implements OnModuleInit {
 
   async postJob(jobsDto: JobsDto, { username, email }): Promise<any> {
     let user = await this.userModel.findOne({ _id: jobsDto.companyId })
-    if (user.usedFreeCredit === false) {
+    if (user.usedFreeJobCredit === false) {
       jobsDto.status = 'queue';
-      await this.userModel.findOneAndUpdate({ _id: jobsDto.companyId }, { usedFreeCredit: true });
+      await this.userModel.findOneAndUpdate({ _id: jobsDto.companyId }, { usedFreeJobCredit: true });
       await this.jobsModel.create(jobsDto);
       const details = {
         description: "Free Job Ad",
@@ -80,7 +80,7 @@ export class JobsService implements OnModuleInit {
 
       return ({ message: "Job Posted", credits: credits })
     }
-    if (user.usedFreeCredit === true && user.job_credits <= 0) {
+    if (user.usedFreeJobCredit === true && user.job_credits <= 0) {
       throw new HttpException({ message: "Not Enough Credits, Can't Post this Job" }, HttpStatus.BAD_REQUEST);
     }
   }

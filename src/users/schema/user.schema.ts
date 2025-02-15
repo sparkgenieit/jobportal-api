@@ -25,10 +25,12 @@ export class User {
     token?: string
     @Prop({ required: false })
     job_credits?: number
-    @Prop({ required: false })
+    @Prop({ required: false  })
     ad_credits?: number
     @Prop({ required: false })
-    usedFreeCredit?: boolean
+    usedFreeJobCredit?: boolean
+    @Prop({ required: false })
+    usedFreeAdCredit?: boolean
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

@@ -208,7 +208,8 @@ export class UsersService {
     createUserDto.job_credits = 0;
     createUserDto.ad_credits = 0;
 
-    createUserDto.usedFreeCredit = false;
+    createUserDto.usedFreeJobCredit = false;
+    createUserDto.usedFreeAdCredit = false;
 
 
     const isUser = await this.userModel.findOne({ email });
