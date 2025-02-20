@@ -15,7 +15,7 @@ export enum AdTypes {
      B2B = "b2b"
 }
 
-export class AdDto {
+export class CompanyAdsDto {
     created_date: Date;
 
     @IsNotEmpty({ message: "Title should not be empty" })
@@ -71,6 +71,5 @@ export class AdDto {
 
 
 }
-
 
 
