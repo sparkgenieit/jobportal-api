@@ -169,9 +169,13 @@ export class CompanyService {
   }
 
   async getPostedAds(company_id: string, limit: number, skip: number, searchTerm: string) {
-    let query: any = {
-      company_id: new Types.ObjectId(company_id),
+    let query: any = {};
+
+    // Apply company_id filter only if it's not "all"
+    if (company_id !== "all") {
+        query.company_id = new Types.ObjectId(company_id);
     }
+
     if (searchTerm && searchTerm.trim() !== "") {
       query.$or = [{ jobTitle: { $regex: searchTerm, $options: 'i' } }, { employjobreference: { $regex: searchTerm, $options: 'i' } }]
     }

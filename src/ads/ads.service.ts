@@ -2,11 +2,13 @@ import { BadRequestException, HttpException, HttpStatus, Injectable, NotFoundExc
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model, Types } from 'mongoose';
 import { Ads } from './schema/Ads.schema';
-import { AdDto, AdStatus } from './dto/ad.dto';
+import { CompanyAdsDto, AdStatus } from './dto/company-ads.dto';
+import { AdminAdsDto } from './dto/admin-ads.dto';
 import { convertToObjectId } from 'src/utils/functions';
 import { LogService } from 'src/audit/logs.service';
 import { AdminLog } from 'src/audit/AdminLog.Schema';
 import { User } from 'src/users/schema/user.schema';
+import { AdminAds } from './schema/Admin-ads.schema';
 
 
 @Injectable()
@@ -14,20 +16,30 @@ export class AdsService {
   constructor(
     private logSerivce: LogService,
     @InjectModel(Ads.name) private readonly adsModel: Model<Ads>,
+    @InjectModel(AdminAds.name) private readonly adminAdsModel: Model<AdminAds>,
     @InjectModel(User.name) private userModel: Model<User>,
     
 
   ) { }
 
-  async createAd(adsDto: AdDto) {
-    return await this.adsModel.create(adsDto);
+  async createAd(adminAdsDto: AdminAdsDto) {
+    if (adminAdsDto.ad_type === 'above-menu') {
+      const existingAd = await this.adminAdsModel.findOne({ ad_type: 'above-menu' });
+      if (existingAd) {
+        throw new HttpException({ message: "'above-menu' Ad already exists" }, HttpStatus.BAD_REQUEST);
+        
+      }
+    }
+    return await this.adminAdsModel.create(adminAdsDto);
   }
 
-  async createCompanyAd(adsDto: AdDto) {
-    adsDto.status = AdStatus.QUEUE
-    await this.userModel.findOneAndUpdate({ _id: adsDto.company_id }, { usedFreeAdCredit: true });
+  async createCompanyAd(companyAdsDto: CompanyAdsDto) {
 
-    return await this.adsModel.create(adsDto);
+    console.log('KIRAN');
+    companyAdsDto.status = AdStatus.QUEUE
+    await this.userModel.findOneAndUpdate({ _id: companyAdsDto.company_id }, { usedFreeAdCredit: true });
+
+    return await this.adsModel.create(companyAdsDto);
   }
 
   async setStatus(status: AdStatus, adId: string) {
@@ -64,7 +76,7 @@ export class AdsService {
   }
 
   async showAd(type: string) {
-    const ads = await this.adsModel.aggregate([
+    const ads = await this.adminAdsModel.aggregate([
       { $match: { ad_type: type } },
       { $sample: { size: 1 } }
     ])
@@ -72,19 +84,22 @@ export class AdsService {
     return ads[0]
   }
 
-  async updateAd(adId: string, adsDto: AdDto): Promise<any> {
-    const isAd = await this.adsModel.findOne({ _id: adId });
+  async updateAd(adId: string, adminAdsDto: AdminAdsDto): Promise<any> {
+    const isAd = await this.adminAdsModel.findOne({ _id: adId });
     if (!isAd) {
       throw new HttpException({ message: "The given Ad does not exist" }, HttpStatus.BAD_REQUEST);
     } else {
-      return await this.adsModel.findOneAndUpdate({ _id: adId }, adsDto);
+      return await this.adminAdsModel.findOneAndUpdate({ _id: adId }, adminAdsDto);
     }
   }
 
   async getAds(): Promise<Ads[]> {
     return await this.adsModel.find()
   }
-
+  async getAdminAds(): Promise<AdminAds[]> {
+    return await this.adminAdsModel.find()
+  }
+  
   async getCompanyAds(id: string): Promise<Ads[]> {
     return await this.adsModel.find({ company_id: id })
   }
@@ -113,6 +128,19 @@ export class AdsService {
       return await this.adsModel.deleteOne({ _id: adId })
     }
   }
+
+  async deleteAdminAd(id: string): Promise<any> {
+
+    const adId = convertToObjectId(id);
+
+    const isAd = await this.adminAdsModel.findOne({ _id: adId });
+    if (!isAd) {
+      throw new NotFoundException("The given Ad does not exist");
+    } else {
+      return await this.adminAdsModel.deleteOne({ _id: adId })
+    }
+  }
+  
 
   async getAssignedAds(adminId: string | Types.ObjectId, limit: number, skip: number) {
       adminId = new mongoose.Types.ObjectId(adminId);
@@ -195,17 +223,17 @@ export class AdsService {
   }
 
   
-    async assignAd({ adminId, adId , adsDto}): Promise<any> {
-      console.log('console.log(adminId);',adsDto);
+    async assignAd({ adminId, adId , companyAdsDto}): Promise<any> {
+      console.log('console.log(adminId);',companyAdsDto);
       adminId = new mongoose.Types.ObjectId(adminId);
       console.log(adminId);
      // adDto = { ...adDto, adminId, status : AdStatus.REVIEW };
-     adsDto.adminId = adminId;
-     adsDto.status = AdStatus.REVIEW;
+     companyAdsDto.adminId = adminId;
+     companyAdsDto.status = AdStatus.REVIEW;
 
        
-  console.log('adDtosssss',adsDto);
-       const admiLog =  await this.adsModel.findOneAndUpdate({ _id: adId }, adsDto);
+  console.log('adDtosssss',companyAdsDto);
+       const admiLog =  await this.adsModel.findOneAndUpdate({ _id: adId }, companyAdsDto);
   console.log(admiLog);
         const log: AdminLog = {
           admin_id: adminId,
@@ -222,25 +250,25 @@ export class AdsService {
       }
     
   
-    async releaseAd({ adminId, adId, adsDto }): Promise<any> {
+    async releaseAd({ adminId, adId, companyAdsDto }): Promise<any> {
       adminId = new mongoose.Types.ObjectId(adminId);
   
   
         const log: AdminLog = {
           admin_id: adminId,
           name: '',
-          adId: adsDto._id.toString(),
+          adId: companyAdsDto._id.toString(),
           fieldName: "Actions",
           changedTo: 'Queue',
           changedFrom: 'AdIn Review',
           description: `Job Released by Admin ${adminId}`
         }
   
-      delete  adsDto.adminId;
-        adsDto.status =  AdStatus.QUEUE;
-        adsDto = {...adsDto , $unset: { adminId: 1 } }
+      delete  companyAdsDto.adminId;
+        companyAdsDto.status =  AdStatus.QUEUE;
+        companyAdsDto = {...companyAdsDto , $unset: { adminId: 1 } }
   
-        await this.adsModel.findOneAndUpdate({ _id: adId }, adsDto);
+        await this.adsModel.findOneAndUpdate({ _id: adId }, companyAdsDto);
   
         await this.logSerivce.createAdminLog(log)
   
@@ -249,11 +277,11 @@ export class AdsService {
   }
 
   
-    async approveAd({ adminId, adId, adsDto }): Promise<any> {
+    async approveAd({ adminId, adId, companyAdsDto }): Promise<any> {
       adminId = new mongoose.Types.ObjectId(adminId);
 
-      adsDto.adminId = adminId;
-      adsDto.status = AdStatus.LIVE;
+      companyAdsDto.adminId = adminId;
+      companyAdsDto.status = AdStatus.LIVE;
         /*
         if (isJob.reportReason || isJob.reportedBy) {
           await this.emailUserAboutReportedJob(jobsDto, false);
@@ -261,13 +289,13 @@ export class AdsService {
           jobsDto.reportReason = null;
         }
           */
-        await this.adsModel.findOneAndUpdate({ _id: adId }, adsDto);
+        await this.adsModel.findOneAndUpdate({ _id: adId }, companyAdsDto);
   
   
         const log: AdminLog = {
           admin_id: adminId,
           name: '',
-          adId: adsDto._id.toString(),
+          adId: companyAdsDto._id.toString(),
           fieldName: "Actions",
           changedTo: 'LIVE',
           changedFrom: 'AdIn Review',
@@ -283,11 +311,11 @@ export class AdsService {
       
     }
   
-    async rejectAd({ adminId, adId, adsDto }): Promise<any> {
+    async rejectAd({ adminId, adId, companyAdsDto }): Promise<any> {
       adminId = new mongoose.Types.ObjectId(adminId);
 
-      adsDto.adminId = adminId;
-        adsDto.status = AdStatus.REJECTED;
+      companyAdsDto.adminId = adminId;
+        companyAdsDto.status = AdStatus.REJECTED;
         /*
         if (isJob.reportReason || isJob.reportedBy) {
           await this.emailUserAboutReportedJob(jobsDto, false);
@@ -295,13 +323,13 @@ export class AdsService {
           jobsDto.reportReason = null;
         }
           */
-        await this.adsModel.findOneAndUpdate({ _id: adId }, adsDto);
+        await this.adsModel.findOneAndUpdate({ _id: adId }, companyAdsDto);
   
   
         const log: AdminLog = {
           admin_id: adminId,
           name: '',
-          adId: adsDto._id.toString(),
+          adId: companyAdsDto._id.toString(),
           fieldName: "Actions",
           changedTo: 'REJECTED',
           changedFrom: 'AdIn Review',

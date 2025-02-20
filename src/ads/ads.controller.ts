@@ -1,6 +1,8 @@
 import { BadRequestException, Body, Controller, Delete, Get, Param, Post, Put, Query, Req, UploadedFile, UseGuards, UseInterceptors, ValidationPipe } from '@nestjs/common';
-import { AdDto, AdStatus } from './dto/ad.dto';
+import { CompanyAdsDto, AdStatus } from './dto/company-ads.dto';
+import { AdminAdsDto} from './dto/admin-ads.dto';
 import { Ads } from './schema/Ads.schema';
+import { AdminAds } from './schema/Admin-ads.schema';
 import { AdsService } from './ads.service';
 import { AuthGuard } from 'src/auth/auth.guard';
 import { Roles } from 'src/auth/roles.decorator';
@@ -14,15 +16,16 @@ const filePath = path.join(__dirname, "..", "..", "public", "uploads", "ads");
 @Controller('ads')
 export class AdsController {
     constructor(
+    
         private readonly adService: AdsService
-    ) { }
+    ) {console.log('ADSSSSSSSSSS'); }
 
     // To create an ad by superadmin 
     @UseGuards(AuthGuard)
     @Roles(["superadmin"])
     @Post('create')
-    async createAdDto(@Body(ValidationPipe) adDto: AdDto): Promise<Ads> {
-        return await this.adService.createAd(adDto);
+    async create(@Body(ValidationPipe) adminAdsDto: AdminAdsDto): Promise<AdminAds> {
+        return await this.adService.createAd(adminAdsDto);
     }
 
     //To create an ad from company or the recruiter
@@ -30,10 +33,11 @@ export class AdsController {
     @Roles([roles.Company, roles.Recruiter])
     @Post('company')
     @UseInterceptors(FileInterceptor('image', upload(filePath))) // 'image' is the name of the file input
-    async createCompanyAd(@UploadedFile() file, @Body(ValidationPipe) adDto: AdDto) {
+    async createCompanyAd(@UploadedFile() file, @Body(ValidationPipe) companyAdsDto: CompanyAdsDto) {
+        console.log('kkkkkUUUUU');
         if (!file) throw new BadRequestException("Please Upload the ad image") // For first time posting an ad, image is required
-        adDto.image = file.filename
-        return await this.adService.createCompanyAd(adDto);
+        companyAdsDto.image = file.filename
+        return await this.adService.createCompanyAd(companyAdsDto);
     }
 
     // to get company ads 
@@ -47,7 +51,7 @@ export class AdsController {
 
     // showing of ads
     @Get("show-ad")
-    async showAd(@Query("type") type): Promise<Ads> {
+    async showAd(@Query("type") type): Promise<AdminAds> {
         return await this.adService.showAd(type)
     }
 
@@ -99,14 +103,14 @@ export class AdsController {
     @Roles([roles.Admin, "superadmin"])
     @Post('assign')
     
-    async assignAd(@Body() data: { adminId: string, adId: string, adsDto:AdDto }) : Promise<Ads> {
+    async assignAd(@Body() data: { adminId: string, adId: string, companyAdsDto:CompanyAdsDto }) : Promise<Ads> {
         return await this.adService.assignAd(data);
     }
 
       @UseGuards(AuthGuard)
         @Roles(["admin", "superadmin"])
         @Post('release')
-        async releaseJob(@Body() data: { adminId: string, adId: string, adsDto:AdDto }) : Promise<Ads> {
+        async releaseJob(@Body() data: { adminId: string, adId: string, companyAdsDto:CompanyAdsDto }) : Promise<Ads> {
             return await this.adService.releaseAd(data);
         }
 
@@ -115,7 +119,7 @@ export class AdsController {
     @Post('multi_release')
     async multiReleaseJob(@Body() bodyData: any, response: any): Promise<Ads> {
         const promises = [];
-        bodyData.forEach(async (data: { adminId: string; adId: string, adsDto:AdDto }) => {
+        bodyData.forEach(async (data: { adminId: string; adId: string, companyAdsDto:CompanyAdsDto }) => {
             await this.adService.releaseAd(data);
         })
         response = { status: '200' };
@@ -125,14 +129,14 @@ export class AdsController {
     @UseGuards(AuthGuard)
     @Roles(["admin", "superadmin"])
     @Post('approve')
-    async approveAd(@Body() data:  { adminId: string, adId: string, adsDto:AdDto }) : Promise<Ads> {
+    async approveAd(@Body() data:  { adminId: string, adId: string, companyAdsDto:CompanyAdsDto }) : Promise<Ads> {
         return await this.adService.approveAd(data);
     }
 
     @UseGuards(AuthGuard)
     @Roles(["admin", "superadmin"])
     @Post('reject')
-    async rejectAd(@Body() data: { adminId: string,  adId: string, adsDto:AdDto }) : Promise<Ads> {
+    async rejectAd(@Body() data: { adminId: string,  adId: string, companyAdsDto:CompanyAdsDto }) : Promise<Ads> {
         return await this.adService.rejectAd(data);
     }
 
@@ -143,11 +147,19 @@ export class AdsController {
         return await this.adService.getAds()
     }
 
+    @UseGuards(AuthGuard)
+    @Roles(["superadmin"])
+    @Get("adminads")
+    async getAdminAds(): Promise<AdminAds[]> {
+        return await this.adService.getAdminAds()
+    }
+
+
 
     @UseGuards(AuthGuard)
     @Put('update/:id')
-    async updateAdDto(@Param("id") id, @Body(ValidationPipe) adDto: AdDto): Promise<Ads[]> {
-        return await this.adService.updateAd(id, adDto);
+    async updateAd(@Param("id") id, @Body(ValidationPipe) adminAdsDto: AdminAdsDto): Promise<AdminAds[]> {
+        return await this.adService.updateAd(id, adminAdsDto);
     }
 
     @UseGuards(AuthGuard)
@@ -156,6 +168,11 @@ export class AdsController {
         return await this.adService.deleteAd(id);
     }
 
+    @UseGuards(AuthGuard)
+    @Delete('delete-admin/:id')
+    async deleteAdminAd(@Param("id") id): Promise<AdminAds[]> {
+        return await this.adService.deleteAdminAd(id);
+    }
         
 
     @UseGuards(AuthGuard)

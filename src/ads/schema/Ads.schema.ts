@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import mongoose, { HydratedDocument, Types } from "mongoose";
-import { AdStatus, AdTypes } from "../dto/ad.dto";
+import { AdStatus, AdTypes } from "../dto/company-ads.dto";
 import { User } from "src/users/schema/user.schema";
 
 export type AdDocument = HydratedDocument<Ads>;
