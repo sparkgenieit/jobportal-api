@@ -8,9 +8,9 @@ export type AdDocument = HydratedDocument<Ads>;
 @Schema()
 export class Ads {
 
-    @Prop({ default: new Date() })
-    date: Date;
-
+    @Prop({ type: Date, default: Date.now, required: false })  // Ensure it's optional
+    creationdate?: Date; // Use `?` to indicate optional field
+    
     @Prop({ required: true })
     title: string;
 

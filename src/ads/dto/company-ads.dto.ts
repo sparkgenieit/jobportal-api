@@ -16,7 +16,7 @@ export enum AdTypes {
 }
 
 export class CompanyAdsDto {
-    created_date: Date;
+    creationdate: Date;
 
     @IsNotEmpty({ message: "Title should not be empty" })
     @IsString({ message: "Invalid Title" })
@@ -65,7 +65,9 @@ export class CompanyAdsDto {
     assigned_to: string
 
  
-    adminId: string
+    adminId: any
+  
+  
 
 
 

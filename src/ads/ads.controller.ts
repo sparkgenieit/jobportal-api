@@ -10,6 +10,7 @@ import { roles } from 'src/utils/Roles';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { upload } from 'src/utils/multerUpload';
 import * as path from 'path';
+import { single } from 'rxjs';
 
 const filePath = path.join(__dirname, "..", "..", "public", "uploads", "ads");
 
@@ -55,6 +56,7 @@ export class AdsController {
         return await this.adService.showAd(type)
     }
 
+   
     // to get specific-page ad 
     @Get("specific-ad-live")
     async specificPageLiveAds(@Query("page") page): Promise<Ads[]> {
@@ -103,7 +105,7 @@ export class AdsController {
     @Roles([roles.Admin, "superadmin"])
     @Post('assign')
     
-    async assignAd(@Body() data: { adminId: string, adId: string, companyAdsDto:CompanyAdsDto }) : Promise<Ads> {
+    async assignAd(@Body() data: { adminId: string, adId: string}) : Promise<Ads> {
         return await this.adService.assignAd(data);
     }
 
@@ -183,5 +185,12 @@ export class AdsController {
        
         const { id } = req.user
         return await this.adService.getAssignedAds(id, +limit, +skip);
+    }
+
+    @UseGuards(AuthGuard)
+    @Roles(["admin"])
+   @Get('details/:id')
+    async getAd(@Param() data) {
+        return await this.adService.getAd(data.id);
     }
 }

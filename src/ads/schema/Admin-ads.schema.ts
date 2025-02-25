@@ -10,7 +10,7 @@ export class AdminAds {
 
     
     @Prop({ type: Date, default: Date.now, required: false })  // Ensure it's optional
-    created_date?: Date; // Use `?` to indicate optional field
+    creationdate?: Date; // Use `?` to indicate optional field
 
     @Prop({ required: true })
     title: string;
