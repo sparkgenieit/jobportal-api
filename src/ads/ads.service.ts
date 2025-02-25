@@ -105,7 +105,7 @@ export class AdsService {
   }
 
   async getAd(id: string) {
-    const adId = convertToObjectId(id);
+    const adId = id;
 
     const isAd = await this.adsModel.findOne({ _id: adId });
 
@@ -223,18 +223,19 @@ export class AdsService {
   }
 
   
-    async assignAd({ adminId, adId , companyAdsDto}): Promise<any> {
-      console.log('console.log(adminId);',companyAdsDto);
+    async assignAd({ adminId, adId }): Promise<any> {
       adminId = new mongoose.Types.ObjectId(adminId);
       console.log(adminId);
      // adDto = { ...adDto, adminId, status : AdStatus.REVIEW };
-     companyAdsDto.adminId = adminId;
-     companyAdsDto.status = AdStatus.REVIEW;
 
-       
-  console.log('adDtosssss',companyAdsDto);
-       const admiLog =  await this.adsModel.findOneAndUpdate({ _id: adId }, companyAdsDto);
-  console.log(admiLog);
+     const _id = convertToObjectId(adId);
+     const AdminId = convertToObjectId(adminId);
+ 
+     const isAd = await this.adsModel.findOne({ _id });
+     if (!isAd) throw new BadRequestException("The given Ad does not exist")
+ 
+     await this.adsModel.findOneAndUpdate({ _id }, { adminId: adminId ,status:AdStatus.REVIEW});
+  
         const log: AdminLog = {
           admin_id: adminId,
           
@@ -278,7 +279,7 @@ export class AdsService {
 
   
     async approveAd({ adminId, adId, companyAdsDto }): Promise<any> {
-      adminId = new mongoose.Types.ObjectId(adminId);
+   
 
       companyAdsDto.adminId = adminId;
       companyAdsDto.status = AdStatus.LIVE;
