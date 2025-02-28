@@ -51,6 +51,7 @@ export class CompanyAdsDto {
     type: AdTypes
 
     show_on_pages: [string]
+    
 
     @IsNotEmpty({ message: "Company ID should not be empty" })
     @IsString({ message: "Invalid Company ID" })

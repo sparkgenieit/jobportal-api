@@ -41,6 +41,26 @@ export class AdsController {
         return await this.adService.createCompanyAd(companyAdsDto);
     }
 
+    @UseGuards(AuthGuard)
+@Roles([roles.Company, roles.Recruiter])
+@Put('company/:id')
+@UseInterceptors(FileInterceptor('image', upload(filePath))) // Intercept image upload
+async updateCompanyAd(
+  @Param('id') id: string,
+  @UploadedFile() file,
+  @Body(ValidationPipe) companyAdsDto: CompanyAdsDto
+): Promise<Ads> {
+  console.log('Updating Company Ad...');
+  
+  // If file is uploaded, assign new image filename
+  if (file) {
+    companyAdsDto.image = file.filename;
+  }
+
+  // Call service method to update ad
+  return await this.adService.updateCompanyAd(id, companyAdsDto);
+}
+
     // to get company ads 
     @UseGuards(AuthGuard)
     @Roles([roles.Company, roles.Recruiter])
@@ -188,7 +208,7 @@ export class AdsController {
     }
 
     @UseGuards(AuthGuard)
-    @Roles(["admin"])
+    @Roles(["admin","employer"])
    @Get('details/:id')
     async getAd(@Param() data) {
         return await this.adService.getAd(data.id);

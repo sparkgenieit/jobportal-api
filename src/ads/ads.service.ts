@@ -42,6 +42,16 @@ export class AdsService {
     return await this.adsModel.create(companyAdsDto);
   }
 
+  async updateCompanyAd(id: string, companyAdsDto: CompanyAdsDto): Promise<Ads> {
+    const existingAd = await this.adsModel.findById(id);
+    if (!existingAd) {
+      throw new NotFoundException('Ad not found');
+    }
+  
+    Object.assign(existingAd, companyAdsDto);
+    return await existingAd.save();
+  }
+
   async setStatus(status: AdStatus, adId: string) {
     const _id = convertToObjectId(adId)
 
@@ -67,12 +77,17 @@ export class AdsService {
 
   async getSpecificPageAds(page: string) {
     const regex = new RegExp(page, 'i') // Eliminating any possibility of any case sensitive issues
-    return await this.adsModel.find({ show_on_pages: { $in: [regex] } }).sort({ data: 1 });
+    return await this.adsModel
+    .find({ show_on_pages: { $regex: regex } }) // Direct regex search in array elements
+    .sort({ data: 1 });
   }
 
   async getSpecificPageLiveAds(page: string) {
-    const regex = new RegExp(page, 'i') // Eliminating any possibility of any case sensitive issues
-    return await this.adsModel.find({ show_on_pages: { $in: [regex] }, status: AdStatus.LIVE }).sort({ data: 1 });
+    const regex = new RegExp(`\\b${page}\\b`, 'i'); // Strict Match
+    const query = this.adsModel.find({ show_on_pages: { $regex: regex }, status: AdStatus.LIVE }).sort({ data: 1 });
+  
+    console.log('MongoDB Query:', query.getFilter()); // Print MongoDB Filter
+    return await query;
   }
 
   async showAd(type: string) {
