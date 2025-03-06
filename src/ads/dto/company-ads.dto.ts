@@ -1,4 +1,4 @@
-import { IsDate, IsDateString, IsEnum, IsNotEmpty, IsOptional, IsString } from "class-validator";
+import { IsDate, IsDateString, IsEnum, IsNotEmpty, IsOptional, IsString, IsArray, ArrayNotEmpty } from "class-validator";
 import { Types } from "mongoose"
 
 
@@ -67,8 +67,9 @@ export class CompanyAdsDto {
 
  
     adminId: any
-  
-  
+
+    booked_dates:[string]      
+    name: string
 
 
 

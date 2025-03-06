@@ -35,7 +35,7 @@ export class AdsService {
 
   async createCompanyAd(companyAdsDto: CompanyAdsDto) {
 
-    console.log('KIRAN');
+    console.log('KIRAN KUMARR CREATED');
     companyAdsDto.status = AdStatus.QUEUE
     await this.userModel.findOneAndUpdate({ _id: companyAdsDto.company_id }, { usedFreeAdCredit: true });
 
@@ -119,16 +119,30 @@ export class AdsService {
     return await this.adsModel.find({ company_id: id })
   }
 
+  async getBlockedDates(adId?: string): Promise<Date[]> {
+    let query: any = {};
+
+    if (adId) {
+      query = { _id: { $ne: new mongoose.Types.ObjectId(adId) } }; // Exclude current ad
+    }
+
+    const ads = await this.adsModel.find(query, { booked_dates: 1 });
+    const blockedDates = [...new Set(ads.flatMap(ad => ad.booked_dates || []))];
+    
+    return blockedDates;
+  }
+ 
   async getAd(id: string) {
     const adId = id;
+    const adDetails = await this.adsModel.findOne({ _id: adId });
 
-    const isAd = await this.adsModel.findOne({ _id: adId });
-
-    if (!isAd) {
-      throw new HttpException({ message: "The given Ad does not exist" }, HttpStatus.BAD_REQUEST);
-    } else {
-      return await this.adsModel.findOne({ _id: adId });
+    if (!adDetails) {
+      throw new HttpException({ message: 'The given Ad does not exist' }, HttpStatus.BAD_REQUEST);
     }
+
+ 
+console.log('adDetails',adDetails);
+    return adDetails;
   }
 
 

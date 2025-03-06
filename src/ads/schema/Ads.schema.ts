@@ -44,8 +44,17 @@ export class Ads {
     @Prop({ required: true })
     created_by: string
 
+    @Prop()
+    booked_dates: [string]
+
+    @Prop()
+    name: string
+    
     @Prop({ type: mongoose.Schema.Types.ObjectId, ref: User.name })
     adminId: User
+
+   
+
 }
 
 export const AdsSchema = SchemaFactory.createForClass(Ads);

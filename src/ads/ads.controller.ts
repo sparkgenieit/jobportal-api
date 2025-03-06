@@ -213,4 +213,9 @@ async updateCompanyAd(
     async getAd(@Param() data) {
         return await this.adService.getAd(data.id);
     }
+
+    @Get('blocked-dates/:id?')
+  async getBlockedDates(@Param('id') adId?: string) {
+    return await this.adService.getBlockedDates(adId);
+  }
 }
