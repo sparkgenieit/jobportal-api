@@ -10,7 +10,13 @@ export enum AdStatus {
 }
 
 export enum AdTypes {
-    HOMEBANNER = "home-banner",
+    HOMEBANNER = "home-page-banner",
+    LANDINGPAGE = "landing-page-popup",
+    HOMEPAGEPIXEL = "home-page-pixel",
+    HOMEPAGELEFT = "home-page-map-left",
+    HOMEPAGERIGHT = "home-page-map-right",
+    
+    
     SPECIFIC_PAGE = "specific-page",
      B2B = "b2b"
 }
@@ -28,12 +34,10 @@ export class CompanyAdsDto {
     description: string;
 
 
-    @IsNotEmpty({ message: "Location should not be empty" })
-    @IsString({ message: "Invalid Location" })
     location: string;
 
-
-    @IsNotEmpty({ message: "End Date should not be empty" })
+    category: string;
+    
     end_date: Date | string
 
     @IsOptional()

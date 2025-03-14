@@ -17,10 +17,14 @@ export class Ads {
     @Prop({ required: true })
     description: string;
 
-    @Prop({ required: true })
+    @Prop()
     location: string;
 
-    @Prop({ required: true })
+    
+    @Prop()
+    category: string;
+
+    @Prop()
     end_date: Date
 
     @Prop({ required: true })
