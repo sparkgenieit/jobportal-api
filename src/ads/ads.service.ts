@@ -82,6 +82,15 @@ export class AdsService {
     .sort({ data: 1 });
   }
 
+  async getSpecificCategoryAds(category: string) {
+    const regex = new RegExp(category, 'i') // Eliminating any possibility of any case sensitive issues
+    return await this.adsModel
+    .find({ category: { $regex: regex }, status: AdStatus.LIVE  }) // Direct regex search in array elements
+    .sort({ data: 1 });
+  }
+
+  
+
   async getSpecificPageLiveAds(page: string) {
     const regex = new RegExp(`\\b${page}\\b`, 'i'); // Strict Match
     const query = this.adsModel.find({ show_on_pages: { $regex: regex }, status: AdStatus.LIVE }).sort({ data: 1 });
