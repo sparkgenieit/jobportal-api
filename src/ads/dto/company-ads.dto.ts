@@ -39,6 +39,7 @@ export class CompanyAdsDto {
     category: string;
     
     end_date: Date | string
+    start_date: Date | string
 
     @IsOptional()
     @IsEnum(AdStatus, { message: "Invalid Status" })

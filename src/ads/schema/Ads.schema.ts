@@ -25,6 +25,9 @@ export class Ads {
     category: string;
 
     @Prop()
+    start_date: Date
+
+    @Prop()
     end_date: Date
 
     @Prop({ required: true })
