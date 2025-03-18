@@ -23,10 +23,10 @@ export class AdsService {
   ) { }
 
   async createAd(adminAdsDto: AdminAdsDto) {
-    if (adminAdsDto.ad_type === 'above-menu') {
-      const existingAd = await this.adminAdsModel.findOne({ ad_type: 'above-menu' });
+    if (adminAdsDto.ad_type === 'home-page-banner') {
+      const existingAd = await this.adminAdsModel.findOne({ ad_type: 'home-page-banner' });
       if (existingAd) {
-        throw new HttpException({ message: "'above-menu' Ad already exists" }, HttpStatus.BAD_REQUEST);
+        throw new HttpException({ message: "'home-page-banner' Ad already exists" }, HttpStatus.BAD_REQUEST);
         
       }
     }
@@ -100,13 +100,28 @@ export class AdsService {
   }
 
   async showAd(type: string) {
+    const isSpecialType = ['landing-page-popup', 'home-page-banner'].includes(type);
+  console.log('isSpecialType',isSpecialType);
+    if (isSpecialType) {
+      const ad = await this.adsModel.aggregate([
+        { $match: { type: type } },
+        { $sample: { size: 1 } }
+      ]);
+  console.log(ad);
+      if (ad.length) {
+        return ad[0];
+      }
+    }
+  console.log('kkkkkkkk');
+    // Default behavior if type is not in the array or no matching ad is found
     const ads = await this.adminAdsModel.aggregate([
       { $match: { ad_type: type } },
-      { $sample: { size: 1 } }
-    ])
-
-    return ads[0]
+      { $sample: { size: 1 } } 
+    ]);
+  
+    return ads[0] || null; // Return null if no ad is found
   }
+  
 
   async updateAd(adId: string, adminAdsDto: AdminAdsDto): Promise<any> {
     const isAd = await this.adminAdsModel.findOne({ _id: adId });

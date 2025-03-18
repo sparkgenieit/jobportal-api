@@ -18,8 +18,8 @@ export class AdminAdsDto {
   @IsNotEmpty()
   ad_image_url: string; // For the image URL of the ad
 
-  @IsEnum(['short', 'long','above-menu',  'landing-page']) // Add any other ad types you need
-  ad_type: 'short' | 'long' | 'above-menu' | 'landing-page';
+  @IsEnum(['short', 'long','home-page-banner',  'landing-page']) // Add any other ad types you need
+  ad_type: 'short' | 'long' | 'home-page-banner' | 'landing-page';
 
   @IsUrl()
   @IsNotEmpty()

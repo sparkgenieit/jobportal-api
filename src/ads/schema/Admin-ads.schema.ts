@@ -21,8 +21,8 @@ export class AdminAds {
     @Prop({ required: true })
     ad_image_url: string;  // Image URL for the ad
 
-    @Prop({ required: true, enum: ['short', 'long','above-menu',  'landing-page'] })  // Ad type validation for 'short' or 'long'
-    ad_type: 'short' | 'long' | 'above-menu' | 'landing-page';
+    @Prop({ required: true, enum: ['short', 'long','home-page-banner',  'landing-page'] })  // Ad type validation for 'short' or 'long'
+    ad_type: 'short' | 'long' | 'home-page-banner' | 'landing-page';
 
     @Prop({ required: true })
     redirect_url: string;  // URL to redirect to when clicked
