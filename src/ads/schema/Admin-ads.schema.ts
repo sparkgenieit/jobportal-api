@@ -1,33 +1,50 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import mongoose, { HydratedDocument } from "mongoose";
-import { AdminAdsDto } from "../dto/admin-ads.dto";  // Assuming you have the DTO in this path
 
 // Define the Admin Ad document type
 export type AdminAdDocument = HydratedDocument<AdminAds>;
 
 @Schema()
 export class AdminAds {
+    @Prop({ type: Date, default: Date.now })
+    creationdate?: Date;
 
-    
-    @Prop({ type: Date, default: Date.now, required: false })  // Ensure it's optional
-    creationdate?: Date; // Use `?` to indicate optional field
-
-    @Prop({ required: true })
+    @Prop({
+        required: function (this: AdminAds) {
+            return !this.ad_client; // Required only if ad_client is empty
+        }
+    })
     title: string;
 
-    @Prop({ required: true })
+    @Prop({
+        required: function (this: AdminAds) {
+            return !this.ad_client;
+        }
+    })
     description: string;
 
-    @Prop({ required: true })
-    ad_image_url: string;  // Image URL for the ad
+    @Prop({
+        required: function (this: AdminAds) {
+            return !this.ad_client;
+        }
+    })
+    ad_image_url: string;
 
-    @Prop({ required: true, enum: ['short', 'long','home-page-banner',  'landing-page'] })  // Ad type validation for 'short' or 'long'
+    @Prop({
+        required: function (this: AdminAds) {
+            return !this.ad_client;
+        }
+    })
+    redirect_url: string;
+
+    @Prop({ required: true, enum: ['short', 'long', 'home-page-banner', 'landing-page'] })
     ad_type: 'short' | 'long' | 'home-page-banner' | 'landing-page';
 
-    @Prop({ required: true })
-    redirect_url: string;  // URL to redirect to when clicked
+    @Prop({ required: false })
+    ad_client?: string; // Optional Google Ad Client ID
 
-
+    @Prop({ required: false })
+    ad_slot?: string; // Optional Google Ad Client ID
 }
 
 export const AdminAdsSchema = SchemaFactory.createForClass(AdminAds);

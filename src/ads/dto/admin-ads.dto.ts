@@ -1,27 +1,49 @@
 import { ObjectId } from 'mongodb';
-import { IsString, IsUrl, IsEnum, IsOptional, IsDate, IsNotEmpty } from 'class-validator';
+import { 
+  IsString, IsUrl, IsEnum, IsOptional, IsDate, IsNotEmpty, IsMongoId, ValidateIf 
+} from 'class-validator';
+import { Transform } from 'class-transformer';
+
+// Define an Enum for Ad Types
+export enum AdType {
+  SHORT = 'short',
+  LONG = 'long',
+  HOME_PAGE_BANNER = 'home-page-banner',
+  LANDING_PAGE = 'landing-page',
+}
 
 export class AdminAdsDto {
-  _id: ObjectId;
 
 
-
+  @ValidateIf((o) => !o.ad_client) // Only required if ad_client is empty
   @IsString()
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'Title is required when Ad Client is empty' })
   title: string;
 
+  @ValidateIf((o) => !o.ad_client)
   @IsString()
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'Description is required when Ad Client is empty' })
   description: string;
 
+  @ValidateIf((o) => !o.ad_client)
   @IsUrl()
-  @IsNotEmpty()
-  ad_image_url: string; // For the image URL of the ad
+  @IsNotEmpty({ message: 'Ad Image URL is required when Ad Client is empty' })
+  ad_image_url: string;
 
-  @IsEnum(['short', 'long','home-page-banner',  'landing-page']) // Add any other ad types you need
-  ad_type: 'short' | 'long' | 'home-page-banner' | 'landing-page';
+  @IsEnum(AdType, { message: 'Ad Type must be one of the predefined values' })
+  @IsNotEmpty({ message: 'Ad Type is required' })
+  ad_type: AdType;
 
+  @ValidateIf((o) => !o.ad_client)
   @IsUrl()
-  @IsNotEmpty()
-  redirect_url: string; // URL to redirect
+  @IsNotEmpty({ message: 'Redirect URL is required when Ad Client is empty' })
+  redirect_url: string;
+
+  @IsOptional()
+  @IsString()
+  ad_client?: string; // Optional field for Google Ads
+
+  @IsOptional()
+  @IsString()
+  ad_slot?: string; // Optional field for Google Ads
 }
