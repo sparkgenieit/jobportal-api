@@ -74,7 +74,7 @@ export class CompanyAdsDto {
     adminId: any
 
     booked_dates:[string]      
-    name: string
+    
 
 
 

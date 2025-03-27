@@ -220,7 +220,14 @@ async updateCompanyAd(
     }
 
     @Get('blocked-dates/:id?')
-  async getBlockedDates(@Param('id') adId?: string) {
-    return await this.adService.getBlockedDates(adId);
-  }
+    async getBlockedDates(
+      @Param('id') adId?: string,
+      @Query('type') type?: string, // Accept 'type' as a query parameter
+    ) {
+      if (!type) {
+        throw new BadRequestException('Type is required');
+      }
+      return await this.adService.getBlockedDates(type, adId);
+    }
+    
 }

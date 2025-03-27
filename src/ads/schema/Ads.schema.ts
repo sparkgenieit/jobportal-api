@@ -54,8 +54,6 @@ export class Ads {
     @Prop()
     booked_dates: [string]
 
-    @Prop()
-    name: string
     
     @Prop({ type: mongoose.Schema.Types.ObjectId, ref: User.name })
     adminId: User

@@ -101,26 +101,40 @@ export class AdsService {
 
   async showAd(type: string) {
     const isSpecialType = ['landing-page-popup', 'home-page-banner'].includes(type);
-  console.log('isSpecialType',isSpecialType);
+    console.log('isSpecialType', isSpecialType);
+    
+    const currentDate = new Date().toLocaleDateString("en-NZ", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).split("/").reverse().join("-"); // Convert DD/MM/YYYY to YYYY-MM-DD
+
+
+const regex = new RegExp(`\\b${currentDate}\\b`, 'i'); // Strict match
+
     if (isSpecialType) {
-      const ad = await this.adsModel.aggregate([
-        { $match: { type: type } },
-        { $sample: { size: 1 } }
-      ]);
-  console.log(ad);
-      if (ad.length) {
-        return ad[0];
-      }
+  
+      const ad =  await this.adsModel.find({ booked_dates: regex, type: type, status: "LIVE" }).sort({ data: 1 });
+
+   
+        console.log(ad);
+
+        if (ad.length) {
+            return ad[0];
+        }
     }
-  console.log('kkkkkkkk');
+
+    console.log('No special type ad found or all are booked.');
+
     // Default behavior if type is not in the array or no matching ad is found
     const ads = await this.adminAdsModel.aggregate([
-      { $match: { ad_type: type } },
-      { $sample: { size: 1 } } 
+        { $match: { ad_type: type } },
+        { $sample: { size: 1 } }
     ]);
-  
-    return ads[0] || null; // Return null if no ad is found
-  }
+
+    return ads.length ? ads[0] : null;
+}
+
   
 
   async updateAd(adId: string, adminAdsDto: AdminAdsDto): Promise<any> {
@@ -143,18 +157,21 @@ export class AdsService {
     return await this.adsModel.find({ company_id: id })
   }
 
-  async getBlockedDates(adId?: string): Promise<Date[]> {
-    let query: any = {};
+  async getBlockedDates(type: string, adId?: string): Promise<string[]> {
+    const query: any = { type }; // Filter by type
 
     if (adId) {
-      query = { _id: { $ne: new mongoose.Types.ObjectId(adId) } }; // Exclude current ad
+        query._id = { $ne: new mongoose.Types.ObjectId(adId) }; // Exclude specific ad
     }
 
-    const ads = await this.adsModel.find(query, { booked_dates: 1 });
-    const blockedDates = [...new Set(ads.flatMap(ad => ad.booked_dates || []))];
-    
-    return blockedDates;
-  }
+    const ads = await this.adsModel.find(query, { booked_dates: 1 }).lean(); // Use `.lean()` for performance
+
+    const blockedDates = new Set(ads.flatMap(ad => ad.booked_dates || []));
+
+    return Array.from(blockedDates); // Convert Set back to an array
+}
+
+
  
   async getAd(id: string) {
     const adId = id;
