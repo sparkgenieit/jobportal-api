@@ -87,13 +87,13 @@ async updateCompanyAd(
    async specificPageAds(@Query("page") page): Promise<Ads[]> {
        return await this.adService.getSpecificPageAds(page)
    }
-
+   /*
     // to get specific-page ad 
     @Get("category-ad")
     async specificCategoryAds(@Query("category") category): Promise<Ads[]> {
         return await this.adService.getSpecificCategoryAds(category)
     }
-   /*
+
     // to approve an ad
     @UseGuards(AuthGuard)
     @Roles([roles.Admin])

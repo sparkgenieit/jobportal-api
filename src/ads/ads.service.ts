@@ -82,13 +82,14 @@ export class AdsService {
     .sort({ data: 1 });
   }
 
+  /*
   async getSpecificCategoryAds(category: string) {
     const regex = new RegExp(category, 'i') // Eliminating any possibility of any case sensitive issues
     return await this.adsModel
     .find({ category: { $regex: regex }, status: AdStatus.LIVE  }) // Direct regex search in array elements
     .sort({ data: 1 });
   }
-
+*/
   
 
   async getSpecificPageLiveAds(page: string) {
@@ -109,8 +110,8 @@ export class AdsService {
       day: "2-digit",
     }).split("/").reverse().join("-"); // Convert DD/MM/YYYY to YYYY-MM-DD
 
-
-const regex = new RegExp(`\\b${currentDate}\\b`, 'i'); // Strict match
+const currentDate1 = '2025-03-29';
+const regex = new RegExp(`\\b${currentDate1}\\b`, 'i'); // Strict match
 
     if (isSpecialType) {
   
