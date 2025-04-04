@@ -29,6 +29,8 @@ export class CreateUserDto {
   token?: string
   job_credits?: number
   ad_credits?: number
+  banner_ad_days?: number
+  landing_page_ad_days?: number
   
   usedFreeJobCredit?: boolean
   usedFreeAdCredit?: boolean

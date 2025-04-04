@@ -207,6 +207,8 @@ export class UsersService {
     createUserDto.password = encryptedPassword;
     createUserDto.job_credits = 0;
     createUserDto.ad_credits = 0;
+    createUserDto.banner_ad_days = 0;
+    createUserDto.landing_page_ad_days = 0;
 
     createUserDto.usedFreeJobCredit = false;
     createUserDto.usedFreeAdCredit = false;

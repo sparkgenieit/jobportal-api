@@ -111,7 +111,7 @@ export class AdsService {
     }).split("/").reverse().join("-"); // Convert DD/MM/YYYY to YYYY-MM-DD
 
 const currentDate1 = '2025-03-29';
-const regex = new RegExp(`\\b${currentDate1}\\b`, 'i'); // Strict match
+const regex = new RegExp(`\\b${currentDate}\\b`, 'i'); // Strict match
 
     if (isSpecialType) {
   

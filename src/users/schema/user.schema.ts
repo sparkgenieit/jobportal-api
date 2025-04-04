@@ -27,6 +27,11 @@ export class User {
     job_credits?: number
     @Prop({ required: false  })
     ad_credits?: number
+    @Prop({ required: false  })
+    banner_ad_days?: number
+    @Prop({ required: false  })
+    landing_page_ad_days?: number
+    
     @Prop({ required: false })
     usedFreeJobCredit?: boolean
     @Prop({ required: false })

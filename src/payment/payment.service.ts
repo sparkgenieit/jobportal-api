@@ -23,7 +23,7 @@ export class PaymentService {
     ) {
         this.stripe = new Stripe(ENV.STRIPE_SERVER_KEY);
     }
-    async makePayment(plan: string, credits: number, price: number, user_id: any, creditType:  'job') {
+    async makePayment(plan: string, credits: number, price: number, selected_days:number, user_id: any, creditType:  'job') {
         let priceInCents = price * 100
         let gstAmount = Math.ceil((0.15 * price) * 100)
         let totalAmount = priceInCents + gstAmount;
@@ -31,6 +31,7 @@ export class PaymentService {
         const metadata = {
             plan,
             credits,
+            selected_days,
             creditType,
             price: priceInCents,
             gst: gstAmount,
@@ -103,15 +104,17 @@ export class PaymentService {
             const session = await this.stripe.checkout.sessions.retrieve(session_id)
             console.log(session);
             if (session.status === "complete") {
-                const { price, user_id, credits,creditType, gst, total } = session.metadata;
+                const { price, user_id, credits,selected_days,creditType, gst, total } = session.metadata;
                 let userId = new mongoose.Types.ObjectId(user_id);
                 const user = await this.userModel.findOne({ _id: userId })
                 if (user.token === session.id) {
                     const ad_credits = (creditType == 'ad')?credits:0;
                     const job_credits = (creditType == 'job')?credits:0;
+                    const banner_ad_days = (creditType == 'banner_ad')?selected_days:0;
+                    const landing_page_ad_days = (creditType == 'landing_page_ad')?selected_days:0;
                     console.log('credits',ad_credits,      '-========',job_credits);
                     let [, profile, response] = await Promise.all([
-                        this.userModel.findOneAndUpdate({ _id: user_id }, { job_credits: user.job_credits +  Number(job_credits),ad_credits: user.ad_credits + Number(ad_credits), token: null }),
+                        this.userModel.findOneAndUpdate({ _id: user_id }, { job_credits: user.job_credits +  Number(job_credits),ad_credits: user.ad_credits + Number(ad_credits),banner_ad_days: user.banner_ad_days + Number(banner_ad_days),landing_page_ad_days: user.landing_page_ad_days + Number(landing_page_ad_days), token: null }),
                         this.companyProfileModel.findOne({ user_id: userId }),
                         this.counterModel.findOneAndUpdate({ counterName: "invoice" }, { $inc: { counterValue: 1 } }, { new: true })
                     ])
