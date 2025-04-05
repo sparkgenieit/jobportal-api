@@ -7,6 +7,8 @@ import { CompanyModule } from './company/company.module';
 import { JobsModule } from './jobs/jobs.module';
 import { AdModule } from './ads/ads.module';
 import { SkillModule } from './skills/skill.module';
+import { CmsModule } from './cms/cms.module';
+
 import { UploadModule } from './upload/upload.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
@@ -37,6 +39,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     UploadModule,
     AdModule,
     SkillModule,
+    CmsModule,
     OrderModule,
     CategoryModule,
     PaymentModule,

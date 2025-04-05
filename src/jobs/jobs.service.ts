@@ -50,7 +50,7 @@ export class JobsService implements OnModuleInit {
     if (user.job_credits > 0) {
       jobsDto.status = 'queue';
       let credits = user.job_credits - 1;
-      await this.userModel.findOneAndUpdate({ _id: jobsDto.companyId }, { credits: credits });
+      await this.userModel.findOneAndUpdate({ _id: jobsDto.companyId }, { job_credits: credits });
       const job = await this.jobsModel.create(jobsDto);
 
       const log: Log = {

@@ -34,14 +34,38 @@ export class AdsService {
   }
 
   async createCompanyAd(companyAdsDto: CompanyAdsDto) {
-
     console.log('KIRAN KUMARR CREATED');
-    companyAdsDto.status = AdStatus.QUEUE
-    await this.userModel.findOneAndUpdate({ _id: companyAdsDto.company_id }, { usedFreeAdCredit: true });
-
+    companyAdsDto.status = AdStatus.QUEUE;
+  
+    const isSpecialType = ['landing-page-popup', 'home-page-banner'].includes(companyAdsDto.type);
+  
+    const user = await this.userModel.findOne({ _id: companyAdsDto.company_id });
+  
+    const updateFields: any = { usedFreeAdCredit: true };
+  
+    if (isSpecialType) {
+      if (companyAdsDto.type === 'landing-page-popup') {
+        const newDays = (user.landing_page_ad_days || 0) - 1;
+        updateFields.landing_page_ad_days = Math.max(0, newDays);
+      } else if (companyAdsDto.type === 'home-page-banner') {
+        const newDays = (user.banner_ad_days || 0) - 1;
+        updateFields.banner_ad_days = Math.max(0, newDays);
+      }
+      // ad_credits not decremented for special types
+    } else {
+      const newCredits = (user.ad_credits || 0) - 1;
+      updateFields.ad_credits = Math.max(0, newCredits);
+    }
+  
+    await this.userModel.findOneAndUpdate(
+      { _id: companyAdsDto.company_id },
+      updateFields
+    );
+  
     return await this.adsModel.create(companyAdsDto);
   }
 
+  
   async updateCompanyAd(id: string, companyAdsDto: CompanyAdsDto): Promise<Ads> {
     const existingAd = await this.adsModel.findById(id);
     if (!existingAd) {
