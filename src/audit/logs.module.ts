@@ -4,6 +4,8 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { LogService } from './logs.service';
 import { AdminLog, AdminLogSchema } from './AdminLog.Schema';
 import { Log, LogSchema } from './Log.schema';
+import { AdLog, AdLogSchema } from './AdLog.schema';
+
 import { LogController } from './logs.controller';
 
 
@@ -12,6 +14,7 @@ import { LogController } from './logs.controller';
     imports: [
         MongooseModule.forFeature([
             { name: Log.name, schema: LogSchema },
+            { name: AdLog.name, schema: AdLogSchema },
             { name: AdminLog.name, schema: AdminLogSchema },
         ]),
     ],

@@ -3,12 +3,14 @@ import { InjectModel } from "@nestjs/mongoose";
 import { Log } from "./Log.schema";
 import { Model } from "mongoose";
 import { AdminLog } from "./AdminLog.Schema";
+import { AdLog } from "./AdLog.Schema";
 
 @Injectable()
 export class LogService {
     constructor(
         @InjectModel(Log.name) private readonly logModel: Model<Log>,
         @InjectModel(AdminLog.name) private readonly adminLogModel: Model<AdminLog>,
+        @InjectModel(AdLog.name) private readonly adLogModel: Model<AdLog>,
     ) { }
 
 
@@ -21,9 +23,19 @@ export class LogService {
     }
 
 
+    
+    async createAdLog(log: AdLog) {
+        await this.adLogModel.create(log)
+    }
+
     async InsertManyLogs(logs: Log[]) {
         await this.logModel.insertMany(logs, { ordered: false })
     }
+
+    async InsertManyAdLogs(logs: AdLog[]) {
+        await this.adLogModel.insertMany(logs, { ordered: false })
+    }
+
 
     async getLogs(id: string, role: string, limit: number, skip: number, filters: any) {
 

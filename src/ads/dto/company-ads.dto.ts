@@ -6,8 +6,10 @@ export enum AdStatus {
     QUEUE = "QUEUE",
     REVIEW = "REVIEW",
     LIVE = 'LIVE',
-    REJECTED = 'REJECTED'
+    REJECTED = 'REJECTED',
+    EXPIRED = 'EXPIRED'
 }
+
 
 export enum AdTypes {
     HOMEBANNER = "home-page-banner",
@@ -70,6 +72,7 @@ export class CompanyAdsDto {
     @IsString({ message: "Invalid Approved By" })
     assigned_to: string
 
+    isCloned : boolean
  
     adminId: any
 

@@ -2,10 +2,10 @@ import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { HydratedDocument } from "mongoose";
 
 
-export type LogDocument = HydratedDocument<Log>;
+export type AdLogDocument = HydratedDocument<AdLog>;
 
 @Schema()
-export class Log {
+export class AdLog {
 
     @Prop({ default: new Date() })
     date?: Date
@@ -17,13 +17,11 @@ export class Log {
     name?: string
 
     @Prop()
-    jobId?: string
+    adId?: string
 
+    
     @Prop()
-    employerReference?: string
-
-    @Prop()
-    jobTitle?: string
+    adTitle?: string
 
     @Prop()
     fieldName?: string
@@ -45,8 +43,8 @@ export class Log {
 
 }
 
-const LogSchema = SchemaFactory.createForClass(Log);
+const AdLogSchema = SchemaFactory.createForClass(AdLog);
 
-LogSchema.index({ "$**": "text" })
+AdLogSchema.index({ "$**": "text" })
 
-export { LogSchema }
+export { AdLogSchema }

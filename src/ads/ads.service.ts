@@ -62,7 +62,8 @@ export class AdsService {
       updateFields
     );
   
-    return await this.adsModel.create(companyAdsDto);
+return  await this.adsModel.create(companyAdsDto);
+
   }
 
   
@@ -71,7 +72,7 @@ export class AdsService {
     if (!existingAd) {
       throw new NotFoundException('Ad not found');
     }
-  
+    companyAdsDto.status = AdStatus.QUEUE;
     Object.assign(existingAd, companyAdsDto);
     return await existingAd.save();
   }

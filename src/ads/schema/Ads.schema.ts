@@ -53,7 +53,9 @@ export class Ads {
 
     @Prop()
     booked_dates: [string]
-
+    
+    @Prop()
+    isCloned: boolean;
     
     @Prop({ type: mongoose.Schema.Types.ObjectId, ref: User.name })
     adminId: User

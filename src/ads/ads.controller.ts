@@ -36,9 +36,13 @@ export class AdsController {
     @UseInterceptors(FileInterceptor('image', upload(filePath))) // 'image' is the name of the file input
     async createCompanyAd(@UploadedFile() file, @Body(ValidationPipe) companyAdsDto: CompanyAdsDto) {
         console.log('kkkkkUUUUU');
-        if (!file) throw new BadRequestException("Please Upload the ad image") // For first time posting an ad, image is required
-        companyAdsDto.image = file.filename
-        return await this.adService.createCompanyAd(companyAdsDto);
+        if(!companyAdsDto.isCloned){
+        if (!file ) throw new BadRequestException("Please Upload the ad image") 
+            companyAdsDto.image = file.filename
+        }
+            return await this.adService.createCompanyAd(companyAdsDto);
+        
+
     }
 
     @UseGuards(AuthGuard)
