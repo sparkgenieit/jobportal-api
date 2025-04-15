@@ -72,7 +72,7 @@ export class CompanyAdsDto {
     @IsString({ message: "Invalid Approved By" })
     assigned_to: string
 
-    isCloned : boolean
+    isCloned : string
  
     adminId: any
 

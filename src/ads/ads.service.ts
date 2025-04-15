@@ -7,14 +7,19 @@ import { AdminAdsDto } from './dto/admin-ads.dto';
 import { convertToObjectId } from 'src/utils/functions';
 import { LogService } from 'src/audit/logs.service';
 import { AdminLog } from 'src/audit/AdminLog.Schema';
+import { AdLog } from 'src/audit/AdLog.Schema';
+import { OrderDto } from 'src/orders/dto/order.dto';
+
 import { User } from 'src/users/schema/user.schema';
 import { AdminAds } from './schema/Admin-ads.schema';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 
 @Injectable()
 export class AdsService {
   constructor(
     private logSerivce: LogService,
+    private eventEmitter: EventEmitter2,
     @InjectModel(Ads.name) private readonly adsModel: Model<Ads>,
     @InjectModel(AdminAds.name) private readonly adminAdsModel: Model<AdminAds>,
     @InjectModel(User.name) private userModel: Model<User>,
@@ -33,7 +38,7 @@ export class AdsService {
     return await this.adminAdsModel.create(adminAdsDto);
   }
 
-  async createCompanyAd(companyAdsDto: CompanyAdsDto) {
+  async createCompanyAd(companyAdsDto: CompanyAdsDto,  { username, email }) {
     console.log('KIRAN KUMARR CREATED');
     companyAdsDto.status = AdStatus.QUEUE;
   
@@ -61,18 +66,45 @@ export class AdsService {
       { _id: companyAdsDto.company_id },
       updateFields
     );
-  
-return  await this.adsModel.create(companyAdsDto);
+    let credits = user.job_credits - 1;
 
+    const ad = await this.adsModel.create(companyAdsDto);
+
+      const log: AdLog = {
+        user_id: companyAdsDto.company_id.toString(),
+        adId: ad._id.toString(),
+        adTitle: companyAdsDto.title,
+        username,
+        email,
+        fieldName: "Actions",
+        changedTo: 'Queue',
+        description: "Posted Ad"
+      }
+
+      await this.logSerivce.createAdLog(log)
+
+      const details = {
+        description: `Ad Posted - ${companyAdsDto.title}`,
+        credits: user.ad_credits - 1,
+        creditType:'Ad',
+        creditsUsed: 1,
+        companyId: user._id
+      }
+
+      this.CreateOrder(details)
+
+      return ({ message: "AD Posted", ad_credits: credits })
   }
-
+CreateOrder(details: OrderDto) {
+    this.eventEmitter.emit("order.create", details)
+  }
   
   async updateCompanyAd(id: string, companyAdsDto: CompanyAdsDto): Promise<Ads> {
     const existingAd = await this.adsModel.findById(id);
     if (!existingAd) {
       throw new NotFoundException('Ad not found');
     }
-    companyAdsDto.status = AdStatus.QUEUE;
+  
     Object.assign(existingAd, companyAdsDto);
     return await existingAd.save();
   }
@@ -221,7 +253,22 @@ console.log('adDetails',adDetails);
     if (!isAd) {
       throw new NotFoundException("The given Ad does not exist");
     } else {
-      return await this.adsModel.deleteOne({ _id: adId })
+       await this.adsModel.deleteOne({ _id: adId })
+
+       const adLog: AdLog = {
+        user_id: isAd.company_id.toString(),
+        adId: isAd._id.toString(),
+        adTitle: isAd.title,
+        fieldName: "Actions",
+              changedTo: 'Deleted',
+              description: "Deleted AD"
+      }
+
+      await this.logSerivce.createAdLog(adLog);
+
+           
+      
+            return { message: "Ad deleted" }
     }
   }
 

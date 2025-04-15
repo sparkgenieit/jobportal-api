@@ -22,6 +22,15 @@ export class LogController {
         return await this.logService.getLogs(id, role, +limit, +skip, data);
     }
 
+    @Roles(["employer",  "admin", "superadmin"])
+    @Post('ad/logs')
+    async getAdLogs(@Req() req) {
+        let { id, role, companyId } = req.user
+
+        const data = req.body
+        const { limit, skip } = req.query
+        return await this.logService.getAdLogs(id, role, +limit, +skip, data);
+    }
 
     @Roles(["admin", "superadmin"])
     @Post('admin/logs')

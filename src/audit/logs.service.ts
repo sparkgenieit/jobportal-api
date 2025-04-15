@@ -87,6 +87,55 @@ export class LogService {
         }
     }
 
+    
+    async getAdLogs(id: string, role: string, limit: number, skip: number, filters: any) {
+
+        let query: any = {}
+
+        if (role === 'admin' || role === "superadmin") {
+            query = {}
+        } else {
+            query.user_id = id
+        }
+
+        filters.adTitle.trim() ? query.adTitle = new RegExp(filters.adTitle, "i") : null
+
+     
+        filters.adId.trim() ? query.adId = new RegExp(filters.adId, "i") : null
+
+        if (filters.fromDate) {
+            const from = new Date(filters.fromDate)
+            from.setHours(0, 0, 0, 0)
+
+            const to = filters.toDate ? new Date(filters.toDate) : new Date()
+            to.setHours(23, 59, 59, 999)
+
+            query.date = { $gte: from, $lte: to }
+        }
+
+        const response = await this.adLogModel.aggregate([
+            {
+                $match: query
+            },
+            {
+                $facet: {
+                    logs: [
+                        { $sort: { date: -1 } },
+                        { $skip: skip },
+                        { $limit: limit }
+                    ],
+                    count: [{ $count: "total" }]
+                }
+            }
+        ])
+
+
+        return {
+            logs: response[0].logs,
+            total: response[0].count[0]?.total || 0,
+            status: 200
+        }
+    }
     async getAdminLogs(id: string, role: string, limit: number, skip: number, filters: any) {
 
         let query: any = {}

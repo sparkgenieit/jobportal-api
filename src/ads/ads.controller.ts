@@ -34,13 +34,16 @@ export class AdsController {
     @Roles([roles.Company, roles.Recruiter])
     @Post('company')
     @UseInterceptors(FileInterceptor('image', upload(filePath))) // 'image' is the name of the file input
-    async createCompanyAd(@UploadedFile() file, @Body(ValidationPipe) companyAdsDto: CompanyAdsDto) {
+    async createCompanyAd(@UploadedFile() file, @Body(ValidationPipe) companyAdsDto: CompanyAdsDto, @Req() req) {
         console.log('kkkkkUUUUU');
-        if(!companyAdsDto.isCloned){
+        if(companyAdsDto.isCloned ===  'false'){
+            console.log("isCloned Fasle");
         if (!file ) throw new BadRequestException("Please Upload the ad image") 
             companyAdsDto.image = file.filename
         }
-            return await this.adService.createCompanyAd(companyAdsDto);
+
+        console.log('companyAdsDto',companyAdsDto);
+            return await this.adService.createCompanyAd(companyAdsDto, req.user);
         
 
     }
