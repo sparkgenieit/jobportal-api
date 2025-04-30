@@ -46,7 +46,7 @@ async uploadCmsFile(@UploadedFile() file) {
   return {
     message: 'File uploaded successfully',
     filename: file.filename,
-    url: `/public/uploads/cms/${file.filename}`
+    url: `/uploads/cms/${file.filename}`
   };
 }
 }
