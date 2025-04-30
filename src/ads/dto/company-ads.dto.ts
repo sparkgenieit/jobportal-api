@@ -85,5 +85,5 @@ export class CompanyAdsDto {
 
     @IsOptional()
     @IsString({ message: "Invalid Website URL" })
-    website: string;
+    website: string; 
 }
