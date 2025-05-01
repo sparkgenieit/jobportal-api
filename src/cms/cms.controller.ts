@@ -13,19 +13,11 @@ const filePath = path.join(__dirname, "..", "..", "public", "uploads", "cms");
 
 
 @Controller('cms')
-@UseGuards(AuthGuard)
 
 export class CmsController {
     constructor(
         private readonly cmsService: CmsService
     ) { }
-
-    @Roles(["superadmin"])
-    @Post()
-    async createOrUpdate(@Body() dto: CmsDto) {
-      return this.cmsService.createOrUpdate(dto);
-    }
-  
     @Get()
     async getPageContent(
       @Query('category') category: string,
@@ -33,6 +25,16 @@ export class CmsController {
     ) {
       return this.cmsService.findOne(category, page);
     }
+    @UseGuards(AuthGuard)
+    
+    @Roles(["superadmin"])
+    @Post()
+    async createOrUpdate(@Body() dto: CmsDto) {
+      return this.cmsService.createOrUpdate(dto);
+    }
+  
+
+    
 
     @Roles(["superadmin"])
 @Post('upload-image')
