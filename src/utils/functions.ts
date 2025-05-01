@@ -86,7 +86,8 @@ export const ENV = {
     CAPTCHA_SECRET_KEY: "6LdnnokqAAAAAIBKyXfoOmyDcHiqSCmBQ-L1jxcu",
     STRIPE_SERVER_KEY: 'sk_test_51PKHdMSIkLQ1QpWMKj1xClSWqcOgyIQsd28qfTkD7scrtjZ5Nf2dAijNlyHXlq5a5CCHzEzqwuqJnV9XydBGYz4z00rBFUPxZc',
     ALLOWED_ORIGIN: 'http://localhost:3000',
-    DATABASE_URL: "mongodb://127.0.0.1:27017/jobportal?authSource=admin"
+   // DATABASE_URL: "mongodb://127.0.0.1:27017/jobportal?authSource=admin"
+   DATABASE_URL: "mongodb+srv://sparkgenieit:<db_password>@cluster0.ir27msy.mongodb.net/jobportal" 
 }
 
 export const convertToObjectId = (id: string) => new mongoose.Types.ObjectId(id);
