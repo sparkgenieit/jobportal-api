@@ -208,6 +208,7 @@ const regex = new RegExp(`\\b${currentDate}\\b`, 'i'); // Strict match
     return await this.adsModel.find()
   }
   async getAdminAds(): Promise<AdminAds[]> {
+    console.log("HIT ADMIN");
     return await this.adminAdsModel.find()
   }
   
