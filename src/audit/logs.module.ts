@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
 import { LogService } from './logs.service';
-import { AdminLog, AdminLogSchema } from './AdminLog.Schema';
+import { AdminLog, AdminLogSchema } from './AdminLog.schema';
 import { Log, LogSchema } from './Log.schema';
 import { AdLog, AdLogSchema } from './AdLog.schema';
 

@@ -35,3 +35,13 @@ lerna-debug.log*
 !.vscode/extensions.json
 
 .env
+
+# Ignore all PDF invoices
+/public/invoices/*.pdf
+
+# Ignore all uploaded ad files
+/public/uploads/ads/*
+
+# Ignore CMS and skillPhoto folders
+/public/uploads/cms/
+/public/uploads/skillPhoto/

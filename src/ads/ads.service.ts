@@ -6,8 +6,8 @@ import { CompanyAdsDto, AdStatus } from './dto/company-ads.dto';
 import { AdminAdsDto } from './dto/admin-ads.dto';
 import { convertToObjectId } from 'src/utils/functions';
 import { LogService } from 'src/audit/logs.service';
-import { AdminLog } from 'src/audit/AdminLog.Schema';
-import { AdLog } from 'src/audit/AdLog.Schema';
+import { AdminLog } from 'src/audit/AdminLog.schema';
+import { AdLog } from 'src/audit/AdLog.schema';
 import { OrderDto } from 'src/orders/dto/order.dto';
 
 import { User } from 'src/users/schema/user.schema';

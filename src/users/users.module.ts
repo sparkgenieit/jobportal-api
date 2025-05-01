@@ -10,7 +10,7 @@ import { JwtService } from '@nestjs/jwt';
 import { CompanyProfile, CompanyProfileSchema } from 'src/company/schema/companyProfile.schema';
 import { UploadController } from 'src/upload/upload.controller';
 import { Recruiter, RecruiterSchema } from 'src/company/schema/recruiter.schema';
-import { AdminLog, AdminLogSchema } from 'src/audit/AdminLog.Schema';
+import { AdminLog, AdminLogSchema } from 'src/audit/AdminLog.schema';
 import { Log, LogSchema } from 'src/audit/Log.schema';
 import { AdLog, AdLogSchema } from 'src/audit/AdLog.schema';
 

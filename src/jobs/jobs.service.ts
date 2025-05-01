@@ -10,7 +10,7 @@ import { Cron } from '@nestjs/schedule';
 import { MailerService } from '@nestjs-modules/mailer';
 import { OrderDto } from 'src/orders/dto/order.dto';
 import { Log } from 'src/audit/Log.schema';
-import { AdminLog } from 'src/audit/AdminLog.Schema';
+import { AdminLog } from 'src/audit/AdminLog.schema';
 import { LogService } from 'src/audit/logs.service';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 

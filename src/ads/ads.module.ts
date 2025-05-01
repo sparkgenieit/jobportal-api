@@ -11,7 +11,7 @@ import { UserJobs, UserJobsSchema } from 'src/users/schema/userJobs.schema';
 import { AdLog, AdLogSchema } from 'src/audit/AdLog.schema';
 import { Log, LogSchema } from 'src/audit/Log.schema';
 
-import { AdminLog, AdminLogSchema } from 'src/audit/AdminLog.Schema';
+import { AdminLog, AdminLogSchema } from 'src/audit/AdminLog.schema';
 import { LogService } from 'src/audit/logs.service';
 
 @Module({

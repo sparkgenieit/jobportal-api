@@ -2,8 +2,8 @@ import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Log } from "./Log.schema";
 import { Model } from "mongoose";
-import { AdminLog } from "./AdminLog.Schema";
-import { AdLog } from "./AdLog.Schema";
+import { AdminLog } from "./AdminLog.schema";
+import { AdLog } from "./AdLog.schema";
 
 @Injectable()
 export class LogService {

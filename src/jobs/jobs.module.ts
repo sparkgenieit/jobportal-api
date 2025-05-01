@@ -10,7 +10,7 @@ import { UserJobs, UserJobsSchema } from 'src/users/schema/userJobs.schema';
 import { CompanyProfile, CompanyProfileSchema } from 'src/company/schema/companyProfile.schema';
 import { Log, LogSchema } from 'src/audit/Log.schema';
 import { AdLog, AdLogSchema } from 'src/audit/AdLog.schema';
-import { AdminLog, AdminLogSchema } from 'src/audit/AdminLog.Schema';
+import { AdminLog, AdminLogSchema } from 'src/audit/AdminLog.schema';
 import { LogService } from 'src/audit/logs.service';
 import { ChartsController } from 'src/charts/charts.controller';
 import { ChartsService } from 'src/charts/charts.service';

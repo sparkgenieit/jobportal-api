@@ -18,7 +18,7 @@ import { Recruiter } from 'src/company/schema/recruiter.schema';
 import { updateUserDto } from './dto/updateUser.dto';
 import { Response } from 'express';
 import { Log } from 'src/audit/Log.schema';
-import { AdminLog } from 'src/audit/AdminLog.Schema';
+import { AdminLog } from 'src/audit/AdminLog.schema';
 import { LogService } from 'src/audit/logs.service';
 import { ENV } from 'src/utils/functions';
 import { OnEvent } from '@nestjs/event-emitter';
