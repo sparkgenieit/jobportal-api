@@ -86,7 +86,7 @@ export class UsersService {
       await this.logService.createAdminLog(log)
     }
 
-    res.cookie('Token', token, { httpOnly: true, sameSite: 'strict', maxAge: 3 * 24 * 60 * 60 * 1000 }) // Cookie will expire after 3 days
+    res.cookie('Token', token, { httpOnly: true, sameSite: 'none', secure: true, maxAge: 3 * 24 * 60 * 60 * 1000 }) // Cookie will expire after 3 days
     res.json(results)
   }
 
