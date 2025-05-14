@@ -39,7 +39,7 @@ export class AdsService {
   }
 
   async createCompanyAd(companyAdsDto: CompanyAdsDto,  { username, email }) {
-    console.log('KIRAN KUMARR CREATED');
+   
     companyAdsDto.status = AdStatus.QUEUE;
   
     const isSpecialType = ['landing-page-popup', 'home-page-banner'].includes(companyAdsDto.type);
@@ -153,13 +153,13 @@ CreateOrder(details: OrderDto) {
     const regex = new RegExp(`\\b${page}\\b`, 'i'); // Strict Match
     const query = this.adsModel.find({ show_on_pages: { $regex: regex }, status: AdStatus.LIVE }).sort({ data: 1 });
   
-    console.log('MongoDB Query:', query.getFilter()); // Print MongoDB Filter
+   // console.log('MongoDB Query:', query.getFilter()); // Print MongoDB Filter
     return await query;
   }
 
   async showAd(type: string) {
     const isSpecialType = ['landing-page-popup', 'home-page-banner'].includes(type);
-    console.log('isSpecialType', isSpecialType);
+    //console.log('isSpecialType', isSpecialType);
     
     const currentDate = new Date().toLocaleDateString("en-NZ", {
       year: "numeric",
@@ -175,7 +175,7 @@ const regex = new RegExp(`\\b${currentDate}\\b`, 'i'); // Strict match
       const ad =  await this.adsModel.find({ booked_dates: regex, type: type, status: "LIVE" }).sort({ data: 1 });
 
    
-        console.log(ad);
+    
 
         if (ad.length) {
             return ad[0];
@@ -208,7 +208,7 @@ const regex = new RegExp(`\\b${currentDate}\\b`, 'i'); // Strict match
     return await this.adsModel.find()
   }
   async getAdminAds(): Promise<AdminAds[]> {
-    console.log("HIT ADMIN");
+    
     return await this.adminAdsModel.find()
   }
   
@@ -241,7 +241,6 @@ const regex = new RegExp(`\\b${currentDate}\\b`, 'i'); // Strict match
     }
 
  
-console.log('adDetails',adDetails);
     return adDetails;
   }
 
@@ -369,7 +368,7 @@ console.log('adDetails',adDetails);
   
     async assignAd({ adminId, adId }): Promise<any> {
       adminId = new mongoose.Types.ObjectId(adminId);
-      console.log(adminId);
+     // console.log(adminId);
      // adDto = { ...adDto, adminId, status : AdStatus.REVIEW };
 
      const _id = convertToObjectId(adId);
@@ -402,14 +401,14 @@ console.log('adDetails',adDetails);
         const log: AdminLog = {
           admin_id: adminId,
           name: '',
-          adId: companyAdsDto._id.toString(),
+          adId: adId,
           fieldName: "Actions",
           changedTo: 'Queue',
           changedFrom: 'AdIn Review',
           description: `Job Released by Admin ${adminId}`
         }
   
-      delete  companyAdsDto.adminId;
+  //    delete  companyAdsDto.adminId;
         companyAdsDto.status =  AdStatus.QUEUE;
         companyAdsDto = {...companyAdsDto , $unset: { adminId: 1 } }
   

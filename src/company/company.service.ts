@@ -177,58 +177,61 @@ export class CompanyService {
     }
 
     if (searchTerm && searchTerm.trim() !== "") {
-      query.$or = [{ jobTitle: { $regex: searchTerm, $options: 'i' } }, { employjobreference: { $regex: searchTerm, $options: 'i' } }]
+      query.$or = [{ title: { $regex: searchTerm, $options: 'i' } }, { employjobreference: { $regex: searchTerm, $options: 'i' } }]
     }
 
     const response = await this.adsModel.aggregate([
-      {
-        $facet: {
-          data: [{
-            $match: query
-          },
-          {
-            $addFields: {
-              sortPriority: {
-                $switch: {
-                  branches: [
-                    {
-                      'case': { $eq: ['$status', 'REJECTED'] },
-                      then: 0
-                    },
-                    {
-                      'case': { $eq: ['$status', 'LIVE'] },
-                      then: 1
-                    },
-                    {
-                      'case': { $eq: ['$status', 'REVIEW'] },
-                      then: 2
-                    },
-                    {
-                      'case': { $eq: ['$status', 'QUEUE'] },
-                      then: 3
-                    },
-                  ],
-                  'default': 4
-                }
-              },           
-            },
-          }, {
-            $sort: {
-              sortPriority: 1,           
-            }
-          },
-          {
-            $skip: skip
-          },
-          {
-            $limit: limit
-          }
-
+  {
+    $match: query
+  },
+  {
+    $lookup: {
+      from: 'companyprofiles', // Use actual collection name
+      localField: 'company_id',
+      foreignField: 'user_id',
+      as: 'companyInfo'
+    }
+  },
+  {
+    $unwind: {
+      path: '$companyInfo',
+      preserveNullAndEmptyArrays: true
+    }
+  },
+  {
+    $addFields: {
+      companyName: '$companyInfo.name',
+      sortPriority: {
+        $switch: {
+          branches: [
+            { case: { $eq: ['$status', 'REJECTED'] }, then: 0 },
+            { case: { $eq: ['$status', 'LIVE'] }, then: 1 },
+            { case: { $eq: ['$status', 'REVIEW'] }, then: 2 },
+            { case: { $eq: ['$status', 'QUEUE'] }, then: 3 },
           ],
-          count: [{ $match: query }, { $count: 'total' }]
+          default: 4
         }
       }
-    ])
+    }
+  },
+  {
+    $sort: {
+      sortPriority: 1,
+    }
+  },
+  { $skip: skip },
+  { $limit: limit },
+  {
+    $facet: {
+      data: [],
+      count: [
+        { $match: query },
+        { $count: 'total' }
+      ]
+    }
+  }
+]);
+
 
     return {
       total: response[0]?.count[0]?.total,

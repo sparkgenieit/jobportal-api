@@ -12,7 +12,7 @@ export class AuthGuard implements CanActivate {
         const roles = this.reflector.get(Roles, context.getHandler())
         const request = context.switchToHttp().getRequest();
         const token = (request.cookies.Token);
-
+//console.log(token)
         if (!token || token.trim() === '') throw new HttpException({ message: 'SESSION EXPIRED! PLEASE SIGN IN' }, HttpStatus.UNAUTHORIZED);
 
         let data: any = {};

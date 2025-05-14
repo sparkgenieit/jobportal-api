@@ -232,7 +232,7 @@ async updateCompanyAd(
     }
 
     @UseGuards(AuthGuard)
-    @Roles(["admin","employer"])
+    @Roles(["admin","employer","superadmin"])
    @Get('details/:id')
     async getAd(@Param() data) {
         return await this.adService.getAd(data.id);
