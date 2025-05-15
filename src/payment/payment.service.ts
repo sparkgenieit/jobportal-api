@@ -53,8 +53,8 @@ export class PaymentService {
             ],
             metadata, // Attach metadata here
             mode: 'payment',
-            success_url: `http://localhost:3000/payment-status?session_id={CHECKOUT_SESSION_ID}&success=true`,
-            cancel_url: `http://localhost:3000/payment-status?success=false`,
+            success_url: `${ENV.BASE_APP_URL}/payment-status?session_id={CHECKOUT_SESSION_ID}&success=true`,
+            cancel_url: `${ENV.BASE_APP_URL}/payment-status?success=false`,
         });
         user_id = new mongoose.Types.ObjectId(user_id);
         await this.userModel.findOneAndUpdate({ _id: user_id }, { token: session.id })
