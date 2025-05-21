@@ -182,7 +182,7 @@ const regex = new RegExp(`\\b${currentDate}\\b`, 'i'); // Strict match
         }
     }
 
-    console.log('No special type ad found or all are booked.');
+    //console.log('No special type ad found or all are booked.');
 
     // Default behavior if type is not in the array or no matching ad is found
     const ads = await this.adminAdsModel.aggregate([
