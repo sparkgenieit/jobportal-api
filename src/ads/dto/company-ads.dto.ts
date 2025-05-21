@@ -40,8 +40,7 @@ export class CompanyAdsDto {
 
     location: string;
 
-    category: string;
-
+    
     end_date: Date | string;
     start_date: Date | string;
 
