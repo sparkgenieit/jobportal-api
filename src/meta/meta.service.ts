@@ -2,7 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model } from 'mongoose';
 import { JwtService } from '@nestjs/jwt';
-import { Meta } from './schema/meta';
+import { Meta } from './schema/meta.schema';
 import { MetaDto } from './dto/meta.dto';
 
 
@@ -14,17 +14,20 @@ export class MetaService {
   ) {}
 
   async createOrUpdate(dto: MetaDto): Promise<Meta> {
-    const { category, page, content } = dto;
+  const { category, page, title, keywords, description } = dto;
 
-    const existing = await this.metaModel.findOne({ category, page });
+  const existing = await this.metaModel.findOne({ category, page });
 
-    if (existing) {
-      existing.keywords = content;
-      return existing.save();
-    }
-
-    return this.metaModel.create(dto);
+  if (existing) {
+    existing.title = title;
+    existing.keywords = keywords;
+    existing.description = description;
+    return existing.save();
   }
+
+  return this.metaModel.create({ category, page, title, keywords, description });
+}
+
 
   async findOne(category: string, page: string): Promise<Meta | null> {
     return this.metaModel.findOne({ category, page });

@@ -81,11 +81,13 @@ export function invoicePdfCreation(details: any) {
     }
 }
 const BASE_APP_URL = 'http://localhost:3000';
+const BASE_NEXT_APP_URL = 'http://localhost:400';
+
 export const ENV = {
     JWT_SECRET_KEY: "WHTOKENSECRETKEY",
     CAPTCHA_SECRET_KEY: "6LdnnokqAAAAAIBKyXfoOmyDcHiqSCmBQ-L1jxcu",
     STRIPE_SERVER_KEY: 'sk_test_51PKHdMSIkLQ1QpWMKj1xClSWqcOgyIQsd28qfTkD7scrtjZ5Nf2dAijNlyHXlq5a5CCHzEzqwuqJnV9XydBGYz4z00rBFUPxZc',
-    ALLOWED_ORIGIN: BASE_APP_URL,
+    ALLOWED_ORIGIN: [BASE_APP_URL, BASE_NEXT_APP_URL], // ✅ now an array
     BASE_APP_URL,
    // ALLOWED_ORIGIN: 'https://jobportal-three-mu.vercel.app',
    // DATABASE_URL: "mongodb://127.0.0.1:27017/jobportal?authSource=admin"

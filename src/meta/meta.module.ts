@@ -3,7 +3,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { MetaController } from './meta.controller';
 
 import { JwtService } from '@nestjs/jwt';
-import { Meta, MetaSchema } from './schema/meta';
+import { Meta, MetaSchema } from './schema/meta.schema';
 import { MetaService } from './meta.service';
 
 @Module({
