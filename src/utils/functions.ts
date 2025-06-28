@@ -81,7 +81,7 @@ export function invoicePdfCreation(details: any) {
     }
 }
 const BASE_APP_URL = 'http://localhost:3000';
-const BASE_NEXT_APP_URL = 'http://localhost:400';
+const BASE_NEXT_APP_URL = 'http://localhost:4000';
 
 export const ENV = {
     JWT_SECRET_KEY: "WHTOKENSECRETKEY",
