@@ -22,6 +22,8 @@ import { NotificationModule } from './notifications/notifications.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { MailModule } from './mails/mail.module';
 import { LogModule } from './audit/logs.module';
+import { GalleryGridModule } from './gallery-grid/gallery-grid.module';
+
 import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
@@ -48,6 +50,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     NotificationModule,
     MailModule,
     LogModule,
+    GalleryGridModule,
   ],
   controllers: [AppController],
   providers: [AppService],

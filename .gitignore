@@ -45,3 +45,5 @@ lerna-debug.log*
 # Ignore CMS and skillPhoto folders
 /public/uploads/cms/
 /public/uploads/skillPhoto/
+
+src/utils/functions.ts
