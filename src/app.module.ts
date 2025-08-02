@@ -23,6 +23,8 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { MailModule } from './mails/mail.module';
 import { LogModule } from './audit/logs.module';
 import { GalleryGridModule } from './gallery-grid/gallery-grid.module';
+import { GalleryAdModule } from './gallery-ad/gallery-ad.module';
+
 
 import { EventEmitterModule } from '@nestjs/event-emitter';
 
@@ -51,6 +53,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     MailModule,
     LogModule,
     GalleryGridModule,
+    GalleryAdModule,
   ],
   controllers: [AppController],
   providers: [AppService],
