@@ -9,7 +9,10 @@ export enum AdType {
   SHORT = 'short',
   LONG = 'long',
   HOME_PAGE_BANNER = 'home-page-banner',
-  LANDING_PAGE = 'landing-page',
+  LANDING_PAGE_POPUP = 'landing-page-popup',
+  CATEGORY_PAGE_AD_1 = 'category-page-ad-1',
+  CATEGORY_PAGE_AD_2 = 'category-page-ad-2',
+  CATEGORY_PAGE_AD_3 = 'category-page-ad-3',
 }
 
 export class AdminAdsDto {
@@ -20,10 +23,6 @@ export class AdminAdsDto {
   @IsNotEmpty({ message: 'Title is required when Ad Client is empty' })
   title: string;
 
-  @ValidateIf((o) => !o.ad_client)
-  @IsString()
-  @IsNotEmpty({ message: 'Description is required when Ad Client is empty' })
-  description: string;
 
   @ValidateIf((o) => !o.ad_client)
   @IsUrl()
